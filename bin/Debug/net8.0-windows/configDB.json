@@ -1,0 +1,8 @@
+{
+  "servidor": "localhost",
+  "puerto": 3306,
+  "usuario": "root",
+  "password": "mellon",
+  "baseDatos": "dbfacturadam",
+  "conectado": false
+}
