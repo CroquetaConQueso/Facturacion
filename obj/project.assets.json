@@ -1610,23 +1610,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\pablo\\.nuget\\packages\\": {},
+    "C:\\Users\\ctorleo571\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\FacturacionDAM.csproj",
+      "projectUniqueName": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\FacturacionDAM.csproj",
       "projectName": "FacturacionDAM",
-      "projectPath": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\FacturacionDAM.csproj",
-      "packagesPath": "C:\\Users\\pablo\\.nuget\\packages\\",
-      "outputPath": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\obj\\",
+      "projectPath": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\FacturacionDAM.csproj",
+      "packagesPath": "C:\\Users\\ctorleo571\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\pablo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\ctorleo571\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

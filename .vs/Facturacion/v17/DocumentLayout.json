@@ -1,57 +1,57 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\",
+  "WorkspaceRootPath": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|C:\\Users\\ctorleo571\\Desktop\\Facturacion\\formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\modelos\\appdam.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\modelos\\appdam.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:modelos\\appdam.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\formularios\\frmdepuracion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\formularios\\frmdepuracion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmdepuracion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\formularios\\frmdepuracion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|C:\\Users\\ctorleo571\\Desktop\\Facturacion\\formularios\\frmdepuracion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmdepuracion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\formularios\\frmconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\formularios\\frmconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\formularios\\frmconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|C:\\Users\\ctorleo571\\Desktop\\Facturacion\\formularios\\frmconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\modelos\\tabla.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\modelos\\tabla.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:modelos\\tabla.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\modelos\\emisor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\modelos\\emisor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:modelos\\emisor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\modelos\\estadoapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\modelos\\estadoapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:modelos\\estadoapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\modelos\\debug.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\modelos\\debug.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:modelos\\debug.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|d:\\instituto\\fuengirola\\fuengirola_curso_25-26\\modulos\\di\\pruebas\\facturacion\\modelos\\configuracionconexion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\ctorleo571\\desktop\\facturacion\\modelos\\configuracionconexion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:modelos\\configuracionconexion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|Facturacion.csproj|D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|Facturacion.csproj|C:\\Users\\ctorleo571\\Desktop\\Facturacion\\formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|Facturacion.csproj|solutionrelative:formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
@@ -80,59 +80,53 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "AppDAM.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\AppDAM.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\AppDAM.cs",
               "RelativeDocumentMoniker": "Modelos\\AppDAM.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\AppDAM.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\AppDAM.cs",
               "RelativeToolTip": "Modelos\\AppDAM.cs",
               "ViewState": "AgIAAIAAAAAAAAAAAAAswIwAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-09T15:17:04.78Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-09T15:17:04.78Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
               "Title": "FrmConfig.cs [Dise\u00F1o]",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmConfig.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmConfig.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmConfig.cs",
               "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmConfig.cs [Dise\u00F1o]",
-              "RelativeToolTip": "Formularios\\FrmConfig.cs [Dise\u00F1o]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-10T14:16:16.381Z",
-              "EditorCaption": " [Dise\u00F1o]"
+              "WhenOpened": "2025-10-10T14:16:16.381Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
               "Title": "FrmConfig.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmConfig.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmConfig.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmConfig.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmConfig.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmConfig.cs",
               "RelativeToolTip": "Formularios\\FrmConfig.cs",
               "ViewState": "AgIAACcAAAAAAAAAAAAwwDMAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-10T11:45:14.089Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-10T11:45:14.089Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "FrmDepuracion.cs [Dise\u00F1o]",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmDepuracion.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmDepuracion.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmDepuracion.cs",
               "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmDepuracion.cs [Dise\u00F1o]",
-              "RelativeToolTip": "Formularios\\FrmDepuracion.cs [Dise\u00F1o]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T17:03:06.276Z",
-              "EditorCaption": " [Dise\u00F1o]"
+              "WhenOpened": "2025-10-17T17:03:06.276Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
               "Title": "Tabla.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\Tabla.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\Tabla.cs",
               "RelativeDocumentMoniker": "Modelos\\Tabla.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\Tabla.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\Tabla.cs",
               "RelativeToolTip": "Modelos\\Tabla.cs",
               "ViewState": "AgIAADsAAAAAAAAAAAAgwAcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -142,34 +136,33 @@
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "FrmDepuracion.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmDepuracion.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmDepuracion.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmDepuracion.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmDepuracion.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmDepuracion.cs",
               "RelativeToolTip": "Formularios\\FrmDepuracion.cs",
               "ViewState": "AgIAACIAAAAAAAAAAAAwwCIAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T17:04:07.893Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-17T17:04:07.893Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "FrmMain.cs [Dise\u00F1o]",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmMain.cs",
+              "Title": "FrmMain.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmMain.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmMain.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmMain.cs [Dise\u00F1o]",
-              "RelativeToolTip": "Formularios\\FrmMain.cs [Dise\u00F1o]",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmMain.cs [Design]",
+              "RelativeToolTip": "Formularios\\FrmMain.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-10T16:58:16.196Z",
-              "EditorCaption": " [Dise\u00F1o]"
+              "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "FrmMain.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmMain.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmMain.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmMain.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmMain.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmMain.cs",
               "RelativeToolTip": "Formularios\\FrmMain.cs",
               "ViewState": "AgIAADIAAAAAAAAAAADwvzwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -180,9 +173,9 @@
               "$type": "Document",
               "DocumentIndex": 8,
               "Title": "Emisor.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\Emisor.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\Emisor.cs",
               "RelativeDocumentMoniker": "Modelos\\Emisor.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\Emisor.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\Emisor.cs",
               "RelativeToolTip": "Modelos\\Emisor.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -192,9 +185,9 @@
               "$type": "Document",
               "DocumentIndex": 10,
               "Title": "Debug.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\Debug.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\Debug.cs",
               "RelativeDocumentMoniker": "Modelos\\Debug.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\Debug.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\Debug.cs",
               "RelativeToolTip": "Modelos\\Debug.cs",
               "ViewState": "AgIAAAgAAAAAAAAAAAAxwA0AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -204,9 +197,9 @@
               "$type": "Document",
               "DocumentIndex": 9,
               "Title": "EstadoApp.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\EstadoApp.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\EstadoApp.cs",
               "RelativeDocumentMoniker": "Modelos\\EstadoApp.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\EstadoApp.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\EstadoApp.cs",
               "RelativeToolTip": "Modelos\\EstadoApp.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -216,9 +209,9 @@
               "$type": "Document",
               "DocumentIndex": 11,
               "Title": "ConfiguracionConexion.cs",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\ConfiguracionConexion.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\ConfiguracionConexion.cs",
               "RelativeDocumentMoniker": "Modelos\\ConfiguracionConexion.cs",
-              "ToolTip": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Modelos\\ConfiguracionConexion.cs",
+              "ToolTip": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Modelos\\ConfiguracionConexion.cs",
               "RelativeToolTip": "Modelos\\ConfiguracionConexion.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -228,7 +221,7 @@
               "$type": "Document",
               "DocumentIndex": 12,
               "Title": "FrmMain.cs [Dise\u00F1o]",
-              "DocumentMoniker": "D:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmMain.cs",
+              "DocumentMoniker": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\Formularios\\FrmMain.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmMain.cs",
               "ToolTip": "J:\\Instituto\\Fuengirola\\Fuengirola_Curso_25-26\\Modulos\\DI\\Pruebas\\Facturacion\\Formularios\\FrmMain.cs [Dise\u00F1o]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
