@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "3n+Bbd5bLpc=",
+  "dgSpecHash": "ZmYDtvXs7U8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\FacturacionDAM.csproj",
+  "projectFilePath": "D:\\Facturacion\\FacturacionDAM.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ctorleo571\\.nuget\\packages\\bouncycastle.cryptography\\2.5.1\\bouncycastle.cryptography.2.5.1.nupkg.sha512",
     "C:\\Users\\ctorleo571\\.nuget\\packages\\google.protobuf\\3.30.0\\google.protobuf.3.30.0.nupkg.sha512",

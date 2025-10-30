@@ -1,68 +1,98 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+﻿#if DEBUG
+using System;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace FacturacionDAM.Formularios
 {
     public partial class FrmDepuracion : Form
     {
-        public string rutaLog;
+        private string _rutaLog = string.Empty;
+        private System.Windows.Forms.Timer _timer;
+
         public FrmDepuracion()
         {
             InitializeComponent();
-            rutaLog = Program.appDAM.rutaLog;
+
+            // Eventos de la UI, acordarse que no es como FX
+            this.Load += FrmDepuracion_Load;
+            this.btnRefrescar.Click += BtnRefrescar_Click;
+            this.cbRefrescarAutomaticamente.CheckedChanged += CbRefrescarAutomaticamente_CheckedChanged;
+
+            // Timer para el auto-refresco (1 s)
+            _timer = new System.Windows.Forms.Timer();
+            _timer.Interval = 1000;
+            _timer.Tick += (s, e) => RefrescarLog(true);
+
+            //Colores de la consola y espacio entre letras 
+            txtLog.BackColor = Color.Black;
+            txtLog.ForeColor = Color.White;
+            if (txtLog.Font == null || txtLog.Font.FontFamily.Name != "Consolas")
+                txtLog.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
+
+            //Loop de los botones
+            btnRefrescar.Enabled = !cbRefrescarAutomaticamente.Checked;
+            _timer.Enabled = cbRefrescarAutomaticamente.Checked;
         }
+
         private void FrmDepuracion_Load(object sender, EventArgs e)
         {
-            txtLog.ForeColor = Color.Gainsboro;
+            // Comprobacion 
+            var baseDir = Program.appDAM?.rutaBase ?? AppDomain.CurrentDomain.BaseDirectory;
+            _rutaLog = Path.Combine(baseDir, "app.log");
 
-            CargarLog();
+            RefrescarLog(true);
         }
 
-        private void btnRefrescar_Click(object sender, EventArgs e)
+        private void BtnRefrescar_Click(object sender, EventArgs e)
         {
-            CargarLog();
+            RefrescarLog(false);
         }
 
-        private void chkAutoRefrescar_CheckedChanged(object sender, EventArgs e)
+        private void CbRefrescarAutomaticamente_CheckedChanged(object sender, EventArgs e)
         {
-            // Activa o desactiva el temporizador según el checkbox
-            timerRefresh.Enabled = chbAutoRefresh.Checked;
+            // Si y no del boton
+            bool auto = cbRefrescarAutomaticamente.Checked;
+            _timer.Enabled = auto;
+            btnRefrescar.Enabled = !auto;
+
+            // Cuando activo auto, hago un refresco inicial silencioso
+            if (auto) RefrescarLog(true);
         }
 
-        private void tmrActualizacion_Tick(object sender, EventArgs e)
+        /// <summary>
+        /// Lee el archivo de log y lo muestra en el TextBox. Si 'silent' es true, no muestro errores.
+        /// </summary>
+        private void RefrescarLog(bool silent)
         {
-            CargarLog();
-        }
+            if (string.IsNullOrWhiteSpace(_rutaLog) || !File.Exists(_rutaLog))
+            {
+                if (!silent)
+                    txtLog.Text = "No se encontró el archivo de log.";
+                return;
+            }
 
-        private void CargarLog()
-        {
             try
             {
-                if (File.Exists(rutaLog))
+                using (var fs = new FileStream(_rutaLog, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var sr = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
                 {
-                    // Leer todo el log
-                    txtLog.Text = File.ReadAllText(rutaLog);
+                    txtLog.Text = sr.ReadToEnd();
+                }
 
-                    // Mover el scroll al final
-                    txtLog.SelectionStart = txtLog.Text.Length;
-                    txtLog.ScrollToCaret();
-                }
-                else
-                {
-                    txtLog.Text = "No se ha encontrado el archivo de log.";
-                }
+                // Me posiciono al final para ver lo último
+                txtLog.SelectionStart = txtLog.TextLength;
+                txtLog.ScrollToCaret();
             }
             catch (Exception ex)
             {
-                txtLog.Text = $"Error al cargar el log: {ex.Message}";
+                if (!silent)
+                    MessageBox.Show("Error al leer el log:\n" + ex.Message, "Depuración",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }
 }
+#endif

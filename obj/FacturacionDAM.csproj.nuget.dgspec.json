@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\FacturacionDAM.csproj": {}
+    "D:\\Facturacion\\FacturacionDAM.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\FacturacionDAM.csproj": {
+    "D:\\Facturacion\\FacturacionDAM.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\FacturacionDAM.csproj",
+        "projectUniqueName": "D:\\Facturacion\\FacturacionDAM.csproj",
         "projectName": "FacturacionDAM",
-        "projectPath": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\FacturacionDAM.csproj",
+        "projectPath": "D:\\Facturacion\\FacturacionDAM.csproj",
         "packagesPath": "C:\\Users\\ctorleo571\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ctorleo571\\Desktop\\Facturacion\\obj\\",
+        "outputPath": "D:\\Facturacion\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

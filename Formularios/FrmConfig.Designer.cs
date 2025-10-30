@@ -235,11 +235,12 @@
             // 
             tsLbRutaConfig.DisplayStyle = ToolStripItemDisplayStyle.Text;
             tsLbRutaConfig.Name = "tsLbRutaConfig";
-            tsLbRutaConfig.Size = new Size(0, 22);
+            tsLbRutaConfig.Size = new Size(86, 22);
+            tsLbRutaConfig.Text = "toolStripLabel1";
             tsLbRutaConfig.TextAlign = ContentAlignment.MiddleLeft;
             tsLbRutaConfig.ToolTipText = "Ruta del archivo de configuración";
             // 
-            // FrmConfig
+            // FrmConnection
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -250,7 +251,7 @@
             Controls.Add(label6);
             Controls.Add(pnData);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Name = "FrmConfig";
+            Name = "FrmConnection";
             Text = "Conexión a Bases de Datos";
             Load += FrmConnection_Load;
             pnData.ResumeLayout(false);

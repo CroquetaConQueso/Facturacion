@@ -1,0 +1,34 @@
+23-10-2025 | 22:12:00 | App | Inicio de la aplicación
+23-10-2025 | 22:12:01 | App | Conexión a la base de datos establecida
+23-10-2025 | 22:12:08 | App | Conexión a la base de datos cerrada
+23-10-2025 | 22:12:22 | App | Inicio de la aplicación
+23-10-2025 | 22:12:25 | App | No se ha podido conectar a la base de datos. Unable to connect to any of the specified MySQL hosts
+23-10-2025 | 22:12:45 | App | Inicio de la aplicación
+23-10-2025 | 22:12:46 | App | Conexión a la base de datos establecida
+23-10-2025 | 22:12:51 | App | Conexión a la base de datos cerrada
+30-10-2025 | 16:35:06 | App | Inicio de la aplicación
+30-10-2025 | 16:35:07 | App | Conexión a la base de datos establecida
+30-10-2025 | 16:35:13 | App | Conexión a la base de datos cerrada
+30-10-2025 | 17:15:34 | App | Inicio de la aplicación
+30-10-2025 | 17:15:36 | App | Conexión a la base de datos establecida
+30-10-2025 | 17:15:42 | App | Conexión a la base de datos cerrada
+30-10-2025 | 18:18:57 | App | Inicio de la aplicación
+30-10-2025 | 18:18:58 | App | Conexión a la base de datos establecida
+30-10-2025 | 18:18:58 | Cargar tabla | Unknown column 'nif' in 'field list'
+30-10-2025 | 18:19:04 | Cargar tabla | Unknown column 'nif' in 'field list'
+30-10-2025 | 18:19:05 | App | Conexión a la base de datos cerrada
+30-10-2025 | 18:20:41 | App | Inicio de la aplicación
+30-10-2025 | 18:20:42 | App | Conexión a la base de datos establecida
+30-10-2025 | 18:20:42 | Cargar tabla | Unknown column 'nif' in 'field list'
+30-10-2025 | 18:20:48 | App | Conexión a la base de datos cerrada
+30-10-2025 | 18:30:16 | App | Inicio de la aplicación
+30-10-2025 | 18:30:16 | App | Conexión a la base de datos establecida
+30-10-2025 | 18:30:26 | App | Conexión a la base de datos cerrada
+30-10-2025 | 18:34:50 | App | Inicio de la aplicación
+30-10-2025 | 18:34:51 | App | Conexión a la base de datos establecida
+30-10-2025 | 18:45:28 | App | Inicio de la aplicación
+30-10-2025 | 18:45:28 | App | Conexión a la base de datos establecida
+30-10-2025 | 18:45:58 | App | Conexión a la base de datos cerrada
+30-10-2025 | 18:46:01 | App | Inicio de la aplicación
+30-10-2025 | 18:46:01 | App | Conexión a la base de datos establecida
+30-10-2025 | 18:46:18 | App | Conexión a la base de datos cerrada

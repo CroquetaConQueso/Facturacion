@@ -1,125 +1,101 @@
-﻿namespace FacturacionDAM.Formularios
+﻿#if DEBUG
+namespace FacturacionDAM.Formularios
 {
     partial class FrmDepuracion
     {
         /// <summary>
-        /// Required designer variable.
+        ///  Necesario para el diseñador de Windows Forms
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
+        // Controles del formulario
+        private System.Windows.Forms.Panel pnlMenu;
+        private System.Windows.Forms.Button btnRefrescar;
+        private System.Windows.Forms.CheckBox cbRefrescarAutomaticamente;
+        private System.Windows.Forms.TextBox txtLog;
+
         /// <summary>
-        /// Clean up any resources being used.
+        ///  Limpieza de recursos
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name="disposing">true si los recursos administrados deben eliminarse</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
-            {
                 components.Dispose();
-            }
+
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+        #region Código generado por el Diseñador de Windows Forms
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            pnBottom = new Panel();
-            chbAutoRefresh = new CheckBox();
-            btnRefresh = new Button();
-            pnLog = new Panel();
+            pnlMenu = new Panel();
+            btnRefrescar = new Button();
+            cbRefrescarAutomaticamente = new CheckBox();
             txtLog = new TextBox();
-            timerRefresh = new System.Windows.Forms.Timer(components);
-            pnBottom.SuspendLayout();
-            pnLog.SuspendLayout();
+            pnlMenu.SuspendLayout();
             SuspendLayout();
             // 
-            // pnBottom
+            // pnlMenu
             // 
-            pnBottom.Controls.Add(chbAutoRefresh);
-            pnBottom.Controls.Add(btnRefresh);
-            pnBottom.Dock = DockStyle.Bottom;
-            pnBottom.Location = new Point(0, 394);
-            pnBottom.Name = "pnBottom";
-            pnBottom.Size = new Size(800, 57);
-            pnBottom.TabIndex = 0;
+            pnlMenu.Controls.Add(btnRefrescar);
+            pnlMenu.Controls.Add(cbRefrescarAutomaticamente);
+            pnlMenu.Dock = DockStyle.Bottom;
+            pnlMenu.Location = new Point(0, 419);
+            pnlMenu.Name = "pnlMenu";
+            pnlMenu.Size = new Size(800, 41);
+            pnlMenu.TabIndex = 0;
             // 
-            // chbAutoRefresh
+            // btnRefrescar
             // 
-            chbAutoRefresh.AutoSize = true;
-            chbAutoRefresh.Location = new Point(177, 19);
-            chbAutoRefresh.Name = "chbAutoRefresh";
-            chbAutoRefresh.Size = new Size(213, 24);
-            chbAutoRefresh.TabIndex = 1;
-            chbAutoRefresh.Text = "Refrescar automáticametne";
-            chbAutoRefresh.UseVisualStyleBackColor = true;
-            chbAutoRefresh.CheckedChanged += chkAutoRefrescar_CheckedChanged;
+            btnRefrescar.Location = new Point(12, 9);
+            btnRefrescar.Name = "btnRefrescar";
+            btnRefrescar.Size = new Size(90, 23);
+            btnRefrescar.TabIndex = 1;
+            btnRefrescar.Text = "Refrescar";
+            btnRefrescar.UseVisualStyleBackColor = true;
             // 
-            // btnRefresh
+            // cbRefrescarAutomaticamente
             // 
-            btnRefresh.Location = new Point(27, 15);
-            btnRefresh.Name = "btnRefresh";
-            btnRefresh.Size = new Size(94, 29);
-            btnRefresh.TabIndex = 0;
-            btnRefresh.Text = "Refrescar";
-            btnRefresh.UseVisualStyleBackColor = true;
-            btnRefresh.Click += btnRefrescar_Click;
-            // 
-            // pnLog
-            // 
-            pnLog.Controls.Add(txtLog);
-            pnLog.Dock = DockStyle.Fill;
-            pnLog.Location = new Point(0, 0);
-            pnLog.Name = "pnLog";
-            pnLog.Size = new Size(800, 394);
-            pnLog.TabIndex = 1;
+            cbRefrescarAutomaticamente.AutoSize = true;
+            cbRefrescarAutomaticamente.Location = new Point(120, 12);
+            cbRefrescarAutomaticamente.Name = "cbRefrescarAutomaticamente";
+            cbRefrescarAutomaticamente.Size = new Size(171, 19);
+            cbRefrescarAutomaticamente.TabIndex = 2;
+            cbRefrescarAutomaticamente.Text = "Refrescar automáticamente";
+            cbRefrescarAutomaticamente.UseVisualStyleBackColor = true;
             // 
             // txtLog
             // 
             txtLog.Dock = DockStyle.Fill;
-            txtLog.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtLog.ForeColor = Color.Black;
+            txtLog.Font = new Font("Consolas", 9F);
             txtLog.Location = new Point(0, 0);
             txtLog.Multiline = true;
             txtLog.Name = "txtLog";
             txtLog.ReadOnly = true;
             txtLog.ScrollBars = ScrollBars.Both;
-            txtLog.Size = new Size(800, 394);
-            txtLog.TabIndex = 0;
-            // 
-            // timerRefresh
-            // 
-            timerRefresh.Interval = 2000;
+            txtLog.Size = new Size(800, 419);
+            txtLog.TabIndex = 3;
+            txtLog.WordWrap = false;
             // 
             // FrmDepuracion
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 451);
-            Controls.Add(pnLog);
-            Controls.Add(pnBottom);
+            ClientSize = new Size(800, 460);
+            Controls.Add(txtLog);
+            Controls.Add(pnlMenu);
+            MaximizeBox = false;
             Name = "FrmDepuracion";
-            Text = "Depuración";
-            Load += FrmDepuracion_Load;
-            pnBottom.ResumeLayout(false);
-            pnBottom.PerformLayout();
-            pnLog.ResumeLayout(false);
-            pnLog.PerformLayout();
+            Text = "Depuración (solo DEBUG)";
+            pnlMenu.ResumeLayout(false);
+            pnlMenu.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
-
-        private Panel pnBottom;
-        private Panel pnLog;
-        private CheckBox chbAutoRefresh;
-        private Button btnRefresh;
-        private TextBox txtLog;
-        private System.Windows.Forms.Timer timerRefresh;
     }
 }
+#endif

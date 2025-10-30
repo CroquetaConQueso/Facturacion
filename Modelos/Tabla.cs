@@ -1,72 +1,58 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FacturacionDAM.Modelos
 {
+    /// <summary>
+    /// Wrapper simple para DataTable + DataAdapter + CommandBuilder.
+    /// </summary>
     public class Tabla
     {
-        private MySqlConnection _conn;              // Objeto de conexión a la base de datos.
-        private MySqlDataAdapter _adapter;          // Puente entre la tabla en la BD y la tabla en memoria (el DataTable).
-        private MySqlCommandBuilder _builder;       // Objeto que nos facilita la ejecución de comandos sql automáticamente.
-        private DataTable _tabla;                   // La tabla en memoria.
+        private readonly MySqlConnection _conn;
+        private readonly MySqlDataAdapter _adapter;
+        private MySqlCommandBuilder _builder;
+        private DataTable _tabla;
 
-        /// <summary>
-        /// Constructor. Recibe el objeto MySqlConnection de conexión a la base de datos.
-        /// </summary>
-        /// <param name="conexion"></param>
         public Tabla(MySqlConnection conexion)
         {
-            _conn = conexion;
+            _conn = conexion ?? throw new ArgumentNullException(nameof(conexion));
             _adapter = new MySqlDataAdapter();
         }
 
-        /// <summary>
-        /// Inicializa la selección de datos de la tabla.
-        /// </summary>
-        /// <param name="sql">Sentencia SQL de acceso.</param>
-        /// <returns></returns>
         public bool InicializarDatos(string sql)
         {
             try
             {
                 _adapter.SelectCommand = new MySqlCommand(sql, _conn);
+
                 _builder = new MySqlCommandBuilder(_adapter);
+                _adapter.InsertCommand = _builder.GetInsertCommand();
+                _adapter.UpdateCommand = _builder.GetUpdateCommand();
+                _adapter.DeleteCommand = _builder.GetDeleteCommand();
+
                 _tabla = new DataTable();
                 _adapter.Fill(_tabla);
                 return true;
             }
             catch (Exception ex)
             {
-                Program.appDAM.RegistrarLog("Cargando emisores", ex.Message);
+                Program.appDAM?.RegistrarLog("Cargar tabla", ex.Message);
                 return false;
             }
         }
 
-        /// <summary>
-        /// Actualiza los datos que contiene el DataTable asociado.
-        /// </summary>
         public void Refrescar()
         {
             _tabla.Clear();
             _adapter.Fill(_tabla);
         }
 
-        /// <summary>
-        /// Guarda los cambios, si los hubiera.
-        /// </summary>
-        public void GuardarCambios()
+        public void GuardarDatos()
         {
             _adapter.Update(_tabla);
         }
 
-        /// <summary>
-        /// Liberamos recursos de forma explícita.
-        /// </summary>
         public void Liberar()
         {
             _tabla?.Dispose();
@@ -74,10 +60,33 @@ namespace FacturacionDAM.Modelos
             _builder = null;
         }
 
-        /// <summary>
-        /// Acceso de sólo lectura al DataTable.
-        /// </summary>
         public DataTable LaTabla => _tabla;
-    }
 
+        
+        public int ValorEntero(DataRowView drv, string columna, int porDefecto = 0)
+        {
+            if (drv == null) return porDefecto;
+            var row = drv.Row;
+            if (!row.Table.Columns.Contains(columna)) return porDefecto;
+
+            var obj = row[columna];
+            if (obj == null || obj == DBNull.Value) return porDefecto;
+
+            if (obj is int i) return i;
+            if (int.TryParse(Convert.ToString(obj), out int v)) return v;
+            return porDefecto;
+        }
+
+        public string ValorTexto(DataRowView drv, string columna, string porDefecto = "")
+        {
+            if (drv == null) return porDefecto;
+            var row = drv.Row;
+            if (!row.Table.Columns.Contains(columna)) return porDefecto;
+
+            var obj = row[columna];
+            if (obj == null || obj == DBNull.Value) return porDefecto;
+
+            return Convert.ToString(obj) ?? porDefecto;
+        }
+    }
 }
