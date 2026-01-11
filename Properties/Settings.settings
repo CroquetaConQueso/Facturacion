@@ -1,0 +1,63 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="FacturacionDAM.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="BrowEmisoresSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowEmisoresLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowEmisoresState" Type="System.String" Scope="User">
+      <Value Profile="(Default)">"Maximized"</Value>
+    </Setting>
+    <Setting Name="BrowClientesSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowClientesLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowClientesState" Type="System.String" Scope="User">
+      <Value Profile="(Default)">"Maximized"</Value>
+    </Setting>
+    <Setting Name="BrowConceptosFacSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowConceptosFacLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowConceptosFacState" Type="System.String" Scope="User">
+      <Value Profile="(Default)">"Maximized"</Value>
+    </Setting>
+    <Setting Name="BrowTiposIvaSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowTiposIvaLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowTiposIvaState" Type="System.String" Scope="User">
+      <Value Profile="(Default)">"Maximized"</Value>
+    </Setting>
+    <Setting Name="BrowProductosSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowProductosLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowProductosState" Type="System.String" Scope="User">
+      <Value Profile="(Default)">"Maximized"</Value>
+    </Setting>
+    <Setting Name="UltimoAnhoSeleccionado" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="BrowFacemiState" Type="System.String" Scope="User">
+      <Value Profile="(Default)">"Maximized"</Value>
+    </Setting>
+    <Setting Name="BrowFacemiSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="BrowFacemiLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

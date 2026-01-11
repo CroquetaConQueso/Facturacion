@@ -1,0 +1,17 @@
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\bin\Debug\net8.0-windows\Facturacion.exe
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\bin\Debug\net8.0-windows\Facturacion.deps.json
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\bin\Debug\net8.0-windows\Facturacion.runtimeconfig.json
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\bin\Debug\net8.0-windows\Facturacion.dll
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\bin\Debug\net8.0-windows\Facturacion.pdb
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.FrmMain.resources
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.csproj.GenerateResource.cache
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.GeneratedMSBuildEditorConfig.editorconfig
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.AssemblyInfoInputs.cache
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.AssemblyInfo.cs
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.csproj.CoreCompileInputs.cache
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.dll
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\refint\Facturacion.dll
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.pdb
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.genruntimeconfig.cache
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\ref\Facturacion.dll
+J:\Instituto\Fuengirola\Fuengirola_Curso_25-26\Modulos\DI\Pruebas\Facturacion\obj\Debug\net8.0-windows\Facturacion.Formularios.FrmMain.resources
