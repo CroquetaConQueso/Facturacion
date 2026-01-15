@@ -20,7 +20,6 @@ namespace FacturacionDAM.Formularios
 
         public bool edicion;
 
-
         public FrmCliente(BindingSource bs, Tabla tabla)
         {
             InitializeComponent();
@@ -33,45 +32,75 @@ namespace FacturacionDAM.Formularios
             if (!ValidarDatos())
                 return;
 
-            _bs.EndEdit();            // Finaliza edición del registro actual
-            _tabla.GuardarCambios();  // Se propaga a la BD
+            _bs.EndEdit();
+            _tabla.GuardarCambios();
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
-            _bs.CancelEdit(); // Cancela cambios si es nueva fila
+            _bs.CancelEdit();
             this.Close();
         }
 
-
         private void FrmCliente_Load(object sender, EventArgs e)
         {
-            txtNifCif.DataBindings.Add("Text", _bs, "nifcif");
-            txtNombre.DataBindings.Add("Text", _bs, "nombre");
-            txtApellidos.DataBindings.Add("Text", _bs, "apellidos");
-            txtNombreComercial.DataBindings.Add("Text", _bs, "nombrecomercial");
-            txtDomicilio.DataBindings.Add("Text", _bs, "domicilio");
-            txtPob.DataBindings.Add("Text", _bs, "poblacion");
-            txtCp.DataBindings.Add("Text", _bs, "codigopostal");
-            txtTel1.DataBindings.Add("Text", _bs, "telefono1");
-            txtTel2.DataBindings.Add("Text", _bs, "telefono2");
-            txtEmail.DataBindings.Add("Text", _bs, "email");
-            
-            // Cargar provincias en el ComboBox
+            // Obtener la tabla actual del BindingSource (DataTable o DataView)
+            DataTable dt = _bs.DataSource as DataTable;
+            if (dt == null)
+            {
+                DataView dv = _bs.DataSource as DataView;
+                if (dv != null) dt = dv.Table;
+            }
+
+            string Columna(params string[] nombres)
+            {
+                if (dt == null) return string.Empty;
+
+                foreach (string n in nombres)
+                {
+                    if (dt.Columns.Contains(n)) return n;
+                }
+
+                return string.Empty;
+            }
+
+            void BindText(TextBox tb, params string[] columnas)
+            {
+                string col = Columna(columnas);
+                if (string.IsNullOrWhiteSpace(col)) return;
+
+                tb.DataBindings.Clear();
+                tb.DataBindings.Add("Text", _bs, col);
+            }
+
+            BindText(txtNifCif, "nifcif");
+            BindText(txtNombre, "nombre");
+            BindText(txtApellidos, "apellidos");
+            BindText(txtNombreComercial, "nombrecomercial");
+
+            // Compatibilidad: BD antigua (domicilio/codigopostal) y BD nueva (direccion/cpostal)
+            BindText(txtDomicilio, "domicilio", "direccion");
+            BindText(txtPob, "poblacion");
+            BindText(txtCp, "codigopostal", "cpostal");
+
+            BindText(txtTel1, "telefono1");
+            BindText(txtTel2, "telefono2");
+            BindText(txtEmail, "email");
+
             Tabla tablaProvincias = new Tabla(Program.appDAM.LaConexion);
             tablaProvincias.InicializarDatos("SELECT * FROM provincias");
             cbProv.DataSource = tablaProvincias.LaTabla;
             cbProv.DisplayMember = "nombreprovincia";
             cbProv.ValueMember = "id";
+
+            cbProv.DataBindings.Clear();
             cbProv.DataBindings.Add("SelectedValue", _bs, "idprovincia");
         }
 
         private bool ValidarDatos()
         {
-
-            // Validación 1: NIF/CIF y nombrecomercial no pueden estar vacíos
             if (string.IsNullOrWhiteSpace(txtNifCif.Text))
             {
                 MessageBox.Show("El campo NIF/CIF no puede estar vacío.");
@@ -84,7 +113,6 @@ namespace FacturacionDAM.Formularios
                 return false;
             }
 
-            // Validación 2: Email válido si se ha introducido
             string email = txtEmail.Text.Trim();
             if (!string.IsNullOrEmpty(email) && !Validaciones.EsEmailValido(email))
             {
@@ -92,22 +120,15 @@ namespace FacturacionDAM.Formularios
                 return false;
             }
 
-            // Validación 3: El nif ya existe.
-            if (NifDuplicado(txtNifCif.Text.Trim())) { 
+            if (NifDuplicado(txtNifCif.Text.Trim()))
+            {
                 MessageBox.Show("El NIF/CIF introducido ya existe en otro registro.");
                 return false;
             }
 
             return true;
-            
         }
 
-        /// <summary>
-        /// Verifica si el nif/cif pasado como parámetro ya existe en la tabla. Si estamos
-        /// en modo edición, busca en todos los registros que no coincida con el actual.
-        /// </summary>
-        /// <param name="nifCif">El nif/cif a verificar.</param>
-        /// <returns>Retorna true si existe, false sino.</returns>
         private bool NifDuplicado(string nifCif)
         {
             if (edicion && _bs.Current is DataRowView row && row["id"] is int id)
@@ -115,7 +136,5 @@ namespace FacturacionDAM.Formularios
 
             return !Validaciones.EsValorCampoUnico("clientes", "nifcif", txtNifCif.Text.Trim());
         }
-
-
     }
 }

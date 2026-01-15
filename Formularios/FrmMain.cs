@@ -1,5 +1,7 @@
 using FacturacionDAM.Modelos;
-using System.Xml.Linq;
+using System;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace FacturacionDAM.Formularios
 {
@@ -10,11 +12,8 @@ namespace FacturacionDAM.Formularios
             InitializeComponent();
         }
 
-        /******** EVENTOS DEL FORMULARIO Y CONTROLES *********/
-
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-
             if (Program.appDAM.conectado)
                 Program.appDAM.DesconectarDB();
         }
@@ -22,23 +21,23 @@ namespace FacturacionDAM.Formularios
         private void FrmMain_Load(object sender, EventArgs e)
         {
 #if !DEBUG
-                // Si no estamos en compilación DEBUG, ocultamos el menú de depuración
-                tsMenuItemDepura.Visible = false;
+            tsMenuItemDepura.Visible = false;
 #endif
             menuMain.MdiWindowListItem = ventanasToolStripMenuItem;
+
+            HookToolButton(tsToolMain, "tsBtnCompras", "Compras", tsBtnCompras_Click);
+            HookToolButton(tsToolMain, "tsBtnProveedores", "Proveedores", tsBtnProveedores_Click);
+
             SeleccionarEmisor();
             RefreshControles();
         }
 
-        private void tsBtnConfig_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioHijo<FrmConfig>();
-        }
+        private void tsBtnConfig_Click(object sender, EventArgs e) => AbrirFormularioHijo<FrmConfig>();
 
         private void tsBtnSalir_Click(object sender, EventArgs e)
         {
             CerrarFormulariosHijos();
-            this.Close();
+            Close();
         }
 
         private void tsMenuItemDepura_Click(object sender, EventArgs e)
@@ -46,46 +45,46 @@ namespace FacturacionDAM.Formularios
 #if DEBUG
             AbrirFormularioHijo<FrmDepuracion>();
 #endif
-
         }
 
-        private void tsBtnEmisores_Click(object sender, EventArgs e)
+        private void tsBtnEmisores_Click(object sender, EventArgs e) => AbrirFormularioHijo<FrmBrowEmisores>();
+
+        private void tsBtnClientes_Click(object sender, EventArgs e) => AbrirFormularioHijoPorNombre("FrmBrowClientes", "FrmBrowCliente");
+
+        private void conceptosDeFacturaciónToolStripMenuItem_Click(object sender, EventArgs e) => AbrirFormularioHijo<FrmBrowConceptosFac>();
+
+        private void tiposDeIVAToolStripMenuItem_Click(object sender, EventArgs e) => AbrirFormularioHijo<FrmBrowTiposIva>();
+
+        private void productosYServiciosToolStripMenuItem_Click(object sender, EventArgs e) => AbrirFormularioHijo<FrmBrowProductos>();
+
+        private void tsBtnVentas_Click(object sender, EventArgs e)
         {
-            AbrirFormularioHijo<FrmBrowEmisores>();
+            if (Program.appDAM.emisor == null)
+            {
+                MessageBox.Show("Debe seleccionar un emisor antes de gestionar facturas.",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!Program.appDAM.HayClientes())
+            {
+                MessageBox.Show(
+                    "No hay clientes registrados.\nDebe registrar al menos un cliente antes de gestionar facturas.",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            AbrirFormularioHijo<FrmBrowFacemi>();
         }
 
-        private void tsBtnClientes_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioHijo<FrmBrowClientes>();
-        }
-
-        private void conceptosDeFacturaciónToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioHijo<FrmBrowConceptosFac>();
-        }
-
-
-        private void tiposDeIVAToolStripMenuItem_Click(object sender, EventArgs e)
+        private void tsBtnCompras_Click(object sender, EventArgs e)
         {
             AbrirFormularioHijo<FrmBrowTiposIva>();
         }
 
-
-        private void productosYServiciosToolStripMenuItem_Click(object sender, EventArgs e)
+        private void tsBtnProveedores_Click(object sender, EventArgs e)
         {
-            AbrirFormularioHijo<FrmBrowProductos>();
-        }
-
-
-        private void tsBtnVentas_Click(object sender, EventArgs e)
-        {
-            if (!Program.appDAM.HayClientes())
-                MessageBox.Show(
-                    "No hay clientes registrados.\nDebe registrar al menos un cliente antes de gestionar facturas.",
-                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
-            else
-                AbrirFormularioHijo<FrmBrowFacemi>();
+            AbrirFormularioHijoPorNombre("FrmBrowProveedores", "FrmBrowProveedor", "FrmProveedores", "FrmProveedor");
         }
 
         private void tsItemMenuSeleccionarEmisor_Click(object sender, EventArgs e)
@@ -95,80 +94,40 @@ namespace FacturacionDAM.Formularios
             RefreshControles();
         }
 
+        private void cascadaToolStripMenuItem_Click(object sender, EventArgs e) => LayoutMdi(MdiLayout.Cascade);
 
-        /// <summary>
-        /// Evento que ordena las ventanas Mdi hijas en cascada.
-        /// </summary>
-        private void cascadaToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.LayoutMdi(MdiLayout.Cascade);
-        }
+        private void mosaicoHorizontalToolStripMenuItem_Click(object sender, EventArgs e) => LayoutMdi(MdiLayout.TileHorizontal);
 
-        /// <summary>
-        /// Evento que ordena en mosaico horizontal las ventanas Mdi hijas.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void mosaicoHorizontalToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.LayoutMdi(MdiLayout.TileHorizontal);
+        private void mosaicoVerticalToolStripMenuItem_Click(object sender, EventArgs e) => LayoutMdi(MdiLayout.TileVertical);
 
-        }
-
-        /// <summary>
-        /// Evento que ordena en mosaico vertical las ventanas Mdi hijas.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void mosaicoVerticalToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.LayoutMdi(MdiLayout.TileVertical);
-        }
-
-        private void cerrarTodasToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            CerrarFormulariosHijos();
-        }
-
-
-        /*************** MÉTODOS PRIVADOS *******************/
+        private void cerrarTodasToolStripMenuItem_Click(object sender, EventArgs e) => CerrarFormulariosHijos();
 
         private void SeleccionarEmisor()
         {
             if ((Program.appDAM.estadoApp == EstadoApp.ConectadoSinEmisor) ||
-                 (Program.appDAM.estadoApp == EstadoApp.Conectado))
+                (Program.appDAM.estadoApp == EstadoApp.Conectado))
             {
                 using (var frm = new FrmSeleccionarEmisor())
                 {
-                    var resultado = frm.ShowDialog();
-
+                    frm.ShowDialog();
                     Program.appDAM.estadoApp =
                         (Program.appDAM.emisor == null) ? EstadoApp.ConectadoSinEmisor : EstadoApp.Conectado;
-
                 }
             }
         }
 
         private void CerrarFormulariosHijos()
         {
-            foreach (Form frm in this.MdiChildren)
-                //if (frm is not FrmDepuracion)
+            foreach (Form frm in MdiChildren)
                 frm.Close();
         }
 
-
-        /// <summary>
-        /// Abre un formulario hijo MDI del tipo indicado. 
-        /// Si ya existe, lo activa y lo restaura si estaba minimizado.
-        /// </summary>
         private void AbrirFormularioHijo<T>() where T : Form, new()
         {
-            // Buscar si ya existe un formulario hijo de ese tipo
-            foreach (Form frm in this.MdiChildren)
+            foreach (Form frm in MdiChildren)
             {
                 if (frm is T)
                 {
-                    // Si estaba minimizado, lo restauramos
                     if (frm.WindowState == FormWindowState.Minimized)
                         frm.WindowState = FormWindowState.Normal;
 
@@ -177,38 +136,82 @@ namespace FacturacionDAM.Formularios
                 }
             }
 
-            // No estaba abierto: creamos una nueva instancia
-            T nuevoFrm = new T();
-            nuevoFrm.MdiParent = this;
-            nuevoFrm.WindowState = FormWindowState.Maximized;
+            T nuevoFrm = new T
+            {
+                MdiParent = this,
+                WindowState = FormWindowState.Maximized
+            };
             nuevoFrm.Show();
         }
 
+        private void AbrirFormularioHijoPorNombre(params string[] nombres)
+        {
+            var asm = typeof(FrmMain).Assembly;
+
+            Type tipo = null;
+            foreach (var n in nombres)
+            {
+                tipo = asm.GetTypes().FirstOrDefault(t => typeof(Form).IsAssignableFrom(t) && t.Name == n);
+                if (tipo != null) break;
+            }
+
+            if (tipo == null)
+                return;
+
+            foreach (Form frm in MdiChildren)
+            {
+                if (frm.GetType() == tipo)
+                {
+                    if (frm.WindowState == FormWindowState.Minimized)
+                        frm.WindowState = FormWindowState.Normal;
+
+                    frm.Activate();
+                    return;
+                }
+            }
+
+            var nuevo = (Form)Activator.CreateInstance(tipo);
+            nuevo.MdiParent = this;
+            nuevo.WindowState = FormWindowState.Maximized;
+            nuevo.Show();
+        }
+
+        private void HookToolButton(ToolStrip strip, string name, string text, EventHandler handler)
+        {
+            ToolStripItem item = strip.Items.Cast<ToolStripItem>()
+                .FirstOrDefault(i => i.Name == name);
+
+            if (item == null)
+            {
+                item = strip.Items.Cast<ToolStripItem>()
+                    .FirstOrDefault(i => string.Equals(i.Text?.Trim(), text, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (item != null)
+            {
+                item.Click -= handler;
+                item.Click += handler;
+            }
+        }
 
         private void RefreshToolBar()
         {
-            if (Program.appDAM.estadoApp != EstadoApp.Conectado)
-            {
-                foreach (ToolStripItem item in tsToolMain.Items)
-                {
-                    if (item is ToolStripButton)
-                    {
-                        switch (item.Name)
-                        {
-                            case "tsBtnConfig":
-                                item.Enabled = true;
-                                break;
-                            case "tsBtnSalir":
-                                item.Enabled = true;
-                                break;
-                            case "tsBtnEmisores":
-                                item.Enabled = (Program.appDAM.estadoApp == EstadoApp.ConectadoSinEmisor) ? true : false;
-                                break;
-                            default:
-                                item.Enabled = false;
-                                break;
+            bool conectado = (Program.appDAM.estadoApp == EstadoApp.Conectado ||
+                              Program.appDAM.estadoApp == EstadoApp.ConectadoSinEmisor);
 
-                        }
+            foreach (ToolStripItem item in tsToolMain.Items)
+            {
+                if (item is ToolStripButton)
+                {
+                    switch (item.Name)
+                    {
+                        case "tsBtnConfig":
+                        case "tsBtnSalir":
+                            item.Enabled = true;
+                            break;
+                        default:
+                            item.Enabled = conectado;
+                            break;
                     }
                 }
             }
@@ -233,22 +236,17 @@ namespace FacturacionDAM.Formularios
                     tsLbEstado.Text = "Conectado a la base de datos, pero no se ha seleccionado un emisor.";
                     break;
                 case EstadoApp.Error:
-                    if (Program.appDAM.ultimoError != "")
-                        tsLbEstado.Text = "Se ha producido un error, revisa el log para más detalles.";
-                    else
-                        tsLbEstado.Text = "Se ha producido un error";
+                    tsLbEstado.Text = (Program.appDAM.ultimoError != "")
+                        ? "Se ha producido un error, revisa el log para más detalles."
+                        : "Se ha producido un error";
                     break;
             }
         }
 
-        /// <summary>
-        /// Actualiza la barra de estado y la barra de botones izquierda.
-        /// </summary>
         private void RefreshControles()
         {
             RefreshToolBar();
             RefreshStatusBar();
         }
-
     }
 }

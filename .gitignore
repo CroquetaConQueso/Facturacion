@@ -1,0 +1,42 @@
+## Visual Studio / .NET
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.cache
+*.log
+
+## Rider
+.idea/
+*.sln.iml
+
+## Build outputs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]ny [Cc]PU/
+[Aa]ppPackages/
+
+## NuGet
+packages/
+*.nupkg
+*.snupkg
+.nuget/
+
+## Publish
+**/publish/
+**/PublishProfiles/
+
+## Test results
+TestResults/
+
+## OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+*.zip

@@ -2,101 +2,91 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FacturacionDAM.Modelos
 {
     public class Tabla
     {
-        private MySqlConnection _conn;                  // Objeto de conexión a la base de datos.
-        private MySqlDataAdapter _adapter;              // Puente entre la tabla en la BD y la tabla en memoria (el DataTable).
-        private MySqlCommandBuilder _builder;           // Objeto que nos facilita la ejecución de comandos sql automáticamente.
-        private DataTable _tabla;                       // La tabla en memoria.
+        private readonly MySqlConnection _cn;
+        private MySqlDataAdapter? _da;
+        private MySqlCommandBuilder? _cb;
 
-        /// <summary>
-        /// Constructor. Recibe el objeto MySqlConnection de conexión a la base de datos.
-        /// </summary>
-        /// <param name="conexion"></param>
-        public Tabla(MySqlConnection conexion)
+        private string? _sqlBase;
+        private Dictionary<string, object>? _paramBase;
+
+        public DataTable LaTabla { get; private set; } = new DataTable();
+
+        public Tabla(MySqlConnection cn)
         {
-            _conn = conexion;
-            _adapter = new MySqlDataAdapter();
+            _cn = cn ?? throw new ArgumentNullException(nameof(cn));
         }
 
-        /// <summary>
-        /// Inicializa la selección de datos de la tabla.
-        /// </summary>
-        /// <param name="sql">Sentencia SQL de acceso.</param>
-        /// <returns></returns>
-        public bool InicializarDatos(string sql)
+        public bool InicializarDatos(string sql, Dictionary<string, object>? parametros = null)
         {
-            try
-            {
-                _adapter.SelectCommand = new MySqlCommand(sql, _conn);
-                _builder = new MySqlCommandBuilder(_adapter);
-                _tabla = new DataTable();
-                _adapter.Fill(_tabla);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Program.appDAM.RegistrarLog("Cargando emisores", ex.Message);
-                return false;
-            }
+            if (string.IsNullOrWhiteSpace(sql)) return false;
+
+            Liberar();
+
+            _sqlBase = sql;
+            _paramBase = parametros != null ? new Dictionary<string, object>(parametros) : null;
+
+            LaTabla = new DataTable();
+
+            _da = new MySqlDataAdapter();
+            _da.SelectCommand = CrearCommand(sql, parametros);
+            _da.Fill(LaTabla);
+
+            return true;
         }
 
-        /// <summary>
-        /// Actualiza los datos que contiene el DataTable asociado.
-        /// </summary>
         public void Refrescar()
         {
-            _tabla.Clear();
-            _adapter.Fill(_tabla);
+            if (_sqlBase == null) return;
+            InicializarDatos(_sqlBase, _paramBase);
         }
 
-        /// <summary>
-        /// Guarda los cambios, si los hubiera.
-        /// </summary>
-        public void GuardarCambios()
+        public int GuardarCambios()
         {
-            _adapter.Update(_tabla);
+            if (_da == null) return 0;
+
+            if (_cb == null)
+                _cb = new MySqlCommandBuilder(_da);
+
+            return _da.Update(LaTabla);
         }
 
-        /// <summary>
-        /// Liberamos recursos de forma explícita.
-        /// </summary>
-        public void Liberar()
+        public int EjecutarComando(string sql, Dictionary<string, object>? parametros = null)
         {
-            _tabla?.Dispose();
-            _adapter?.Dispose();
-            _builder = null;
-        }
-
-        /// <summary>
-        /// Asigna una DataTable a la tabla interna.
-        /// </summary>
-        /// <param name="aTabla">El objeto DataTable a asignar.</param>
-        public void AsignaLaTabla (DataTable aTabla)
-        {
-            _tabla = aTabla;
-        }
-
-        public int EjecutarComando(string aSql, Dictionary<string, object> aParametros)
-        {
-            using var cmd = new MySqlCommand(aSql, _conn);
-            foreach (var p in aParametros)
-                cmd.Parameters.AddWithValue(p.Key, p.Value);
-
+            using var cmd = CrearCommand(sql, parametros);
             return cmd.ExecuteNonQuery();
         }
 
+        public object? EjecutarEscalar(string sql, Dictionary<string, object>? parametros = null)
+        {
+            using var cmd = CrearCommand(sql, parametros);
+            return cmd.ExecuteScalar();
+        }
 
-        /// <summary>
-        /// Acceso de sólo lectura al DataTable.
-        /// </summary>
-        public DataTable LaTabla => _tabla;
+        public void Liberar()
+        {
+            _cb?.Dispose();
+            _cb = null;
+
+            _da?.Dispose();
+            _da = null;
+        }
+
+        private MySqlCommand CrearCommand(string sql, Dictionary<string, object>? parametros)
+        {
+            var cmd = new MySqlCommand(sql, _cn);
+
+            if (parametros != null)
+            {
+                foreach (var kv in parametros)
+                    cmd.Parameters.AddWithValue(kv.Key, kv.Value ?? DBNull.Value);
+            }
+
+            return cmd;
+        }
     }
-
 }
