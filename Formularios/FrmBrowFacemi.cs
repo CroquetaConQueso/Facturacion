@@ -159,9 +159,12 @@ namespace FacturacionDAM.Formularios
 
         private void CargarFacturasClienteSeleccionado()
         {
+            _bsFacturas.SuspendBinding();
+            _bsFacturas.DataSource = null;
+            _bsFacturas.ResumeBinding();
+
             if (_bsClientes.Current is not DataRowView rowCliente)
             {
-                _bsFacturas.DataSource = null;
                 ActualizarEstado(0, ContarTotalesAnho());
                 return;
             }
@@ -176,24 +179,32 @@ namespace FacturacionDAM.Formularios
             };
 
             const string sql = @"
-                SELECT f.*
-                FROM facemi f
-                WHERE f.idemisor = @idEmisor
-                  AND f.idcliente = @idCliente
-                  AND YEAR(f.fecha) = @year
-                ORDER BY f.fecha DESC, f.id DESC;";
+        SELECT f.*
+        FROM facemi f
+        WHERE f.idemisor = @idEmisor
+          AND f.idcliente = @idCliente
+          AND YEAR(f.fecha) = @year
+        ORDER BY f.fecha DESC, f.id DESC;";
 
             if (!_tablaFacemi.InicializarDatos(sql, p))
             {
-                _bsFacturas.DataSource = null;
                 ActualizarEstado(0, ContarTotalesAnho());
                 return;
             }
 
+            dgFacturas.DataSource = null;
+
             _bsFacturas.DataSource = _tablaFacemi.LaTabla;
+
+            dgFacturas.AutoGenerateColumns = true;
+            dgFacturas.DataSource = _bsFacturas;
+
+            if (_bsFacturas.Count > 0)
+                _bsFacturas.Position = 0;
 
             ActualizarEstado(_bsFacturas.Count, ContarTotalesAnho());
         }
+
 
         private int ContarTotalesAnho()
         {
@@ -238,14 +249,11 @@ namespace FacturacionDAM.Formularios
 
             int idCliente = Convert.ToInt32(rowCliente["id"]);
 
-            _bsFacturas.AddNew();
-
             using var frm = new FrmFacemi(_bsFacturas, _tablaFacemi, _idEmisor, idCliente, _yearActual, -1);
             if (frm.ShowDialog(this) == DialogResult.OK)
                 CargarFacturasClienteSeleccionado();
-            else
-                _bsFacturas.CancelEdit();
         }
+
 
 
         private void tsBtnEdit_Click(object sender, EventArgs e)

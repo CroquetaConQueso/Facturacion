@@ -43,25 +43,21 @@ namespace FacturacionDAM.Formularios
         {
             InitializeComponent();
 
-            if (aBs == null) throw new ArgumentNullException(nameof(aBs));
-            if (aTabla == null) throw new ArgumentNullException(nameof(aTabla));
-
             _idCliente = aIdCliente;
             _idEmisor = aIdEmisor;
             _anhoFactura = aYear;
-
             idFactura = aIdFactura;
+
             modoEdicion = (aIdFactura > 0);
 
-            _bsFactura = new BindingSource();
             _tablaFactura = new Tabla(Program.appDAM.LaConexion);
-            _tablaLineasFactura = new Tabla(Program.appDAM.LaConexion);
-            _tablaConceptos = new Tabla(Program.appDAM.LaConexion);
-            _bsLineasFactura = new BindingSource();
+            _bsFactura = new BindingSource();
 
             InitFactura();
             WireUI();
         }
+
+
 
 
         private void WireUI()
@@ -82,16 +78,32 @@ namespace FacturacionDAM.Formularios
         {
             try
             {
-                if (!CargarConceptos() || !CargarDatosEmisorYCliente())
+                if (!_tablaFactura.InicializarDatos(
+                        modoEdicion ? "SELECT * FROM facemi WHERE id = @id" : "SELECT * FROM facemi WHERE 1=0",
+                        modoEdicion ? new Dictionary<string, object> { { "@id", idFactura } } : null))
                     return;
 
-                if (!AsegurarFacturaEnMemoria())
+                _bsFactura.DataSource = _tablaFactura.LaTabla;
+
+                if (!modoEdicion)
                 {
-                    MessageBox.Show("No se pudo preparar la factura en memoria.", "Aviso",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Close();
-                    return;
+                    _bsFactura.AddNew();
+
+                    if (_bsFactura.Current is DataRowView row)
+                    {
+                        row["idemisor"] = _idEmisor;
+                        row["idcliente"] = _idCliente;
+                        row["fecha"] = new DateTime(_anhoFactura, DateTime.Today.Month, DateTime.Today.Day);
+                        row["numero"] = Program.appDAM.emisor.nextNumFac;
+
+                        if (row.Row.Table.Columns.Contains("pagada") && row["pagada"] == DBNull.Value) row["pagada"] = 0;
+                        if (row.Row.Table.Columns.Contains("aplicaret") && row["aplicaret"] == DBNull.Value) row["aplicaret"] = 0;
+                        if (row.Row.Table.Columns.Contains("tiporet") && row["tiporet"] == DBNull.Value) row["tiporet"] = 0;
+                    }
                 }
+
+                if (!CargarConceptos() || !CargarDatosEmisorYCliente())
+                    return;
 
                 PrepararBindingFactura();
 
@@ -101,16 +113,17 @@ namespace FacturacionDAM.Formularios
                     CrearLineasFacturaNueva();
 
                 PrepararBindingLineas();
-                ActualizarEstado();
                 RecalcularTotales();
             }
             catch (Exception ex)
             {
-                Program.appDAM.RegistrarLog("Inicializar factura. Edición: " + modoEdicion, ex.Message);
-                MessageBox.Show("Se ha producido un error al inicializar la factura.",
+                Program.appDAM.RegistrarLog("Inicializar factura. Edición: " + modoEdicion.ToString(), ex.Message);
+                MessageBox.Show("Se ha producido un error al incializar la factura",
                     "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
 
         private void FrmFacemi_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -217,12 +230,8 @@ namespace FacturacionDAM.Formularios
         {
             try
             {
-                if (!AsegurarFacturaEnMemoria())
-                {
-                    MessageBox.Show("No hay factura activa en memoria (BindingSource.Current es null).", "Aviso",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                if (!(_bsFactura.Current is DataRowView))
                     return false;
-                }
 
                 if (!ValidarDatos())
                     return false;
@@ -244,17 +253,18 @@ namespace FacturacionDAM.Formularios
                     modoEdicion = true;
                 }
 
-                SetStatus("Factura guardada.");
                 return true;
             }
             catch (Exception ex)
             {
-                Program.appDAM.RegistrarLog("Guardar factura", ex.Message);
+                Program.appDAM.RegistrarLog("Guardar nueva factura", ex.Message);
                 MessageBox.Show("Se ha producido un error al guardar la factura.",
                     "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
+
+
 
         private bool ValidarDatos()
         {
@@ -407,6 +417,9 @@ namespace FacturacionDAM.Formularios
 
         private bool CargarConceptos()
         {
+            if (_tablaConceptos == null)
+                _tablaConceptos = new Tabla(Program.appDAM.LaConexion);
+
             if (_tablaConceptos.InicializarDatos("SELECT id, descripcion FROM conceptosfac ORDER BY descripcion"))
             {
                 cbConceptFac.DataSource = _tablaConceptos.LaTabla;
@@ -416,14 +429,21 @@ namespace FacturacionDAM.Formularios
             }
 
             cbConceptFac.Enabled = false;
-            MessageBox.Show("No se pudieron cargar los conceptos de facturación.", "Aviso",
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
             return false;
         }
 
+
         private void InitFactura()
         {
+            if (_tablaLineasFactura == null)
+                _tablaLineasFactura = new Tabla(Program.appDAM.LaConexion);
+
+            if (_tablaConceptos == null)
+                _tablaConceptos = new Tabla(Program.appDAM.LaConexion);
+
+            if (_bsLineasFactura == null)
+                _bsLineasFactura = new BindingSource();
+
             lbNifcifEmisor.Text = "";
             lbNombreEmisor.Text = "";
             lbNifcifCliente.Text = "";
@@ -439,37 +459,8 @@ namespace FacturacionDAM.Formularios
             lbCuota.Text = "";
             lbTotal.Text = "";
             lbRetencion.Text = "";
-            tsLbStatus.Text = "";
         }
 
-        private bool AsegurarFacturaEnMemoria()
-        {
-            if (_bsFactura?.Current is DataRowView) return true;
-
-            if (_bsFactura != null && _bsFactura.DataSource == null && _tablaFactura?.LaTabla != null)
-                _bsFactura.DataSource = _tablaFactura.LaTabla;
-
-            if (_tablaFactura?.LaTabla == null || _tablaFactura.LaTabla.Columns.Count == 0)
-            {
-                string sql = modoEdicion && idFactura > 0
-                    ? $"SELECT * FROM facemi WHERE id = {idFactura}"
-                    : "SELECT * FROM facemi WHERE 1=0";
-
-                if (!_tablaFactura.InicializarDatos(sql))
-                    return false;
-
-                if (_bsFactura != null)
-                    _bsFactura.DataSource = _tablaFactura.LaTabla;
-            }
-
-            if (!modoEdicion && _bsFactura != null)
-                _bsFactura.AddNew();
-
-            if (modoEdicion && _bsFactura != null && _bsFactura.Count > 0)
-                _bsFactura.MoveFirst();
-
-            return (_bsFactura?.Current is DataRowView);
-        }
 
         private void CargarLineasFacturaExistente()
         {
