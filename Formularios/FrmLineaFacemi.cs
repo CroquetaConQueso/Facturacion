@@ -21,13 +21,14 @@ namespace FacturacionDAM.Formularios
         private bool _cargandoProductos = false;
         private bool _aplicandoProducto = false;
 
-        public FrmLineaFacemi(BindingSource bsLineas, Tabla tablaLineas, int idFacemi)
+        public FrmLineaFacemi(BindingSource bsLineas, Tabla tablaLineas, int idFacemi, bool edicion = false)
         {
             InitializeComponent();
 
             _bsLineas = bsLineas ?? throw new ArgumentNullException(nameof(bsLineas));
             _tablaLineas = tablaLineas ?? throw new ArgumentNullException(nameof(tablaLineas));
             _idFacemi = idFacemi;
+            this.edicion = edicion;
 
             _tablaProductos = new Tabla(Program.appDAM.LaConexion);
             _bsProductos = new BindingSource();
@@ -47,9 +48,9 @@ namespace FacturacionDAM.Formularios
 
             txtDescripcion.TextChanged += TxtDescripcion_TextChanged;
 
-            // Evita que el usuario escriba texto libre y se quede un valor raro
             cbProducto.DropDownStyle = ComboBoxStyle.DropDownList;
         }
+
 
         private void FrmLineaFacemi_Load(object sender, EventArgs e)
         {
@@ -302,12 +303,25 @@ namespace FacturacionDAM.Formularios
             if (!ValidarLinea())
                 return;
 
+            if (_bsLineas.Current is DataRowView row)
+            {
+                if (row.Row.Table.Columns.Contains("idfacemi"))
+                    row["idfacemi"] = _idFacemi;
+
+                if (row.Row.Table.Columns.Contains("descripcion"))
+                    row["descripcion"] = (txtDescripcion.Text ?? "").Trim();
+            }
+
             RecalcularYVolcar();
+
             _bsLineas.EndEdit();
+            _tablaLineas.GuardarCambios();
 
             DialogResult = DialogResult.OK;
             Close();
         }
+
+
 
 
         private void btnCancelar_Click(object sender, EventArgs e)

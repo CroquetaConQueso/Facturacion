@@ -130,7 +130,6 @@ namespace FacturacionDAM.Formularios
             if (DialogResult != DialogResult.OK && _bsFactura != null)
                 _bsFactura.CancelEdit();
         }
-
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
             bool crearLinea = false;
@@ -155,13 +154,13 @@ namespace FacturacionDAM.Formularios
 
             _bsLineasFactura.AddNew();
 
-            FrmLineaFacemi frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura);
+            if (_bsLineasFactura.Current is DataRowView row && row.Row.Table.Columns.Contains("idfacemi"))
+                row["idfacemi"] = idFactura;
+
+            using var frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura);
 
             if (frm.ShowDialog(this) == DialogResult.OK)
             {
-                _bsLineasFactura.EndEdit();
-                _tablaLineasFactura.GuardarCambios();
-
                 _tablaLineasFactura.Refrescar();
                 ActualizarEstado();
                 RecalcularTotales();
@@ -172,18 +171,17 @@ namespace FacturacionDAM.Formularios
             }
         }
 
+
+
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
             if (!(_bsLineasFactura.Current is DataRowView)) return;
 
-            FrmLineaFacemi frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura);
+            using var frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura);
             frm.edicion = true;
 
             if (frm.ShowDialog(this) == DialogResult.OK)
             {
-                _bsLineasFactura.EndEdit();
-                _tablaLineasFactura.GuardarCambios();
-
                 _tablaLineasFactura.Refrescar();
                 ActualizarEstado();
                 RecalcularTotales();
@@ -260,16 +258,36 @@ namespace FacturacionDAM.Formularios
                     modoEdicion = true;
                 }
 
+                if (_bsLineasFactura != null)
+                    _bsLineasFactura.EndEdit();
+
+                if (_tablaLineasFactura?.LaTabla != null)
+                {
+                    foreach (DataRow r in _tablaLineasFactura.LaTabla.Rows)
+                    {
+                        if (r.RowState == DataRowState.Deleted) continue;
+
+                        if (r.Table.Columns.Contains("idfacemi"))
+                            r["idfacemi"] = idFactura;
+                    }
+
+                    _tablaLineasFactura.GuardarCambios();
+                }
+
+                SetStatus("Factura guardada.");
                 return true;
             }
             catch (Exception ex)
             {
-                Program.appDAM.RegistrarLog("Guardar nueva factura", ex.Message);
+                Program.appDAM.RegistrarLog("Guardar factura", ex.Message);
                 MessageBox.Show("Se ha producido un error al guardar la factura.",
                     "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
+
+
+
 
 
 
