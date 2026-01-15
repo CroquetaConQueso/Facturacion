@@ -159,6 +159,9 @@ namespace FacturacionDAM.Formularios
 
             if (frm.ShowDialog(this) == DialogResult.OK)
             {
+                _bsLineasFactura.EndEdit();
+                _tablaLineasFactura.GuardarCambios();
+
                 _tablaLineasFactura.Refrescar();
                 ActualizarEstado();
                 RecalcularTotales();
@@ -178,11 +181,15 @@ namespace FacturacionDAM.Formularios
 
             if (frm.ShowDialog(this) == DialogResult.OK)
             {
+                _bsLineasFactura.EndEdit();
+                _tablaLineasFactura.GuardarCambios();
+
                 _tablaLineasFactura.Refrescar();
                 ActualizarEstado();
                 RecalcularTotales();
             }
         }
+
 
         private void tsBtnDelete_Click(object sender, EventArgs e)
         {

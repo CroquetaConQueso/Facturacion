@@ -303,9 +303,12 @@ namespace FacturacionDAM.Formularios
                 return;
 
             RecalcularYVolcar();
+            _bsLineas.EndEdit();
+
             DialogResult = DialogResult.OK;
             Close();
         }
+
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
