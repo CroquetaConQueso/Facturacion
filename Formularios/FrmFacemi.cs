@@ -130,44 +130,36 @@ namespace FacturacionDAM.Formularios
             if (DialogResult != DialogResult.OK && _bsFactura != null)
                 _bsFactura.CancelEdit();
         }
+
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
-            bool crearLinea = false;
-
+            bool mCrearNuevaLinea = false;
             if (!modoEdicion)
             {
                 if (MessageBox.Show(
-                        "No ha guardado la nueva factura.\n¿Guardar la nueva factura antes de crear la línea?",
-                        "Confirmación",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question) == DialogResult.Yes)
+                            "No ha guardado la nueva factura.\n" +
+                            "¿Guardar la nueva factura antes crear la línea de facturación?",
+                            "Confirmación", MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question) == DialogResult.Yes)
+
+                    mCrearNuevaLinea = GuardarFactura();
+            }
+            else
+                mCrearNuevaLinea = true;
+
+            if (mCrearNuevaLinea)
+            {
+                _bsLineasFactura.AddNew();
+
+                FrmLineaFacemi frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura);
+                if (frm.ShowDialog(this) == DialogResult.OK)
                 {
-                    crearLinea = GuardarFactura();
+                    _tablaLineasFactura.Refrescar();
+                    ActualizarEstado();
+                    RecalcularTotales();
                 }
-            }
-            else
-            {
-                crearLinea = true;
-            }
-
-            if (!crearLinea) return;
-
-            _bsLineasFactura.AddNew();
-
-            if (_bsLineasFactura.Current is DataRowView row && row.Row.Table.Columns.Contains("idfacemi"))
-                row["idfacemi"] = idFactura;
-
-            using var frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura);
-
-            if (frm.ShowDialog(this) == DialogResult.OK)
-            {
-                _tablaLineasFactura.Refrescar();
-                ActualizarEstado();
-                RecalcularTotales();
-            }
-            else
-            {
-                _bsLineasFactura.CancelEdit();
+                else
+                    _bsLineasFactura.CancelEdit();
             }
         }
 
@@ -175,16 +167,15 @@ namespace FacturacionDAM.Formularios
 
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
-            if (!(_bsLineasFactura.Current is DataRowView)) return;
-
-            using var frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura);
-            frm.edicion = true;
-
-            if (frm.ShowDialog(this) == DialogResult.OK)
+            if (_bsLineasFactura.Current is DataRowView)
             {
-                _tablaLineasFactura.Refrescar();
-                ActualizarEstado();
-                RecalcularTotales();
+                FrmLineaFacemi frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura, true);
+                if (frm.ShowDialog(this) == DialogResult.OK)
+                {
+                    _tablaLineasFactura.Refrescar();
+                    ActualizarEstado();
+                    RecalcularTotales();
+                }
             }
         }
 
@@ -235,51 +226,32 @@ namespace FacturacionDAM.Formularios
         {
             try
             {
-                if (!(_bsFactura.Current is DataRowView))
-                    return false;
-
                 if (!ValidarDatos())
                     return false;
-
-                ForzarValoresNoNulos();
-
-                _bsFactura.EndEdit();
-                _tablaFactura.GuardarCambios();
-
-                if (!modoEdicion)
+                else
                 {
-                    using (var cmd = new MySqlCommand("SELECT LAST_INSERT_ID()", Program.appDAM.LaConexion))
+                    ForzarValoresNoNulos();
+                    //this.ValidateChildren();         // Fuerza a que todos los controles acutalicen sus bindings.
+                    _bsFactura.EndEdit();            // Guarda en memoria
+                    _tablaFactura.GuardarCambios();  // ✔ Guarda en BD
+
+                    if (!modoEdicion)
                     {
-                        object res = cmd.ExecuteScalar();
-                        idFactura = Convert.ToInt32(res);
+                        // Obtenemos el ID autogenerado desde MySQL/MariaDB
+                        using (var cmd = new MySqlCommand("SELECT LAST_INSERT_ID()", Program.appDAM.LaConexion))
+                        {
+                            object res = cmd.ExecuteScalar();
+                            idFactura = Convert.ToInt32(res);
+                        }
+                        ActualizarNumeracionEmisorSiEsNuevaFactura();
                     }
 
-                    ActualizarNumeracionEmisorSiEsNuevaFactura();
-                    modoEdicion = true;
+                    return true;
                 }
-
-                if (_bsLineasFactura != null)
-                    _bsLineasFactura.EndEdit();
-
-                if (_tablaLineasFactura?.LaTabla != null)
-                {
-                    foreach (DataRow r in _tablaLineasFactura.LaTabla.Rows)
-                    {
-                        if (r.RowState == DataRowState.Deleted) continue;
-
-                        if (r.Table.Columns.Contains("idfacemi"))
-                            r["idfacemi"] = idFactura;
-                    }
-
-                    _tablaLineasFactura.GuardarCambios();
-                }
-
-                SetStatus("Factura guardada.");
-                return true;
             }
             catch (Exception ex)
             {
-                Program.appDAM.RegistrarLog("Guardar factura", ex.Message);
+                Program.appDAM.RegistrarLog("Guardar nueva factura", ex.Message);
                 MessageBox.Show("Se ha producido un error al guardar la factura.",
                     "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
