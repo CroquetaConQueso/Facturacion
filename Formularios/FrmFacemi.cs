@@ -127,15 +127,18 @@ namespace FacturacionDAM.Formularios
         {
             if (DialogResult != DialogResult.OK && _bsFactura != null)
             {
+             
+                dgLineasFactura.DataSource = null;
+                _bsFactura.RaiseListChangedEvents = false;
+
+                
                 try
                 {
-                    
-                    _bsFactura.RaiseListChangedEvents = false;
                     _bsFactura.CancelEdit();
                 }
-                catch (Exception)
+                catch
                 {
-                    
+                 
                 }
             }
         }
@@ -566,8 +569,7 @@ namespace FacturacionDAM.Formularios
 
         private void RecalcularTotales()
         {
-            
-            if (_bsFactura == null || _bsFactura.Current == null || _tablaLineasFactura?.LaTabla == null)
+            if (_bsFactura?.Current == null || _tablaLineasFactura?.LaTabla == null)
                 return;
 
             decimal baseSum = 0m, cuotaSum = 0m;
@@ -581,17 +583,14 @@ namespace FacturacionDAM.Formularios
                 cuotaSum += fila.Field<decimal?>("cuota") ?? 0m;
             }
 
-            decimal total = baseSum + cuotaSum;
-            decimal tipoRet = chkRetencion.Checked ? numTipoRet.Value : 0m;
-            decimal retencion = Math.Round(baseSum * (tipoRet / 100m), 2, MidpointRounding.AwayFromZero);
-
-            
             if (_bsFactura.Current is DataRowView row)
             {
                 row["base"] = baseSum;
                 row["cuota"] = cuotaSum;
-                row["total"] = total;
-                row["retencion"] = retencion;
+                row["total"] = baseSum + cuotaSum;
+
+                decimal tipoRet = chkRetencion.Checked ? numTipoRet.Value : 0m;
+                row["retencion"] = Math.Round(baseSum * (tipoRet / 100m), 2, MidpointRounding.AwayFromZero);
             }
         }
 

@@ -59,6 +59,8 @@ namespace FacturacionDAM.Modelos {
             ConfiguraYConectaDB(rutaConfigDB);
         }
 
+
+
         public void ConfiguraYConectaDB(string aRutaConfig)  {
             // Inicializo la variable que guarda el último error
             ultimoError = "";

@@ -30,13 +30,18 @@ namespace FacturacionDAM.Formularios
 
         private void btnAceptar_Click(object sender, EventArgs e)
         {
-            if (!ValidarDatos())
-                return;
+            _bs.EndEdit();
+            _tabla.GuardarCambios();
 
-            _bs.EndEdit();            // Finaliza edición del registro actual
-            _tabla.GuardarCambios();  // Se propaga a la BD
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            if (_bs.Current is DataRowView row)
+            {
+                Program.appDAM.emisor.nextNumFac = Convert.ToInt32(row["nextnumfac"]);
+                Program.appDAM.emisor.nombreComercial = row["nombrecomercial"].ToString();
+                Program.appDAM.emisor.nifcif = row["nifcif"].ToString();
+            }
+
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
