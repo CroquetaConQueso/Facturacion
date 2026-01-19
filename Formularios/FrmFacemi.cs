@@ -88,7 +88,6 @@ namespace FacturacionDAM.Formularios
                 if (!modoEdicion)
                 {
                     _bsFactura.AddNew();
-
                     if (_bsFactura.Current is DataRowView row)
                     {
                         row["idemisor"] = _idEmisor;
@@ -114,12 +113,11 @@ namespace FacturacionDAM.Formularios
 
                 PrepararBindingLineas();
                 RecalcularTotales();
+                ActualizarEstado();
             }
             catch (Exception ex)
             {
-                Program.appDAM.RegistrarLog("Inicializar factura. Edición: " + modoEdicion.ToString(), ex.Message);
-                MessageBox.Show("Se ha producido un error al incializar la factura",
-                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Program.appDAM.RegistrarLog("Inicializar factura", ex.Message);
             }
         }
 
@@ -128,42 +126,41 @@ namespace FacturacionDAM.Formularios
         private void FrmFacemi_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (DialogResult != DialogResult.OK && _bsFactura != null)
-                _bsFactura.CancelEdit();
+            {
+                try
+                {
+                    
+                    _bsFactura.RaiseListChangedEvents = false;
+                    _bsFactura.CancelEdit();
+                }
+                catch (Exception)
+                {
+                    
+                }
+            }
         }
 
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
-            bool mCrearNuevaLinea = false;
-            if (!modoEdicion)
-            {
-                if (MessageBox.Show(
-                            "No ha guardado la nueva factura.\n" +
-                            "¿Guardar la nueva factura antes crear la línea de facturación?",
-                            "Confirmación", MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question) == DialogResult.Yes)
-
-                    mCrearNuevaLinea = GuardarFactura();
-            }
-            else
-                mCrearNuevaLinea = true;
+            bool mCrearNuevaLinea = modoEdicion || (MessageBox.Show("¿Guardar factura antes?", "Aviso", MessageBoxButtons.YesNo) == DialogResult.Yes && GuardarFactura());
 
             if (mCrearNuevaLinea)
             {
                 _bsLineasFactura.AddNew();
-
                 FrmLineaFacemi frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura);
                 if (frm.ShowDialog(this) == DialogResult.OK)
                 {
-                    _tablaLineasFactura.Refrescar();
                     ActualizarEstado();
                     RecalcularTotales();
+                    dgLineasFactura.Focus();
                 }
                 else
+                {
                     _bsLineasFactura.CancelEdit();
+                    RecalcularTotales();
+                }
             }
         }
-
-
 
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
@@ -172,9 +169,9 @@ namespace FacturacionDAM.Formularios
                 FrmLineaFacemi frm = new FrmLineaFacemi(_bsLineasFactura, _tablaLineasFactura, idFactura, true);
                 if (frm.ShowDialog(this) == DialogResult.OK)
                 {
-                    _tablaLineasFactura.Refrescar();
                     ActualizarEstado();
                     RecalcularTotales();
+                    dgLineasFactura.Focus();
                 }
             }
         }
@@ -226,42 +223,43 @@ namespace FacturacionDAM.Formularios
         {
             try
             {
-                if (!ValidarDatos())
-                    return false;
-                else
+                if (!(_bsFactura.Current is DataRowView)) return false;
+                _bsFactura.EndEdit();
+
+                if (!ValidarDatos()) return false;
+
+                ForzarValoresNoNulos();
+                _tablaFactura.GuardarCambios();
+
+                if (!modoEdicion)
                 {
-                    ForzarValoresNoNulos();
-                    //this.ValidateChildren();         // Fuerza a que todos los controles acutalicen sus bindings.
-                    _bsFactura.EndEdit();            // Guarda en memoria
-                    _tablaFactura.GuardarCambios();  // ✔ Guarda en BD
-
-                    if (!modoEdicion)
+                    using (var cmd = new MySqlCommand("SELECT LAST_INSERT_ID()", Program.appDAM.LaConexion))
                     {
-                        // Obtenemos el ID autogenerado desde MySQL/MariaDB
-                        using (var cmd = new MySqlCommand("SELECT LAST_INSERT_ID()", Program.appDAM.LaConexion))
-                        {
-                            object res = cmd.ExecuteScalar();
-                            idFactura = Convert.ToInt32(res);
-                        }
-                        ActualizarNumeracionEmisorSiEsNuevaFactura();
+                        object res = cmd.ExecuteScalar();
+                        idFactura = Convert.ToInt32(res);
                     }
-
-                    return true;
+                    ActualizarNumeracionEmisorSiEsNuevaFactura();
+                    modoEdicion = true;
                 }
+
+                if (_bsLineasFactura != null) _bsLineasFactura.EndEdit();
+                if (_tablaLineasFactura?.LaTabla != null)
+                {
+                    foreach (DataRow r in _tablaLineasFactura.LaTabla.Rows)
+                    {
+                        if (r.RowState == DataRowState.Deleted || r.RowState == DataRowState.Detached) continue;
+                        if (r.Table.Columns.Contains("idfacemi")) r["idfacemi"] = idFactura;
+                    }
+                    _tablaLineasFactura.GuardarCambios();
+                }
+                return true;
             }
             catch (Exception ex)
             {
-                Program.appDAM.RegistrarLog("Guardar nueva factura", ex.Message);
-                MessageBox.Show("Se ha producido un error al guardar la factura.",
-                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Program.appDAM.RegistrarLog("Guardar factura", ex.Message);
                 return false;
             }
         }
-
-
-
-
-
 
         private bool ValidarDatos()
         {
@@ -568,31 +566,26 @@ namespace FacturacionDAM.Formularios
 
         private void RecalcularTotales()
         {
-            if (_tablaLineasFactura?.LaTabla == null || _tablaLineasFactura.LaTabla.Rows.Count == 0)
-            {
-                if (_bsFactura?.Current is DataRowView row0)
-                {
-                    row0["base"] = 0m;
-                    row0["cuota"] = 0m;
-                    row0["total"] = 0m;
-                    row0["retencion"] = 0m;
-                }
+            
+            if (_bsFactura == null || _bsFactura.Current == null || _tablaLineasFactura?.LaTabla == null)
                 return;
-            }
 
             decimal baseSum = 0m, cuotaSum = 0m;
 
             foreach (DataRow fila in _tablaLineasFactura.LaTabla.Rows)
             {
+                if (fila.RowState == DataRowState.Deleted || fila.RowState == DataRowState.Detached)
+                    continue;
+
                 baseSum += fila.Field<decimal?>("base") ?? 0m;
                 cuotaSum += fila.Field<decimal?>("cuota") ?? 0m;
             }
 
             decimal total = baseSum + cuotaSum;
-
             decimal tipoRet = chkRetencion.Checked ? numTipoRet.Value : 0m;
             decimal retencion = Math.Round(baseSum * (tipoRet / 100m), 2, MidpointRounding.AwayFromZero);
 
+            
             if (_bsFactura.Current is DataRowView row)
             {
                 row["base"] = baseSum;
