@@ -39,7 +39,6 @@ namespace FacturacionDAM.Formularios
             btnCancelar.Click += btnCancelar_Click;
 
             cbProducto.SelectedValueChanged += cbProducto_SelectedValueChanged;
-
             BtnProducto.Click += BtnProducto_Click;
 
             numCantidad.ValueChanged += CamposCalculo_ValueChanged;
@@ -50,7 +49,6 @@ namespace FacturacionDAM.Formularios
 
             cbProducto.DropDownStyle = ComboBoxStyle.DropDownList;
         }
-
 
         private void FrmLineaFacemi_Load(object sender, EventArgs e)
         {
@@ -73,8 +71,6 @@ namespace FacturacionDAM.Formularios
             }
 
             CargarControlesDesdeFila(drv);
-
-            // IMPORTANTE RECALCULAR AL INICIO
             RecalcularYVolcar();
         }
 
@@ -82,14 +78,12 @@ namespace FacturacionDAM.Formularios
         {
             var row = drv.Row;
 
-            // Asegurar FK a la factura (idfacemi)
             if (row.Table.Columns.Contains("idfacemi"))
             {
                 if (row["idfacemi"] == DBNull.Value || Convert.ToInt32(row["idfacemi"]) == 0)
                     row["idfacemi"] = _idFacemi;
             }
 
-            // Defaults para evitar DBNulls
             SetDefault(row, "cantidad", 1m);
             SetDefault(row, "precio", 0m);
             SetDefault(row, "base", 0m);
@@ -97,7 +91,6 @@ namespace FacturacionDAM.Formularios
             SetDefault(row, "cuota", 0m);
             SetDefault(row, "descripcion", "");
 
-            // idproducto puede ser NULL
             if (row.Table.Columns.Contains("idproducto") && (row["idproducto"] == null))
                 row["idproducto"] = DBNull.Value;
         }
@@ -124,7 +117,6 @@ namespace FacturacionDAM.Formularios
             if (!_tablaProductos.InicializarDatos(sql))
                 return false;
 
-            // Marcar PK para busquedas rapidas (Find)
             if (_tablaProductos.LaTabla.Columns.Contains("id"))
                 _tablaProductos.LaTabla.PrimaryKey = new[] { _tablaProductos.LaTabla.Columns["id"] };
 
@@ -133,22 +125,18 @@ namespace FacturacionDAM.Formularios
             try
             {
                 _bsProductos.DataSource = _tablaProductos.LaTabla;
-
                 cbProducto.DataSource = _bsProductos;
                 cbProducto.DisplayMember = "descripcion";
                 cbProducto.ValueMember = "id";
 
-                // Arregla el problema de SelectedValue al cargar
                 if (_bsLineas.Current is DataRowView drvLinea)
                 {
                     if (drvLinea.Row.Table.Columns.Contains("idproducto") && drvLinea["idproducto"] != DBNull.Value)
                     {
-                        int idProd = Convert.ToInt32(drvLinea["idproducto"]);
-                        cbProducto.SelectedValue = idProd;
+                        cbProducto.SelectedValue = Convert.ToInt32(drvLinea["idproducto"]);
                     }
                     else
                     {
-                        
                         cbProducto.SelectedIndex = -1;
                     }
                 }
@@ -164,17 +152,14 @@ namespace FacturacionDAM.Formularios
         private void CargarControlesDesdeFila(DataRowView drv)
         {
             var row = drv.Row;
-
             txtDescripcion.Text = Convert.ToString(row["descripcion"]) ?? "";
-
             numCantidad.Value = ToDecimal(row, "cantidad", 1m);
             numPrecio.Value = ToDecimal(row, "precio", 0m);
             numTipoIva.Value = ToDecimal(row, "tipoiva", 0m);
 
             if (row.Table.Columns.Contains("idproducto") && row["idproducto"] != DBNull.Value)
             {
-                int idProd = Convert.ToInt32(row["idproducto"]);
-                try { cbProducto.SelectedValue = idProd; }
+                try { cbProducto.SelectedValue = Convert.ToInt32(row["idproducto"]); }
                 catch { cbProducto.SelectedIndex = -1; }
             }
             else
@@ -188,7 +173,6 @@ namespace FacturacionDAM.Formularios
             if (!row.Table.Columns.Contains(col)) return def;
             var v = row[col];
             if (v == null || v == DBNull.Value) return def;
-
             try { return Convert.ToDecimal(v); }
             catch { return def; }
         }
@@ -196,69 +180,44 @@ namespace FacturacionDAM.Formularios
         private void TxtDescripcion_TextChanged(object sender, EventArgs e)
         {
             if (_bsLineas.Current is not DataRowView drv) return;
-            if (!drv.Row.Table.Columns.Contains("descripcion")) return;
-
-            drv["descripcion"] = txtDescripcion.Text ?? "";
+            if (drv.Row.Table.Columns.Contains("descripcion"))
+                drv["descripcion"] = txtDescripcion.Text ?? "";
         }
 
-        private void cbProducto_SelectedValueChanged(object sender, EventArgs e)
-        {
-            AplicarProductoSeleccionado();
-        }
-
-        private void BtnProducto_Click(object sender, EventArgs e)
-        {
-            AplicarProductoSeleccionado();
-        }
+        private void cbProducto_SelectedValueChanged(object sender, EventArgs e) => AplicarProductoSeleccionado();
+        private void BtnProducto_Click(object sender, EventArgs e) => AplicarProductoSeleccionado();
 
         private void AplicarProductoSeleccionado()
         {
-            if (_cargandoProductos) return;
-            if (_aplicandoProducto) return;
+            if (_cargandoProductos || _aplicandoProducto || cbProducto.SelectedValue == null || cbProducto.SelectedValue == DBNull.Value) return;
 
-            if (_bsLineas.Current is not DataRowView drvLinea) return;
-
-            // Si no hay seleccion real
-            if (cbProducto.SelectedValue == null || cbProducto.SelectedValue == DBNull.Value) return;
-
-            int idProd;
-            try { idProd = Convert.ToInt32(cbProducto.SelectedValue); }
-            catch { return; }
-
-            var dt = _tablaProductos.LaTabla;
-            DataRow prodRow = dt.Rows.Find(idProd);
+            int idProd = Convert.ToInt32(cbProducto.SelectedValue);
+            DataRow prodRow = _tablaProductos.LaTabla.Rows.Find(idProd);
             if (prodRow == null) return;
 
             _aplicandoProducto = true;
-
             try
             {
-                var rowL = drvLinea.Row;
+                var rowL = ((DataRowView)_bsLineas.Current).Row;
 
-                // idproducto
-                if (rowL.Table.Columns.Contains("idproducto"))
-                    rowL["idproducto"] = idProd;
+                if (rowL.Table.Columns.Contains("idproducto")) rowL["idproducto"] = idProd;
 
-                // descripcion
                 string desc = Convert.ToString(prodRow["descripcion"]) ?? "";
                 txtDescripcion.Text = desc;
-                if (rowL.Table.Columns.Contains("descripcion"))
-                    rowL["descripcion"] = desc;
+                if (rowL.Table.Columns.Contains("descripcion")) rowL["descripcion"] = desc;
 
-                // precio
                 decimal precio = prodRow["preciounidad"] == DBNull.Value ? 0m : Convert.ToDecimal(prodRow["preciounidad"]);
                 numPrecio.Value = NormalizarNumeric(numPrecio, precio);
 
-                // tipo IVA
                 decimal iva = prodRow["iva_porcentaje"] == DBNull.Value ? 0m : Convert.ToDecimal(prodRow["iva_porcentaje"]);
                 numTipoIva.Value = NormalizarNumeric(numTipoIva, iva);
 
                 RecalcularYVolcar();
+
+                txtDescripcion.Focus();
+                txtDescripcion.SelectionStart = txtDescripcion.Text.Length;
             }
-            finally
-            {
-                _aplicandoProducto = false;
-            }
+            finally { _aplicandoProducto = false; }
         }
 
         private decimal NormalizarNumeric(NumericUpDown num, decimal v)
@@ -268,15 +227,11 @@ namespace FacturacionDAM.Formularios
             return decimal.Round(v, num.DecimalPlaces, MidpointRounding.AwayFromZero);
         }
 
-        private void CamposCalculo_ValueChanged(object sender, EventArgs e)
-        {
-            RecalcularYVolcar();
-        }
+        private void CamposCalculo_ValueChanged(object sender, EventArgs e) => RecalcularYVolcar();
 
         private void RecalcularYVolcar()
         {
             if (_bsLineas.Current is not DataRowView drv) return;
-
             var row = drv.Row;
 
             decimal cantidad = numCantidad.Value;
@@ -300,29 +255,21 @@ namespace FacturacionDAM.Formularios
 
         private void btnAceptar_Click(object sender, EventArgs e)
         {
-            if (!ValidarLinea())
-                return;
+            if (!ValidarLinea()) return;
 
             if (_bsLineas.Current is DataRowView row)
             {
-                if (row.Row.Table.Columns.Contains("idfacemi"))
-                    row["idfacemi"] = _idFacemi;
-
-                if (row.Row.Table.Columns.Contains("descripcion"))
-                    row["descripcion"] = (txtDescripcion.Text ?? "").Trim();
+                if (row.Row.Table.Columns.Contains("idfacemi")) row["idfacemi"] = _idFacemi;
+                row["descripcion"] = (txtDescripcion.Text ?? "").Trim();
             }
 
             RecalcularYVolcar();
-
             _bsLineas.EndEdit();
             _tablaLineas.GuardarCambios();
 
             DialogResult = DialogResult.OK;
             Close();
         }
-
-
-
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
@@ -353,7 +300,6 @@ namespace FacturacionDAM.Formularios
                 return false;
             }
 
-            // asegurar idfacemi
             if (_bsLineas.Current is DataRowView drv && drv.Row.Table.Columns.Contains("idfacemi"))
             {
                 if (drv["idfacemi"] == DBNull.Value || Convert.ToInt32(drv["idfacemi"]) == 0)
