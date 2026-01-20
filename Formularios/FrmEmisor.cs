@@ -30,13 +30,34 @@ namespace FacturacionDAM.Formularios
 
         private void btnAceptar_Click(object sender, EventArgs e)
         {
-            if (!ValidarDatos())
-                return;
+            try
+            {
+                _bs.EndEdit();
 
-            _bs.EndEdit();            // Finaliza edición del registro actual
-            _tabla.GuardarCambios();  // Se propaga a la BD
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+                if (_tabla.LaTabla.GetChanges() != null)
+                {
+                    _tabla.GuardarCambios();
+                }
+
+                if (_bs.Current is DataRowView row)
+                {
+                    Program.appDAM.emisor.nextNumFac = Convert.ToInt32(row["nextnumfac"] == DBNull.Value ? 0 : row["nextnumfac"]);
+                    Program.appDAM.emisor.nombreComercial = row["nombrecomercial"].ToString();
+                    Program.appDAM.emisor.nifcif = row["nifcif"].ToString();
+                }
+
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (DBConcurrencyException)
+            {
+                MessageBox.Show("Los datos han sido modificados por otro proceso. Se recargarán los datos.", "Error de Concurrencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _tabla.Refrescar();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar: " + ex.Message);
+            }
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)

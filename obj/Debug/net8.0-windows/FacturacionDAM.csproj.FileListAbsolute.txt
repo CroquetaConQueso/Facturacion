@@ -235,3 +235,5 @@ C:\Users\Usuario\Desktop\Proyectos\c#\Facturacion\obj\Debug\net8.0-windows\Factu
 C:\Users\Usuario\Desktop\Proyectos\c#\Facturacion\obj\Debug\net8.0-windows\Facturac.FCD41D73.Up2Date
 C:\Users\Usuario\Desktop\Proyectos\c#\Facturacion\obj\Debug\net8.0-windows\FacturacionDAM.genruntimeconfig.cache
 C:\Users\Usuario\Desktop\Proyectos\c#\Facturacion\obj\Debug\net8.0-windows\ref\FacturacionDAM.dll
+C:\Users\Usuario\Desktop\Proyectos\c#\Facturacion\obj\Debug\net8.0-windows\FacturacionDAM.Formularios.FrmBrowProveedores.resources
+C:\Users\Usuario\Desktop\Proyectos\c#\Facturacion\obj\Debug\net8.0-windows\FacturacionDAM.Formularios.FrmProveedor.resources

@@ -266,7 +266,6 @@ namespace FacturacionDAM.Formularios
             RecalcularYVolcar();
             _bsLineas.EndEdit();
             _tablaLineas.GuardarCambios();
-
             DialogResult = DialogResult.OK;
             Close();
         }

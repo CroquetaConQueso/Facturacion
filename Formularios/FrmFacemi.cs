@@ -120,22 +120,42 @@ namespace FacturacionDAM.Formularios
                 Program.appDAM.RegistrarLog("Inicializar factura", ex.Message);
             }
         }
+        private bool ExisteNumeroFactura(int numero)
+        {
+            string sql = @"
+        SELECT COUNT(*) 
+        FROM facemi 
+        WHERE idemisor = @idemisor 
+          AND numero = @numero 
+          AND YEAR(fecha) = @anho 
+          AND id <> @idActual";
 
+            var parametros = new Dictionary<string, object>
+    {
+        { "@idemisor", _idEmisor },
+        { "@numero", numero },
+        { "@anho", _anhoFactura },
+        { "@idActual", modoEdicion ? idFactura : -1 }
+    };
+
+            object? esc = _tablaFactura.EjecutarEscalar(sql, parametros);
+            return Convert.ToInt32(esc ?? 0) > 0;
+        }
 
 
         private void FrmFacemi_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (DialogResult != DialogResult.OK && _bsFactura != null)
             {
+                this.AutoValidate = AutoValidate.Disable;
+                _bsFactura.RaiseListChangedEvents = false;
+
                 try
                 {
-                    
-                    _bsFactura.RaiseListChangedEvents = false;
                     _bsFactura.CancelEdit();
                 }
-                catch (Exception)
+                catch
                 {
-                    
                 }
             }
         }
@@ -322,20 +342,20 @@ namespace FacturacionDAM.Formularios
             int idActual = modoEdicion ? idFactura : -1;
 
             string sqlCheck = @"
-                SELECT COUNT(*)
-                FROM facemi
-                WHERE idemisor = @idemisor
-                  AND numero = @numero
-                  AND YEAR(fecha) = @anho
-                  AND id <> @idActual";
+        SELECT COUNT(*)
+        FROM facemi
+        WHERE idemisor = @idemisor
+          AND numero = @numero
+          AND YEAR(fecha) = @anho
+          AND id <> @idActual";
 
             var parametros = new Dictionary<string, object>
-            {
-                { "@idemisor", _idEmisor },
-                { "@numero", numero },
-                { "@anho", _anhoFactura },
-                { "@idActual", idActual }
-            };
+    {
+        { "@idemisor", _idEmisor },
+        { "@numero", numero },
+        { "@anho", _anhoFactura },
+        { "@idActual", idActual }
+    };
 
             object? esc = _tablaFactura.EjecutarEscalar(sqlCheck, parametros);
             int duplicados = Convert.ToInt32(esc ?? 0);
@@ -356,17 +376,15 @@ namespace FacturacionDAM.Formularios
 
         private void ForzarValoresNoNulos()
         {
-            if (!(_bsFactura.Current is DataRowView row))
-                return;
+            if (!(_bsFactura.Current is DataRowView row)) return;
 
-            if (row["tiporet"] == DBNull.Value)
-                row["tiporet"] = numTipoRet.Value;
-
-            if (row["aplicaret"] == DBNull.Value)
-                row["aplicaret"] = chkRetencion.Checked ? 1 : 0;
-
-            if (row["pagada"] == DBNull.Value)
-                row["pagada"] = chkPagada.Checked ? 1 : 0;
+            if (row["tiporet"] == DBNull.Value) row["tiporet"] = numTipoRet.Value;
+            if (row["aplicaret"] == DBNull.Value) row["aplicaret"] = chkRetencion.Checked ? 1 : 0;
+            if (row["pagada"] == DBNull.Value) row["pagada"] = chkPagada.Checked ? 1 : 0;
+            if (row["base"] == DBNull.Value) row["base"] = 0m;
+            if (row["cuota"] == DBNull.Value) row["cuota"] = 0m;
+            if (row["total"] == DBNull.Value) row["total"] = 0m;
+            if (row["retencion"] == DBNull.Value) row["retencion"] = 0m;
         }
 
         private void ActualizarNumeracionEmisorSiEsNuevaFactura()
@@ -455,6 +473,7 @@ namespace FacturacionDAM.Formularios
             lbTotal.Text = "";
             lbRetencion.Text = "";
         }
+
 
 
         private void CargarLineasFacturaExistente()
@@ -566,8 +585,7 @@ namespace FacturacionDAM.Formularios
 
         private void RecalcularTotales()
         {
-            
-            if (_bsFactura == null || _bsFactura.Current == null || _tablaLineasFactura?.LaTabla == null)
+            if (_bsFactura?.Current == null || _tablaLineasFactura?.LaTabla == null)
                 return;
 
             decimal baseSum = 0m, cuotaSum = 0m;
@@ -581,17 +599,14 @@ namespace FacturacionDAM.Formularios
                 cuotaSum += fila.Field<decimal?>("cuota") ?? 0m;
             }
 
-            decimal total = baseSum + cuotaSum;
-            decimal tipoRet = chkRetencion.Checked ? numTipoRet.Value : 0m;
-            decimal retencion = Math.Round(baseSum * (tipoRet / 100m), 2, MidpointRounding.AwayFromZero);
-
-            
             if (_bsFactura.Current is DataRowView row)
             {
                 row["base"] = baseSum;
                 row["cuota"] = cuotaSum;
-                row["total"] = total;
-                row["retencion"] = retencion;
+                row["total"] = baseSum + cuotaSum;
+
+                decimal tipoRet = chkRetencion.Checked ? numTipoRet.Value : 0m;
+                row["retencion"] = Math.Round(baseSum * (tipoRet / 100m), 2, MidpointRounding.AwayFromZero);
             }
         }
 
