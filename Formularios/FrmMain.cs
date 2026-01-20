@@ -46,6 +46,7 @@ namespace FacturacionDAM.Formularios
             AbrirFormularioHijo<FrmDepuracion>();
 #endif
         }
+        private void tsBtnProveedores_Click_1(object sender, EventArgs e) =>AbrirFormularioHijo<FrmBrowProveedores>();
 
         private void tsBtnEmisores_Click(object sender, EventArgs e) => AbrirFormularioHijo<FrmBrowEmisores>();
 
@@ -248,5 +249,6 @@ namespace FacturacionDAM.Formularios
             RefreshToolBar();
             RefreshStatusBar();
         }
+
     }
 }
