@@ -29,13 +29,24 @@ namespace FacturacionDAM.Formularios
 
         private void btnAceptar_Click(object sender, EventArgs e)
         {
-            if (!ValidarDatos())
-                return;
+            try
+            {
+                _bs.EndEdit();
 
-            _bs.EndEdit();
-            _tabla.GuardarCambios();
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+                if (!ValidarDatos()) return;
+
+                if (_tabla.LaTabla.GetChanges() != null)
+                {
+                    _tabla.GuardarCambios();
+                }
+
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar: " + ex.Message, "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
@@ -103,26 +114,30 @@ namespace FacturacionDAM.Formularios
         {
             if (string.IsNullOrWhiteSpace(txtNifCif.Text))
             {
-                MessageBox.Show("El campo NIF/CIF no puede estar vacío.");
+                MessageBox.Show("El campo NIF/CIF no puede estar vacío.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtNifCif.Focus();
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtNombreComercial.Text))
             {
-                MessageBox.Show("El campo Nombre Comercial no puede estar vacío.");
+                MessageBox.Show("El campo Razón Social / Nombre Comercial no puede estar vacío.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtNombreComercial.Focus();
                 return false;
             }
 
             string email = txtEmail.Text.Trim();
             if (!string.IsNullOrEmpty(email) && !Validaciones.EsEmailValido(email))
             {
-                MessageBox.Show("El formato del email no es válido.");
+                MessageBox.Show("El formato del email no es válido.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtEmail.Focus();
                 return false;
             }
 
             if (NifDuplicado(txtNifCif.Text.Trim()))
             {
-                MessageBox.Show("El NIF/CIF introducido ya existe en otro registro.");
+                MessageBox.Show("El NIF/CIF introducido ya existe en otro registro de proveedores.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtNifCif.Focus();
                 return false;
             }
 
@@ -131,10 +146,14 @@ namespace FacturacionDAM.Formularios
 
         private bool NifDuplicado(string nifCif)
         {
-            if (edicion && _bs.Current is DataRowView row && row["id"] is int id)
-                return !Validaciones.EsValorCampoUnico("proveedors", "nifcif", txtNifCif.Text.Trim(), id);
+            int? idActual = null;
 
-            return !Validaciones.EsValorCampoUnico("proveedors", "nifcif", txtNifCif.Text.Trim());
+            if (edicion && _bs.Current is DataRowView row && row["id"] != DBNull.Value)
+            {
+                idActual = Convert.ToInt32(row["id"]);
+            }
+
+            return !Validaciones.EsValorCampoUnico("proveedores", "nifcif", nifCif, idActual);
         }
     }
 }

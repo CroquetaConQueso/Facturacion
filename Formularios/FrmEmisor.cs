@@ -34,6 +34,11 @@ namespace FacturacionDAM.Formularios
             {
                 _bs.EndEdit();
 
+                if (!ValidarDatos())
+                {
+                    return; 
+                }
+
                 if (_tabla.LaTabla.GetChanges() != null)
                 {
                     _tabla.GuardarCambios();

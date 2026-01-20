@@ -267,6 +267,7 @@
             tsBtnProveedores.Size = new Size(97, 51);
             tsBtnProveedores.Text = "Proveedores";
             tsBtnProveedores.TextImageRelation = TextImageRelation.ImageAboveText;
+            tsBtnProveedores.Click += tsBtnProveedores_Click_1;
             // 
             // toolStripSeparator2
             // 
