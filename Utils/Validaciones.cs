@@ -16,6 +16,8 @@ namespace FacturacionDAM.Utils
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(tabla) || string.IsNullOrWhiteSpace(campo)) return true;
+
                 string consulta = $"SELECT COUNT(*) FROM {tabla} WHERE {campo} = @valor";
 
                 using var cmd = new MySqlCommand(consulta, Program.appDAM.LaConexion);
@@ -30,13 +32,16 @@ namespace FacturacionDAM.Utils
                 if (Program.appDAM.LaConexion.State != System.Data.ConnectionState.Open)
                     Program.appDAM.LaConexion.Open();
 
-                return Convert.ToInt32(cmd.ExecuteScalar()) == 0;
+                int count = Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+                return count == 0;
             }
-            catch (MySqlException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("Error en validación: " + ex.Message);
-                return false;
+               
+                Program.appDAM.RegistrarLog("Error en Validación Unica", ex.Message);
+
+                return true;
             }
         }
     }
-}
+    }
