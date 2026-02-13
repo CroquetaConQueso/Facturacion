@@ -415,5 +415,24 @@ namespace FacturacionDAM.Formularios
             if (sfd.ShowDialog(this) == DialogResult.OK)
                 ExportarDatos.ExportarXML(dt, sfd.FileName, "Facemi");
         }
+
+        /*
+        private void btnInforme_Click(object sender, EventArgs e)
+        {
+            DateTime fechaInicial = new DateTime(_year.CurrentYear, 1, 1);
+            DateTime fechaFinal = new DateTime(_year.CurrentYear, 12, 31);
+
+            FrmInformeFacemiAnual frm = new FrmInformeFacemiAnual();
+
+            frm.dTPAnoInicio.MinDate = fechaInicial;
+            frm.dTPAnoInicio.MaxDate = fechaFinal;
+            frm.dTPAnoInicio.Value = fechaInicial;
+
+            frm.dTPAnoFin.MinDate = fechaInicial;
+            frm.dTPAnoFin.MaxDate = fechaFinal;
+            frm.dTPAnoFin.Value = fechaFinal;
+
+            frm.ShowDialog(this);
+        }*/
     }
 }

@@ -11,8 +11,16 @@
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmlineafacemi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\formularios\\frmbrowfacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmbrowfacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\modelos\\tabla.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:modelos\\tabla.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\modelos\\utilidades.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:modelos\\utilidades.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\formularios\\frmfacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmfacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\formularios\\frmbrowfacemi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -21,6 +29,18 @@
     {
       "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\formularios\\frmbrowfacemi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmbrowfacemi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\formularios\\frmfacrec.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmfacrec.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\formularios\\frmbrowfacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmbrowfacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\formularios\\frmbrowfacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmbrowfacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\formularios\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -77,10 +97,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|c:\\users\\usuario\\desktop\\proyectos\\csharp\\facturacion\\formularios\\frmbrowproveedores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D90B1B74-9619-4349-B54A-4EE3CCA647D6}|FacturacionDAM.csproj|solutionrelative:formularios\\frmbrowproveedores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmFacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Formularios\\FrmFacrec.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -90,7 +106,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Bookmark",
@@ -106,68 +122,122 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Tabla.cs",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Modelos\\Tabla.cs",
+              "RelativeDocumentMoniker": "Modelos\\Tabla.cs",
+              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Modelos\\Tabla.cs",
+              "RelativeToolTip": "Modelos\\Tabla.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAzwFAAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-13T17:55:14.303Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Utilidades.cs",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Modelos\\Utilidades.cs",
+              "RelativeDocumentMoniker": "Modelos\\Utilidades.cs",
+              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Modelos\\Utilidades.cs",
+              "RelativeToolTip": "Modelos\\Utilidades.cs",
+              "ViewState": "AgIAAGUAAAAAAAAAAAAAwIgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-13T17:54:50.216Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "FrmFacrec.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmFacrec.Designer.cs",
+              "RelativeDocumentMoniker": "Formularios\\FrmFacrec.Designer.cs",
+              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmFacrec.Designer.cs",
+              "RelativeToolTip": "Formularios\\FrmFacrec.Designer.cs",
+              "ViewState": "AgIAAPcCAAAAAAAAAADwvxEDAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-13T17:47:35.593Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "FrmBrowFacrec.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowFacrec.cs",
+              "RelativeDocumentMoniker": "Formularios\\FrmBrowFacrec.cs",
+              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowFacrec.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Formularios\\FrmBrowFacrec.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-13T17:40:53.204Z",
+              "EditorCaption": " [Dise\u00F1o]"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "FrmLineaFacemi.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmLineaFacemi.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmLineaFacemi.cs",
               "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmLineaFacemi.cs",
               "RelativeToolTip": "Formularios\\FrmLineaFacemi.cs",
-              "ViewState": "AgIAAHYAAAAAAAAAAAAUwIgAAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAABUBAAAAAAAAAAAuwH8AAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-13T17:11:54.095Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 4,
               "Title": "FrmFacrec.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmFacrec.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmFacrec.cs",
               "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmFacrec.cs",
               "RelativeToolTip": "Formularios\\FrmFacrec.cs",
-              "ViewState": "AgIAAEcBAAAAAAAAAAAuwH8BAAABAAAAAAAAAA==",
+              "ViewState": "AgIAADwBAAAAAAAAAAAkwFYBAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-13T17:11:12.4Z"
+              "WhenOpened": "2026-02-13T17:11:12.4Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 8,
               "Title": "FrmBrowFacrec.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowFacrec.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowFacrec.cs",
               "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowFacrec.cs",
               "RelativeToolTip": "Formularios\\FrmBrowFacrec.cs",
-              "ViewState": "AgIAAIAAAAAAAAAAAAAswKEBAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-13T17:00:38.756Z"
+              "WhenOpened": "2026-02-13T17:00:38.756Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "FrmBrowFacemi.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowFacemi.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowFacemi.cs",
               "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowFacemi.cs",
               "RelativeToolTip": "Formularios\\FrmBrowFacemi.cs",
-              "ViewState": "AgIAAHUAAAAAAAAAAAAYwIoAAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAAIEBAAAAAAAAAAAcwJkBAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-13T15:53:52.758Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "FrmBrowFacemi.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowFacemi.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowFacemi.cs",
               "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowFacemi.cs [Dise\u00F1o]",
               "RelativeToolTip": "Formularios\\FrmBrowFacemi.cs [Dise\u00F1o]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-13T15:46:13.103Z"
+              "WhenOpened": "2026-02-13T15:46:13.103Z",
+              "EditorCaption": " [Dise\u00F1o]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 10,
               "Title": "FrmMain.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmMain.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmMain.cs",
@@ -180,7 +250,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 11,
               "Title": "FrmMain.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmMain.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmMain.cs",
@@ -191,7 +261,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 12,
               "Title": "FrmProducto.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmProducto.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmProducto.cs",
@@ -202,7 +272,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 13,
               "Title": "FrmSeleccionarEmisor.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmSeleccionarEmisor.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmSeleccionarEmisor.cs",
@@ -220,11 +290,12 @@
               "ToolTip": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmLineaFacemi.cs [Dise\u00F1o]",
               "RelativeToolTip": "Formularios\\FrmLineaFacemi.cs [Dise\u00F1o]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-13T15:45:03.953Z"
+              "WhenOpened": "2026-02-13T15:45:03.953Z",
+              "EditorCaption": " [Dise\u00F1o]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 14,
               "Title": "FrmBrowTiposIva.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowTiposIva.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowTiposIva.cs",
@@ -235,7 +306,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 16,
               "Title": "FrmBrowProductos.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowProductos.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowProductos.cs",
@@ -246,7 +317,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 17,
               "Title": "FrmBrowEmisores.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowEmisores.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowEmisores.cs",
@@ -257,7 +328,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 18,
               "Title": "FrmBrowConceptosFac.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowConceptosFac.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowConceptosFac.cs",
@@ -268,7 +339,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 19,
               "Title": "FrmBrowClientes.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowClientes.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowClientes.cs",
@@ -279,7 +350,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 21,
               "Title": "Validaciones.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Utils\\Validaciones.cs",
               "RelativeDocumentMoniker": "Utils\\Validaciones.cs",
@@ -291,7 +362,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 20,
               "Title": "FrmProveedor.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmProveedor.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmProveedor.cs",
@@ -304,7 +375,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 22,
               "Title": "FrmProveedor.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmProveedor.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmProveedor.cs",
@@ -315,7 +386,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 23,
               "Title": "FrmBrowProveedores.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowProveedores.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowProveedores.cs",
@@ -328,7 +399,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 15,
               "Title": "FrmBrowProveedores.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\Formularios\\FrmBrowProveedores.cs",
               "RelativeDocumentMoniker": "Formularios\\FrmBrowProveedores.cs",

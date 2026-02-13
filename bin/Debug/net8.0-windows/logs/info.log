@@ -567,3 +567,7 @@
 2026-02-13 | 17:45:01 | Conexión a la DB | Conexión abierta correctamente
 2026-02-13 | 17:46:15 | TieneFacturasEmitidas Proveedor | Unknown column 'f.idproveedor' in 'on clause'
 2026-02-13 | 17:46:58 | Desonexión de la DB | Conexión cerrada correctamente.
+2026-02-13 | 18:55:33 | Conexión a la DB | Conexión abierta correctamente
+2026-02-13 | 18:56:09 | Desonexión de la DB | Conexión cerrada correctamente.
+2026-02-13 | 18:56:58 | Conexión a la DB | Conexión abierta correctamente
+2026-02-13 | 18:57:30 | Desonexión de la DB | Conexión cerrada correctamente.

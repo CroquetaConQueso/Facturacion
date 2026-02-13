@@ -784,7 +784,6 @@
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "FrmFacrec";
             this.Text = "Factura Recibida";
-            this.Load += new System.EventHandler(this.FrmFacrec_Load);
             this.pnBtns.ResumeLayout(false);
             this.pnData.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
