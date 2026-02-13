@@ -60,6 +60,9 @@
             toolStripSeparator4 = new ToolStripSeparator();
             toolStripLabel1 = new ToolStripLabel();
             tsComboYear = new ToolStripComboBox();
+            tsLbTotalBase = new ToolStripStatusLabel();
+            tsLbTotalCuota = new ToolStripStatusLabel();
+            tsLbTotalTotal = new ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)splitContainerFacemi).BeginInit();
             splitContainerFacemi.Panel1.SuspendLayout();
             splitContainerFacemi.Panel2.SuspendLayout();
@@ -210,7 +213,7 @@
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
-            statusStrip1.Items.AddRange(new ToolStripItem[] { tsLbNumReg, tsLbStatus });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { tsLbNumReg, tsLbStatus, tsLbTotalBase, tsLbTotalCuota, tsLbTotalTotal });
             statusStrip1.Location = new Point(0, 0);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(560, 22);
@@ -378,6 +381,27 @@
             tsComboYear.Size = new Size(75, 27);
             tsComboYear.SelectedIndexChanged += tsComboYear_SelectedIndexChanged;
             // 
+            // tsLbTotalBase
+            // 
+            tsLbTotalBase.Margin = new Padding(10, 3, 0, 2);
+            tsLbTotalBase.Name = "tsLbTotalBase";
+            tsLbTotalBase.Size = new Size(63, 17);
+            tsLbTotalBase.Text = "Total Base:";
+            // 
+            // tsLbTotalCuota
+            // 
+            tsLbTotalCuota.Margin = new Padding(10, 3, 0, 2);
+            tsLbTotalCuota.Name = "tsLbTotalCuota";
+            tsLbTotalCuota.Size = new Size(71, 17);
+            tsLbTotalCuota.Text = "Total Cuota:";
+            // 
+            // tsLbTotalTotal
+            // 
+            tsLbTotalTotal.Margin = new Padding(10, 3, 0, 2);
+            tsLbTotalTotal.Name = "tsLbTotalTotal";
+            tsLbTotalTotal.Size = new Size(92, 17);
+            tsLbTotalTotal.Text = "Total de Totales:";
+            // 
             // FrmBrowFacemi
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -442,5 +466,8 @@
         private Label lbHeadFacemi;
         private ToolStripLabel toolStripLabel1;
         private ToolStripComboBox tsComboYear;
+        private ToolStripStatusLabel tsLbTotalBase;
+        private ToolStripStatusLabel tsLbTotalCuota;
+        private ToolStripStatusLabel tsLbTotalTotal;
     }
 }
