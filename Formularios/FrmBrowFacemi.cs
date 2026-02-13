@@ -128,6 +128,25 @@ namespace FacturacionDAM.Formularios
                 dgClientes.Columns["id"].Visible = false;
 
             dgClientes.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(255, 240, 255, 255);
+
+            foreach (DataGridViewColumn col in dgClientes.Columns)
+            {
+                switch (col.Name.ToLower())
+                {
+                    case "nombrecomercial":
+                        col.HeaderText = "Nombre Comercial";
+                        break;
+                    case "nombre":
+                        col.HeaderText = "Nombre";
+                        break;
+                    case "apellidos":
+                        col.HeaderText = "Apellidos";
+                        break;
+                    case "nifcif":
+                        col.HeaderText = "NIF/CIF";
+                        break;
+                }
+            }
         }
 
         private void ConfigurarFacturas()
@@ -166,6 +185,7 @@ namespace FacturacionDAM.Formularios
             if (_bsClientes.Current is not DataRowView rowCliente)
             {
                 ActualizarEstado(0, ContarTotalesAnho());
+                CalcularTotales();
                 return;
             }
 
@@ -189,6 +209,7 @@ namespace FacturacionDAM.Formularios
             if (!_tablaFacemi.InicializarDatos(sql, p))
             {
                 ActualizarEstado(0, ContarTotalesAnho());
+                CalcularTotales();
                 return;
             }
 
@@ -199,12 +220,102 @@ namespace FacturacionDAM.Formularios
             dgFacturas.AutoGenerateColumns = true;
             dgFacturas.DataSource = _bsFacturas;
 
+            ConfigurarCabeceras();
+
             if (_bsFacturas.Count > 0)
                 _bsFacturas.Position = 0;
 
             ActualizarEstado(_bsFacturas.Count, ContarTotalesAnho());
+            CalcularTotales();
         }
 
+        private void ConfigurarCabeceras()
+        {
+            foreach (DataGridViewColumn col in dgFacturas.Columns)
+            {
+                switch (col.Name.ToLower())
+                {
+                    case "idemisor":
+                        col.HeaderText = "ID Emisor";
+                        break;
+                    case "idcliente":
+                        col.HeaderText = "ID Cliente";
+                        break;
+                    case "idconceptofac":
+                        col.HeaderText = "ID Concepto";
+                        break;
+                    case "nombrecomercial":
+                        col.HeaderText = "Nombre Comercial";
+                        break;
+                    case "fecha":
+                        col.HeaderText = "Fecha";
+                        break;
+                    case "base":
+                        col.HeaderText = "Base Imponible";
+                        col.DefaultCellStyle.Format = "N2";
+                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                        break;
+                    case "cuota":
+                        col.HeaderText = "Cuota IVA";
+                        col.DefaultCellStyle.Format = "N2";
+                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                        break;
+                    case "total":
+                        col.HeaderText = "Total Factura";
+                        col.DefaultCellStyle.Format = "N2";
+                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                        break;
+                    case "pagada":
+                        col.HeaderText = "Pagada";
+                        break;
+                    case "numero":
+                        col.HeaderText = "Número";
+                        break;
+                    default:
+                        // Regla general para IDs no contemplados arriba (ej: idusuario -> ID Usuario)
+                        if (col.Name.ToLower().StartsWith("id") && col.Name.Length > 2)
+                        {
+                            string rest = col.Name.Substring(2);
+                            col.HeaderText = "ID " + char.ToUpper(rest[0]) + rest.Substring(1);
+                        }
+                        else if (!string.IsNullOrEmpty(col.Name))
+                        {
+                            string header = col.Name.Replace("_", " ");
+                            if (header.Length > 0)
+                                col.HeaderText = char.ToUpper(header[0]) + header.Substring(1);
+                        }
+                        break;
+                }
+            }
+        }
+
+        private void CalcularTotales()
+        {
+            decimal totalBase = 0;
+            decimal totalCuota = 0;
+            decimal totalTotal = 0;
+
+            if (_bsFacturas.DataSource is DataTable dt)
+            {
+                foreach (DataRowView rowView in _bsFacturas)
+                {
+                    DataRow row = rowView.Row;
+
+                    if (dt.Columns.Contains("base") && row["base"] != DBNull.Value)
+                        totalBase += Convert.ToDecimal(row["base"]);
+
+                    if (dt.Columns.Contains("cuota") && row["cuota"] != DBNull.Value)
+                        totalCuota += Convert.ToDecimal(row["cuota"]);
+
+                    if (dt.Columns.Contains("total") && row["total"] != DBNull.Value)
+                        totalTotal += Convert.ToDecimal(row["total"]);
+                }
+            }
+
+            if (tsLbTotalBase != null) tsLbTotalBase.Text = $"Totales base: {totalBase:N2}";
+            if (tsLbTotalCuota != null) tsLbTotalCuota.Text = $"Totales cuota: {totalCuota:N2}";
+            if (tsLbTotalTotal != null) tsLbTotalTotal.Text = $"Totales totales: {totalTotal:N2}";
+        }
 
         private int ContarTotalesAnho()
         {
@@ -253,8 +364,6 @@ namespace FacturacionDAM.Formularios
             if (frm.ShowDialog(this) == DialogResult.OK)
                 CargarFacturasClienteSeleccionado();
         }
-
-
 
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
