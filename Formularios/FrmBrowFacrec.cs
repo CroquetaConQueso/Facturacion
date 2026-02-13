@@ -12,13 +12,13 @@ namespace FacturacionDAM.Formularios
 {
     public partial class FrmBrowFacrec : Form
     {
-        private Tabla _tablaClientes;
-        private Tabla _tablaFacemi;
+        private Tabla _tablaProveedores;
+        private Tabla _tablaFacrec;
 
-        private readonly BindingSource _bsClientes = new BindingSource();
+        private readonly BindingSource _bsProveedores = new BindingSource();
         private readonly BindingSource _bsFacturas = new BindingSource();
 
-        private int _idProveedor;
+        private int _idEmpresa; // Corresponde al emisor activo
         private int _yearActual;
 
         public FrmBrowFacrec()
@@ -26,58 +26,58 @@ namespace FacturacionDAM.Formularios
             InitializeComponent();
         }
 
-        private void FrmBrowFacemi_Load(object sender, EventArgs e)
+        private void FrmBrowFacrec_Load(object sender, EventArgs e)
         {
-            if (Program.appDAM?.proveedor == null)
+            if (Program.appDAM?.emisor == null)
             {
-                MessageBox.Show("No hay proveedor activo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("No hay empresa (emisor) activa.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
                 return;
             }
 
-            _idProveedor = Program.appDAM.proveedor.id;
+            _idEmpresa = Program.appDAM.emisor.id;
 
-            _tablaClientes = new Tabla(Program.appDAM.LaConexion);
-            _tablaFacemi = new Tabla(Program.appDAM.LaConexion);
+            _tablaProveedores = new Tabla(Program.appDAM.LaConexion);
+            _tablaFacrec = new Tabla(Program.appDAM.LaConexion);
 
             CargarYearsDesdeBD();
-            CargarClientes();
+            CargarProveedores();
 
-            dgClientes.DataSource = _bsClientes;
+            dgProveedores.DataSource = _bsProveedores;
             dgFacturas.DataSource = _bsFacturas;
 
-            ConfigurarClientes();
+            ConfigurarProveedores();
             ConfigurarFacturas();
 
-            CargarFacturasClienteSeleccionado();
+            CargarFacturasProveedorSeleccionado();
         }
 
-        private void FrmBrowFacemi_Shown(object sender, EventArgs e)
+        private void FrmBrowFacrec_Shown(object sender, EventArgs e)
         {
-            ConfiguracionVentana.Restaurar(this, "BrowFacemi");
+            ConfiguracionVentana.Restaurar(this, "BrowFacrec");
         }
 
-        private void FrmBrowFacemi_FormClosing(object sender, FormClosingEventArgs e)
+        private void FrmBrowFacrec_FormClosing(object sender, FormClosingEventArgs e)
         {
-            ConfiguracionVentana.Guardar(this, "BrowFacemi");
+            ConfiguracionVentana.Guardar(this, "BrowFacrec");
         }
 
         private void CargarYearsDesdeBD()
         {
             tsComboYear.Items.Clear();
-
             var years = new List<int>();
 
             try
             {
+                // Buscamos años disponibles en facturas recibidas para la empresa actual
                 const string sql = @"
                     SELECT DISTINCT YEAR(fecha) AS anho
-                    FROM facemi
-                    WHERE idproveedor = @idProveedor
+                    FROM facrec
+                    WHERE idempresa = @idEmpresa
                     ORDER BY anho DESC;";
 
                 using var cmd = new MySqlCommand(sql, Program.appDAM.LaConexion);
-                cmd.Parameters.AddWithValue("@idProveedor", _idProveedor);
+                cmd.Parameters.AddWithValue("@idEmpresa", _idEmpresa);
 
                 using var rd = cmd.ExecuteReader();
                 while (rd.Read())
@@ -101,35 +101,35 @@ namespace FacturacionDAM.Formularios
             _yearActual = (int)tsComboYear.SelectedItem;
         }
 
-        private void CargarClientes()
+        private void CargarProveedores()
         {
             const string sql = @"SELECT id, nombrecomercial, nombre, apellidos, nifcif
                                  FROM proveedores
                                  ORDER BY nombrecomercial, nombre, apellidos;";
 
-            if (!_tablaClientes.InicializarDatos(sql))
+            if (!_tablaProveedores.InicializarDatos(sql))
             {
                 MessageBox.Show("No se pudieron cargar los proveedores.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            _bsClientes.DataSource = _tablaClientes.LaTabla;
+            _bsProveedores.DataSource = _tablaProveedores.LaTabla;
         }
 
-        private void ConfigurarClientes()
+        private void ConfigurarProveedores()
         {
-            dgClientes.ReadOnly = true;
-            dgClientes.MultiSelect = false;
-            dgClientes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgClientes.AllowUserToAddRows = false;
-            dgClientes.AllowUserToDeleteRows = false;
+            dgProveedores.ReadOnly = true;
+            dgProveedores.MultiSelect = false;
+            dgProveedores.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgProveedores.AllowUserToAddRows = false;
+            dgProveedores.AllowUserToDeleteRows = false;
 
-            if (dgClientes.Columns.Contains("id"))
-                dgClientes.Columns["id"].Visible = false;
+            if (dgProveedores.Columns.Contains("id"))
+                dgProveedores.Columns["id"].Visible = false;
 
-            dgClientes.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(255, 240, 255, 255);
+            dgProveedores.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(255, 240, 255, 255);
 
-            foreach (DataGridViewColumn col in dgClientes.Columns)
+            foreach (DataGridViewColumn col in dgProveedores.Columns)
             {
                 switch (col.Name.ToLower())
                 {
@@ -143,7 +143,7 @@ namespace FacturacionDAM.Formularios
                         col.HeaderText = "Apellidos";
                         break;
                     case "nifcif":
-                        col.HeaderText = "NIF/CIF";
+                        col.HeaderText = "NIFCIF";
                         break;
                 }
             }
@@ -163,9 +163,9 @@ namespace FacturacionDAM.Formularios
             dgFacturas.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(255, 240, 255, 255);
         }
 
-        private void dgClientes_SelectionChanged(object sender, EventArgs e)
+        private void dgProveedores_SelectionChanged(object sender, EventArgs e)
         {
-            CargarFacturasClienteSeleccionado();
+            CargarFacturasProveedorSeleccionado();
         }
 
         private void tsComboYear_SelectedIndexChanged(object sender, EventArgs e)
@@ -173,40 +173,40 @@ namespace FacturacionDAM.Formularios
             if (tsComboYear.SelectedItem is int y)
                 _yearActual = y;
 
-            CargarFacturasClienteSeleccionado();
+            CargarFacturasProveedorSeleccionado();
         }
 
-        private void CargarFacturasClienteSeleccionado()
+        private void CargarFacturasProveedorSeleccionado()
         {
             _bsFacturas.SuspendBinding();
             _bsFacturas.DataSource = null;
             _bsFacturas.ResumeBinding();
 
-            if (_bsClientes.Current is not DataRowView rowCliente)
+            if (_bsProveedores.Current is not DataRowView rowProveedor)
             {
                 ActualizarEstado(0, ContarTotalesAnho());
                 CalcularTotales();
                 return;
             }
 
-            int idCliente = Convert.ToInt32(rowCliente["id"]);
+            int idProveedor = Convert.ToInt32(rowProveedor["id"]);
 
             var p = new Dictionary<string, object>
             {
-                ["@idProveedor"] = _idProveedor,
-                ["@idCliente"] = idCliente,
+                ["@idEmpresa"] = _idEmpresa,
+                ["@idProveedor"] = idProveedor,
                 ["@year"] = _yearActual
             };
 
             const string sql = @"
-        SELECT f.*
-        FROM facemi f
-        WHERE f.idproveedor = @idProveedor
-          AND f.idcliente = @idCliente
-          AND YEAR(f.fecha) = @year
-        ORDER BY f.fecha DESC, f.id DESC;";
+                SELECT f.*
+                FROM facrec f
+                WHERE f.idempresa = @idEmpresa
+                  AND f.idproveedor = @idProveedor
+                  AND YEAR(f.fecha) = @year
+                ORDER BY f.fecha DESC, f.id DESC;";
 
-            if (!_tablaFacemi.InicializarDatos(sql, p))
+            if (!_tablaFacrec.InicializarDatos(sql, p))
             {
                 ActualizarEstado(0, ContarTotalesAnho());
                 CalcularTotales();
@@ -214,8 +214,7 @@ namespace FacturacionDAM.Formularios
             }
 
             dgFacturas.DataSource = null;
-
-            _bsFacturas.DataSource = _tablaFacemi.LaTabla;
+            _bsFacturas.DataSource = _tablaFacrec.LaTabla;
 
             dgFacturas.AutoGenerateColumns = true;
             dgFacturas.DataSource = _bsFacturas;
@@ -235,17 +234,14 @@ namespace FacturacionDAM.Formularios
             {
                 switch (col.Name.ToLower())
                 {
+                    case "idempresa":
+                        col.HeaderText = "ID Empresa";
+                        break;
                     case "idproveedor":
                         col.HeaderText = "ID Proveedor";
                         break;
-                    case "idcliente":
-                        col.HeaderText = "ID Cliente";
-                        break;
                     case "idconceptofac":
                         col.HeaderText = "ID Concepto";
-                        break;
-                    case "nombrecomercial":
-                        col.HeaderText = "Nombre Comercial";
                         break;
                     case "fecha":
                         col.HeaderText = "Fecha";
@@ -272,7 +268,7 @@ namespace FacturacionDAM.Formularios
                         col.HeaderText = "Número";
                         break;
                     default:
-                        // Regla general para IDs no contemplados arriba (ej: idusuario -> ID Usuario)
+                        // Formato User Friendly genérico
                         if (col.Name.ToLower().StartsWith("id") && col.Name.Length > 2)
                         {
                             string rest = col.Name.Substring(2);
@@ -323,12 +319,12 @@ namespace FacturacionDAM.Formularios
             {
                 const string sql = @"
                     SELECT COUNT(*)
-                    FROM facemi
-                    WHERE idproveedor = @idProveedor
+                    FROM facrec
+                    WHERE idempresa = @idEmpresa
                       AND YEAR(fecha) = @year;";
 
                 using var cmd = new MySqlCommand(sql, Program.appDAM.LaConexion);
-                cmd.Parameters.AddWithValue("@idProveedor", _idProveedor);
+                cmd.Parameters.AddWithValue("@idEmpresa", _idEmpresa);
                 cmd.Parameters.AddWithValue("@year", _yearActual);
 
                 var obj = cmd.ExecuteScalar();
@@ -349,33 +345,36 @@ namespace FacturacionDAM.Formularios
                 tsLbStatus.Text = $"Nº de registros totales: {totales}";
         }
 
+        // Navegación del BindingSource
         private void tsBtnFirst_Click(object sender, EventArgs e) => _bsFacturas.MoveFirst();
         private void tsBtnPrev_Click(object sender, EventArgs e) => _bsFacturas.MovePrevious();
         private void tsBtnNext_Click(object sender, EventArgs e) => _bsFacturas.MoveNext();
         private void tsBtnLast_Click(object sender, EventArgs e) => _bsFacturas.MoveLast();
 
+        // Acciones CRUD
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
-            if (_bsClientes.Current is not DataRowView rowCliente) return;
+            if (_bsProveedores.Current is not DataRowView rowProveedor) return;
 
-            int idCliente = Convert.ToInt32(rowCliente["id"]);
+            int idProveedor = Convert.ToInt32(rowProveedor["id"]);
 
-            using var frm = new FrmFacemi(_bsFacturas, _tablaFacemi, _idProveedor, idCliente, _yearActual, -1);
+            // Asumimos que existirá FrmFacrec similar a FrmFacemi
+            using var frm = new FrmFacrec(_bsFacturas, _tablaFacrec, _idEmpresa, idProveedor, _yearActual, -1);
             if (frm.ShowDialog(this) == DialogResult.OK)
-                CargarFacturasClienteSeleccionado();
+                CargarFacturasProveedorSeleccionado();
         }
 
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
-            if (_bsClientes.Current is not DataRowView rowCliente) return;
+            if (_bsProveedores.Current is not DataRowView rowProveedor) return;
             if (_bsFacturas.Current is not DataRowView rowFactura) return;
 
-            int idCliente = Convert.ToInt32(rowCliente["id"]);
-            int idFacemi = Convert.ToInt32(rowFactura["id"]);
+            int idProveedor = Convert.ToInt32(rowProveedor["id"]);
+            int idFacrec = Convert.ToInt32(rowFactura["id"]);
 
-            using var frm = new FrmFacemi(_bsFacturas, _tablaFacemi, _idProveedor, idCliente, _yearActual, idFacemi);
+            using var frm = new FrmFacrec(_bsFacturas, _tablaFacrec, _idEmpresa, idProveedor, _yearActual, idFacrec);
             if (frm.ShowDialog(this) == DialogResult.OK)
-                CargarFacturasClienteSeleccionado();
+                CargarFacturasProveedorSeleccionado();
         }
 
         private void dgFacturas_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -388,21 +387,21 @@ namespace FacturacionDAM.Formularios
         {
             if (_bsFacturas.Current is not DataRowView) return;
 
-            if (MessageBox.Show("¿Eliminar la factura seleccionada?", "Confirmar",
+            if (MessageBox.Show("¿Eliminar la factura recibida seleccionada?", "Confirmar",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
 
             _bsFacturas.RemoveCurrent();
-            _tablaFacemi.GuardarCambios();
-            _tablaFacemi.Refrescar();
-            CargarFacturasClienteSeleccionado();
+            _tablaFacrec.GuardarCambios();
+            _tablaFacrec.Refrescar();
+            CargarFacturasProveedorSeleccionado();
         }
 
         private void tsBtnExportCSV_Click(object sender, EventArgs e)
         {
             if (_bsFacturas.DataSource is not DataTable dt || dt.Rows.Count == 0) return;
 
-            using var sfd = new SaveFileDialog { Filter = "Archivo CSV (*.csv)|*.csv", FileName = "facemi.csv" };
+            using var sfd = new SaveFileDialog { Filter = "Archivo CSV (*.csv)|*.csv", FileName = "facrec.csv" };
             if (sfd.ShowDialog(this) == DialogResult.OK)
                 ExportarDatos.ExportarCSV(dt, sfd.FileName);
         }
@@ -411,9 +410,9 @@ namespace FacturacionDAM.Formularios
         {
             if (_bsFacturas.DataSource is not DataTable dt || dt.Rows.Count == 0) return;
 
-            using var sfd = new SaveFileDialog { Filter = "Archivo XML (*.xml)|*.xml", FileName = "facemi.xml" };
+            using var sfd = new SaveFileDialog { Filter = "Archivo XML (*.xml)|*.xml", FileName = "facrec.xml" };
             if (sfd.ShowDialog(this) == DialogResult.OK)
-                ExportarDatos.ExportarXML(dt, sfd.FileName, "Facemi");
+                ExportarDatos.ExportarXML(dt, sfd.FileName, "Facrec");
         }
     }
 }

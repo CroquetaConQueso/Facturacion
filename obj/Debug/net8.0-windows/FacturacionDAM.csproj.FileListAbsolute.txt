@@ -292,3 +292,6 @@ C:\Users\Usuario\Desktop\Proyectos\csharp\Facturacion\obj\Debug\net8.0-windows\r
 C:\Users\Usuario\Desktop\Proyectos\csharp\Facturacion\obj\Debug\net8.0-windows\FacturacionDAM.pdb
 C:\Users\Usuario\Desktop\Proyectos\csharp\Facturacion\obj\Debug\net8.0-windows\FacturacionDAM.genruntimeconfig.cache
 C:\Users\Usuario\Desktop\Proyectos\csharp\Facturacion\obj\Debug\net8.0-windows\ref\FacturacionDAM.dll
+C:\Users\Usuario\Desktop\Proyectos\csharp\Facturacion\obj\Debug\net8.0-windows\FacturacionDAM.Formularios.FrmBrowFacrec.resources
+C:\Users\Usuario\Desktop\Proyectos\csharp\Facturacion\obj\Debug\net8.0-windows\FacturacionDAM.Formularios.FrmFacrec.resources
+C:\Users\Usuario\Desktop\Proyectos\csharp\Facturacion\obj\Debug\net8.0-windows\FacturacionDAM.Formularios.FrmLineaFacrec.resources
