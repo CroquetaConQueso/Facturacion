@@ -1,5 +1,4 @@
-﻿// Ruta: FacturacionDAM/Modelos/Utilidades.cs
-using System;
+﻿using System;
 using System.Configuration;
 using System.Data;
 using System.Drawing;
@@ -24,12 +23,8 @@ namespace FacturacionDAM.Modelos
                 Properties.Settings.Default[$"{clave}WindowState"] = (int)state;
                 Properties.Settings.Default.Save();
             }
-            catch (SettingsPropertyNotFoundException)
-            {
-            }
-            catch
-            {
-            }
+            catch (SettingsPropertyNotFoundException) { }
+            catch { }
         }
 
         public static void RestaurarVentana(Form frm, string clave)
@@ -52,12 +47,8 @@ namespace FacturacionDAM.Modelos
                     else frm.WindowState = FormWindowState.Normal;
                 }
             }
-            catch (SettingsPropertyNotFoundException)
-            {
-            }
-            catch
-            {
-            }
+            catch (SettingsPropertyNotFoundException) { }
+            catch { }
         }
 
         public static int LeerIntSetting(string key, int porDefecto)
@@ -68,10 +59,6 @@ namespace FacturacionDAM.Modelos
                 if (v == null) return porDefecto;
                 if (v is int i) return i;
                 if (int.TryParse(Convert.ToString(v), out var n)) return n;
-                return porDefecto;
-            }
-            catch (SettingsPropertyNotFoundException)
-            {
                 return porDefecto;
             }
             catch
@@ -87,12 +74,7 @@ namespace FacturacionDAM.Modelos
                 Properties.Settings.Default[key] = valor;
                 Properties.Settings.Default.Save();
             }
-            catch (SettingsPropertyNotFoundException)
-            {
-            }
-            catch
-            {
-            }
+            catch { }
         }
 
         public static void ExportarCSV(DataTable dt, string rutaArchivo)
@@ -128,6 +110,28 @@ namespace FacturacionDAM.Modelos
                 copia.TableName = nombreDataset;
 
             copia.WriteXml(rutaArchivo, XmlWriteMode.WriteSchema);
+        }
+
+        // Método añadido solicitado
+        public static void ForzarValoresNoNulos(DataRow row, string[] columnas)
+        {
+            foreach (string col in columnas)
+            {
+                if (row.Table.Columns.Contains(col))
+                {
+                    if (row[col] == DBNull.Value || row[col] == null)
+                    {
+                        Type t = row.Table.Columns[col].DataType;
+                        if (t == typeof(decimal)) row[col] = 0m;
+                        else if (t == typeof(int)) row[col] = 0;
+                        else if (t == typeof(double)) row[col] = 0d;
+                        else row[col] = 0;
+                    }
+                }
+            }
+
+            if (row.Table.Columns.Contains("aplicaret") && row["aplicaret"] == DBNull.Value) row["aplicaret"] = 0;
+            if (row.Table.Columns.Contains("pagada") && row["pagada"] == DBNull.Value) row["pagada"] = 0;
         }
     }
 }

@@ -67,6 +67,17 @@ namespace FacturacionDAM.Modelos
             return cmd.ExecuteScalar();
         }
 
+        // Método añadido solicitado
+        public long UltimoIdInsertado()
+        {
+            var res = EjecutarEscalar("SELECT LAST_INSERT_ID()");
+            if (res != null && res != DBNull.Value)
+            {
+                return Convert.ToInt64(res);
+            }
+            return 0;
+        }
+
         public void Liberar()
         {
             _cb?.Dispose();

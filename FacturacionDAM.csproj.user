@@ -7,6 +7,9 @@
     <Compile Update="Formularios\FrmBrowFacemi.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Formularios\FrmBrowFacrec.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Formularios\FrmBrowProveedores.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -34,7 +37,13 @@
     <Compile Update="Formularios\FrmBrowEmisores.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Formularios\FrmFacrec.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Formularios\FrmLineaFacemi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Formularios\FrmLineaFacrec.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Formularios\FrmProducto.cs">
