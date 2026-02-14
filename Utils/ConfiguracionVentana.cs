@@ -1,66 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
+using System.Windows.Forms;
 
 namespace FacturacionDAM.Utils
 {
     public static class ConfiguracionVentana
     {
-
-        /// <summary>
-        /// Guarda el estado de la ventana.
-        /// </summary>
-        /// <param name="frm">Objeto de tipo Form cuyas propiedades queremos guardar.</param>
-        /// <param name="nombreForm">Nombre que le he puesto al form, para encontrar la propiedad adecuada en los Settings.</param>
-        public static void Guardar(Form frm, string nombreForm)
+        public static void Guardar(Form form, string clave)
         {
-            Properties.Settings.Default[$"{nombreForm}State"] = frm.WindowState.ToString();
-            if (frm.WindowState == FormWindowState.Normal)
+            if (form == null || string.IsNullOrWhiteSpace(clave)) return;
+
+            var s = Properties.Settings.Default;
+
+            string kState = $"{clave}_WindowState";
+            string kLoc = $"{clave}_Location";
+            string kSize = $"{clave}_Size";
+
+            if (s.Properties[kState] == null || s.Properties[kLoc] == null || s.Properties[kSize] == null)
+                return;
+
+            s[kState] = (int)form.WindowState;
+
+            if (form.WindowState == FormWindowState.Normal)
             {
-                Properties.Settings.Default[$"{nombreForm}Location"] = frm.Location;
-                Properties.Settings.Default[$"{nombreForm}Size"] = frm.Size;
+                s[kLoc] = form.Location;
+                s[kSize] = form.Size;
             }
-            Properties.Settings.Default.Save();
+            else
+            {
+                s[kLoc] = form.RestoreBounds.Location;
+                s[kSize] = form.RestoreBounds.Size;
+            }
+
+            s.Save();
         }
 
-        /// <summary>
-        /// Restaura el estado de la ventana.
-        /// </summary>
-        /// <param name="frm">Objeto de tipo Form cuyas propiedades queremos restaurar.</param>
-        /// <param name="nombreForm">Nombre que le he puesto al form, para encontrar la propiedad adecuada en los Settings.</param>
-
-        public static void Restaurar(Form frm, string nombreForm)
+        public static void Restaurar(Form form, string clave)
         {
+            if (form == null || string.IsNullOrWhiteSpace(clave)) return;
 
-            // Restaurar el estado
-            string estado = Properties.Settings.Default[$"{nombreForm}State"].ToString();
-            switch (estado)
+            var s = Properties.Settings.Default;
+
+            string kState = $"{clave}_WindowState";
+            string kLoc = $"{clave}_Location";
+            string kSize = $"{clave}_Size";
+
+            if (s.Properties[kState] == null || s.Properties[kLoc] == null || s.Properties[kSize] == null)
+                return;
+
+            if (s[kLoc] is Point loc)
             {
-                case "Maximized":
-                    frm.WindowState = FormWindowState.Maximized;
-                    break;
-                case "Minimized":
-                    frm.WindowState = FormWindowState.Minimized;
-                    break;
-                default:
-                    frm.WindowState = FormWindowState.Normal;
-                    break;
+                form.StartPosition = FormStartPosition.Manual;
+                form.Location = loc;
             }
 
-            //if (Properties.Settings.Default[$"{nombreForm}State"] is string estado)
-                //frm.WindowState = Enum.Parse<FormWindowState>(estado);
+            if (s[kSize] is Size size && size.Width > 0 && size.Height > 0)
+                form.Size = size;
 
-            if (frm.WindowState == FormWindowState.Normal)
+            if (s[kState] is int ws)
             {
-                if (Properties.Settings.Default[$"{nombreForm}Location"] is Point loc)
-                    frm.Location = loc;
-
-                if (Properties.Settings.Default[$"{nombreForm}Size"] is Size sz)
-                    frm.Size = sz;
+                var st = (FormWindowState)ws;
+                if (st == FormWindowState.Maximized || st == FormWindowState.Normal)
+                    form.WindowState = st;
             }
         }
-
     }
 }

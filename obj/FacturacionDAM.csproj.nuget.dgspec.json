@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Facturacion\\FacturacionDAM.csproj": {}
+    "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\FacturacionDAM.csproj": {}
   },
   "projects": {
-    "F:\\Facturacion\\FacturacionDAM.csproj": {
+    "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\FacturacionDAM.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Facturacion\\FacturacionDAM.csproj",
+        "projectUniqueName": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\FacturacionDAM.csproj",
         "projectName": "FacturacionDAM",
-        "projectPath": "F:\\Facturacion\\FacturacionDAM.csproj",
+        "projectPath": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\FacturacionDAM.csproj",
         "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
-        "outputPath": "F:\\Facturacion\\obj\\",
+        "outputPath": "C:\\Users\\Usuario\\Desktop\\Proyectos\\csharp\\Facturacion\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -78,7 +78,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

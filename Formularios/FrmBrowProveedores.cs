@@ -9,13 +9,13 @@ using System.Windows.Forms;
 
 namespace FacturacionDAM.Formularios
 {
-    public partial class FrmBrowClientes : Form
+    public partial class FrmBrowProveedores : Form
     {
         private Tabla _tabla;
         private BindingSource _bs = new BindingSource();
         private Dictionary<int, string> _provincias;
 
-        public FrmBrowClientes()
+        public FrmBrowProveedores()
         {
             InitializeComponent();
             _provincias = new Dictionary<int, string>();
@@ -29,7 +29,7 @@ namespace FacturacionDAM.Formularios
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
             _bs.AddNew();
-            FrmCliente frm = new FrmCliente(_bs, _tabla);
+            FrmProveedor frm = new FrmProveedor(_bs, _tabla);
             frm.edicion = false;
 
             if (frm.ShowDialog(this) == DialogResult.OK)
@@ -47,7 +47,7 @@ namespace FacturacionDAM.Formularios
         {
             if (_bs.Current is DataRowView)
             {
-                FrmCliente frm = new FrmCliente(_bs, _tabla);
+                FrmProveedor frm = new FrmProveedor(_bs, _tabla);
                 frm.edicion = true;
 
                 if (frm.ShowDialog(this) == DialogResult.OK)
@@ -75,7 +75,7 @@ namespace FacturacionDAM.Formularios
 
                 if (TieneFacturasEmitidas(mNif))
                 {
-                    MessageBox.Show("No se puede eliminar el Cliente porque tiene facturas emitidas.");
+                    MessageBox.Show("No se puede eliminar el Proveedor porque tiene facturas emitidas.");
                     return;
                 }
 
@@ -106,11 +106,11 @@ namespace FacturacionDAM.Formularios
             }
         }
 
-        private void FrmBrowClientes_Load(object sender, EventArgs e)
+        private void FrmBrowProveedores_Load(object sender, EventArgs e)
         {
             _tabla = new Tabla(Program.appDAM.LaConexion);
 
-            string mSql = "SELECT * FROM clientes";
+            string mSql = "SELECT * FROM proveedores";
 
             if (_tabla.InicializarDatos(mSql))
             {
@@ -122,21 +122,21 @@ namespace FacturacionDAM.Formularios
             }
             else
             {
-                MessageBox.Show("No se pudieron cargar los clientes.",
+                MessageBox.Show("No se pudieron cargar los proveedores.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             ActualizarEstado();
         }
 
-        private void FrmBrowClientes_FormClosing(object sender, FormClosingEventArgs e)
+        private void FrmBrowProveedores_FormClosing(object sender, FormClosingEventArgs e)
         {
-            ConfiguracionVentana.Guardar(this, "BrowClientes");
+            ConfiguracionVentana.Guardar(this, "BrowProveedores");
         }
 
-        private void FrmBrowClientes_Shown(object sender, EventArgs e)
+        private void FrmBrowProveedores_Shown(object sender, EventArgs e)
         {
-            ConfiguracionVentana.Restaurar(this, "BrowClientes");
+            ConfiguracionVentana.Restaurar(this, "BrowProveedores");
         }
 
         private void tsBtnExportCSV_Click(object sender, EventArgs e)
@@ -152,7 +152,7 @@ namespace FacturacionDAM.Formularios
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Archivo XML (*.xml)|*.xml";
             if (sfd.ShowDialog() == DialogResult.OK)
-                ExportarDatos.ExportarXML((DataTable)_bs.DataSource, sfd.FileName, "Clientes");
+                ExportarDatos.ExportarXML((DataTable)_bs.DataSource, sfd.FileName, "Proveedores");
         }
 
         private void ActualizarEstado()
@@ -257,7 +257,7 @@ namespace FacturacionDAM.Formularios
                 using var cmd = new MySqlCommand(@"
                     SELECT COUNT(*)
                     FROM facemi f
-                    INNER JOIN clientes c ON c.id = f.idcliente
+                    INNER JOIN proveedores c ON c.id = f.idproveedor
                     WHERE c.nifcif = @nif;", Program.appDAM.LaConexion);
 
                 cmd.Parameters.AddWithValue("@nif", aNifCif);
@@ -272,7 +272,7 @@ namespace FacturacionDAM.Formularios
             }
             catch (Exception ex)
             {
-                Program.appDAM?.RegistrarLog("TieneFacturasEmitidas Cliente", ex.Message);
+                Program.appDAM?.RegistrarLog("TieneFacturasEmitidas Proveedor", ex.Message);
                 return false;
             }
         }

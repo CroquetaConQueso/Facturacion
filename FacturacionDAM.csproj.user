@@ -1,13 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Compile Update="Formularios\FrmFacemi.cs">
+    <Compile Update="Formularios\FrmBrowClientes.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Formularios\FrmBrowFacemi.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="Formularios\FrmBrowClientes.cs">
+    <Compile Update="Formularios\FrmBrowFacrec.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Formularios\FrmBrowProveedores.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Formularios\FrmFacemi.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Formularios\FrmBrowConceptosFac.cs">
@@ -31,10 +37,22 @@
     <Compile Update="Formularios\FrmBrowEmisores.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Formularios\FrmFacrec.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Formularios\FrmInformeFacemiAnual.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Formularios\FrmLineaFacemi.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Formularios\FrmLineaFacrec.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Formularios\FrmProducto.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Formularios\FrmProveedor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Formularios\FrmSeleccionarEmisor.cs">

@@ -1,6 +1,6 @@
 ﻿namespace FacturacionDAM.Formularios
 {
-    partial class FrmBrowFacemi
+    partial class FrmBrowFacrec
     {
         /// <summary>
         /// Required designer variable.
@@ -29,16 +29,16 @@
         private void InitializeComponent()
         {
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmBrowFacemi));
-            splitContainerFacemi = new SplitContainer();
-            pnClientes = new Panel();
-            dgClientes = new DataGridView();
-            pnHeadClientes = new Panel();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmBrowFacrec));
+            splitContainerFacrec = new SplitContainer();
+            pnProveedores = new Panel();
+            dgProveedores = new DataGridView();
+            pnHeadProveedores = new Panel();
             label1 = new Label();
             pnGrid = new Panel();
             dgFacturas = new DataGridView();
-            pnHeadFacemi = new Panel();
-            lbHeadFacemi = new Label();
+            pnHeadFacrec = new Panel();
+            lbHeadFacrec = new Label();
             pnStatus = new Panel();
             statusStrip1 = new StatusStrip();
             tsLbNumReg = new ToolStripStatusLabel();
@@ -63,75 +63,75 @@
             tsLbTotalBase = new ToolStripStatusLabel();
             tsLbTotalCuota = new ToolStripStatusLabel();
             tsLbTotalTotal = new ToolStripStatusLabel();
-            ((System.ComponentModel.ISupportInitialize)splitContainerFacemi).BeginInit();
-            splitContainerFacemi.Panel1.SuspendLayout();
-            splitContainerFacemi.Panel2.SuspendLayout();
-            splitContainerFacemi.SuspendLayout();
-            pnClientes.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgClientes).BeginInit();
-            pnHeadClientes.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainerFacrec).BeginInit();
+            splitContainerFacrec.Panel1.SuspendLayout();
+            splitContainerFacrec.Panel2.SuspendLayout();
+            splitContainerFacrec.SuspendLayout();
+            pnProveedores.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgProveedores).BeginInit();
+            pnHeadProveedores.SuspendLayout();
             pnGrid.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgFacturas).BeginInit();
-            pnHeadFacemi.SuspendLayout();
+            pnHeadFacrec.SuspendLayout();
             pnStatus.SuspendLayout();
             statusStrip1.SuspendLayout();
             pnMenu.SuspendLayout();
             tsHerramientas.SuspendLayout();
             SuspendLayout();
             // 
-            // splitContainerFacemi
+            // splitContainerFacrec
             // 
-            splitContainerFacemi.BorderStyle = BorderStyle.FixedSingle;
-            splitContainerFacemi.Dock = DockStyle.Fill;
-            splitContainerFacemi.Location = new Point(0, 0);
-            splitContainerFacemi.Name = "splitContainerFacemi";
+            splitContainerFacrec.BorderStyle = BorderStyle.FixedSingle;
+            splitContainerFacrec.Dock = DockStyle.Fill;
+            splitContainerFacrec.Location = new Point(0, 0);
+            splitContainerFacrec.Name = "splitContainerFacrec";
             // 
-            // splitContainerFacemi.Panel1
+            // splitContainerFacrec.Panel1
             // 
-            splitContainerFacemi.Panel1.Controls.Add(pnClientes);
-            splitContainerFacemi.Panel1.Controls.Add(pnHeadClientes);
-            splitContainerFacemi.Panel1MinSize = 150;
+            splitContainerFacrec.Panel1.Controls.Add(pnProveedores);
+            splitContainerFacrec.Panel1.Controls.Add(pnHeadProveedores);
+            splitContainerFacrec.Panel1MinSize = 150;
             // 
-            // splitContainerFacemi.Panel2
+            // splitContainerFacrec.Panel2
             // 
-            splitContainerFacemi.Panel2.Controls.Add(pnGrid);
-            splitContainerFacemi.Panel2.Controls.Add(pnStatus);
-            splitContainerFacemi.Panel2.Controls.Add(pnMenu);
-            splitContainerFacemi.Panel2MinSize = 250;
-            splitContainerFacemi.Size = new Size(846, 450);
-            splitContainerFacemi.SplitterDistance = 280;
-            splitContainerFacemi.TabIndex = 0;
+            splitContainerFacrec.Panel2.Controls.Add(pnGrid);
+            splitContainerFacrec.Panel2.Controls.Add(pnStatus);
+            splitContainerFacrec.Panel2.Controls.Add(pnMenu);
+            splitContainerFacrec.Panel2MinSize = 250;
+            splitContainerFacrec.Size = new Size(846, 450);
+            splitContainerFacrec.SplitterDistance = 280;
+            splitContainerFacrec.TabIndex = 0;
             // 
-            // pnClientes
+            // pnProveedores
             // 
-            pnClientes.Controls.Add(dgClientes);
-            pnClientes.Dock = DockStyle.Fill;
-            pnClientes.Location = new Point(0, 27);
-            pnClientes.Name = "pnClientes";
-            pnClientes.Size = new Size(278, 421);
-            pnClientes.TabIndex = 1;
+            pnProveedores.Controls.Add(dgProveedores);
+            pnProveedores.Dock = DockStyle.Fill;
+            pnProveedores.Location = new Point(0, 27);
+            pnProveedores.Name = "pnProveedores";
+            pnProveedores.Size = new Size(278, 421);
+            pnProveedores.TabIndex = 1;
             // 
-            // dgClientes
+            // dgProveedores
             // 
-            dgClientes.AllowUserToAddRows = false;
-            dgClientes.AllowUserToDeleteRows = false;
-            dgClientes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgClientes.Dock = DockStyle.Fill;
-            dgClientes.Location = new Point(0, 0);
-            dgClientes.Name = "dgClientes";
-            dgClientes.RowHeadersWidth = 51;
-            dgClientes.Size = new Size(278, 421);
-            dgClientes.TabIndex = 0;
-            dgClientes.SelectionChanged += dgClientes_SelectionChanged;
+            dgProveedores.AllowUserToAddRows = false;
+            dgProveedores.AllowUserToDeleteRows = false;
+            dgProveedores.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgProveedores.Dock = DockStyle.Fill;
+            dgProveedores.Location = new Point(0, 0);
+            dgProveedores.Name = "dgProveedores";
+            dgProveedores.RowHeadersWidth = 51;
+            dgProveedores.Size = new Size(278, 421);
+            dgProveedores.TabIndex = 0;
+            dgProveedores.SelectionChanged += dgProveedores_SelectionChanged;
             // 
-            // pnHeadClientes
+            // pnHeadProveedores
             // 
-            pnHeadClientes.Controls.Add(label1);
-            pnHeadClientes.Dock = DockStyle.Top;
-            pnHeadClientes.Location = new Point(0, 0);
-            pnHeadClientes.Name = "pnHeadClientes";
-            pnHeadClientes.Size = new Size(278, 27);
-            pnHeadClientes.TabIndex = 0;
+            pnHeadProveedores.Controls.Add(label1);
+            pnHeadProveedores.Dock = DockStyle.Top;
+            pnHeadProveedores.Location = new Point(0, 0);
+            pnHeadProveedores.Name = "pnHeadProveedores";
+            pnHeadProveedores.Size = new Size(278, 27);
+            pnHeadProveedores.TabIndex = 0;
             // 
             // label1
             // 
@@ -142,13 +142,13 @@
             label1.Name = "label1";
             label1.Size = new Size(278, 27);
             label1.TabIndex = 0;
-            label1.Text = "Clientes";
+            label1.Text = "Proveedores";
             label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // pnGrid
             // 
             pnGrid.Controls.Add(dgFacturas);
-            pnGrid.Controls.Add(pnHeadFacemi);
+            pnGrid.Controls.Add(pnHeadFacrec);
             pnGrid.Dock = DockStyle.Fill;
             pnGrid.Location = new Point(0, 28);
             pnGrid.Name = "pnGrid";
@@ -180,26 +180,26 @@
             dgFacturas.TabIndex = 0;
             dgFacturas.CellMouseDoubleClick += dgFacturas_CellMouseDoubleClick;
             // 
-            // pnHeadFacemi
+            // pnHeadFacrec
             // 
-            pnHeadFacemi.Controls.Add(lbHeadFacemi);
-            pnHeadFacemi.Dock = DockStyle.Top;
-            pnHeadFacemi.Location = new Point(0, 2);
-            pnHeadFacemi.Name = "pnHeadFacemi";
-            pnHeadFacemi.Size = new Size(560, 42);
-            pnHeadFacemi.TabIndex = 1;
+            pnHeadFacrec.Controls.Add(lbHeadFacrec);
+            pnHeadFacrec.Dock = DockStyle.Top;
+            pnHeadFacrec.Location = new Point(0, 2);
+            pnHeadFacrec.Name = "pnHeadFacrec";
+            pnHeadFacrec.Size = new Size(560, 42);
+            pnHeadFacrec.TabIndex = 1;
             // 
-            // lbHeadFacemi
+            // lbHeadFacrec
             // 
-            lbHeadFacemi.BackColor = Color.Gainsboro;
-            lbHeadFacemi.Dock = DockStyle.Fill;
-            lbHeadFacemi.Font = new Font("Segoe UI", 12F);
-            lbHeadFacemi.Location = new Point(0, 0);
-            lbHeadFacemi.Name = "lbHeadFacemi";
-            lbHeadFacemi.Size = new Size(560, 42);
-            lbHeadFacemi.TabIndex = 0;
-            lbHeadFacemi.Text = "Facturas del cliente seleccionado, en el año seleccionado";
-            lbHeadFacemi.TextAlign = ContentAlignment.MiddleCenter;
+            lbHeadFacrec.BackColor = Color.Gainsboro;
+            lbHeadFacrec.Dock = DockStyle.Fill;
+            lbHeadFacrec.Font = new Font("Segoe UI", 12F);
+            lbHeadFacrec.Location = new Point(0, 0);
+            lbHeadFacrec.Name = "lbHeadFacrec";
+            lbHeadFacrec.Size = new Size(560, 42);
+            lbHeadFacrec.TabIndex = 0;
+            lbHeadFacrec.Text = "Facturas del proveedor seleccionado, en el año seleccionado";
+            lbHeadFacrec.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // pnStatus
             // 
@@ -402,27 +402,27 @@
             tsLbTotalTotal.Size = new Size(92, 17);
             tsLbTotalTotal.Text = "Total de Totales:";
             // 
-            // FrmBrowFacemi
+            // FrmBrowFacrec
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(846, 450);
-            Controls.Add(splitContainerFacemi);
-            Name = "FrmBrowFacemi";
+            Controls.Add(splitContainerFacrec);
+            Name = "FrmBrowFacrec";
             Text = "Facturas Emitidas";
-            FormClosing += FrmBrowFacemi_FormClosing;
-            Load += FrmBrowFacemi_Load;
-            Shown += FrmBrowFacemi_Shown;
-            splitContainerFacemi.Panel1.ResumeLayout(false);
-            splitContainerFacemi.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitContainerFacemi).EndInit();
-            splitContainerFacemi.ResumeLayout(false);
-            pnClientes.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgClientes).EndInit();
-            pnHeadClientes.ResumeLayout(false);
+            FormClosing += FrmBrowFacrec_FormClosing;
+            Load += FrmBrowFacrec_Load;
+            Shown += FrmBrowFacrec_Shown;
+            splitContainerFacrec.Panel1.ResumeLayout(false);
+            splitContainerFacrec.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainerFacrec).EndInit();
+            splitContainerFacrec.ResumeLayout(false);
+            pnProveedores.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgProveedores).EndInit();
+            pnHeadProveedores.ResumeLayout(false);
             pnGrid.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgFacturas).EndInit();
-            pnHeadFacemi.ResumeLayout(false);
+            pnHeadFacrec.ResumeLayout(false);
             pnStatus.ResumeLayout(false);
             pnStatus.PerformLayout();
             statusStrip1.ResumeLayout(false);
@@ -436,8 +436,8 @@
 
         #endregion
 
-        private SplitContainer splitContainerFacemi;
-        private Panel pnHeadClientes;
+        private SplitContainer splitContainerFacrec;
+        private Panel pnHeadProveedores;
         private Label label1;
         private Panel pnMenu;
         private ToolStrip tsHerramientas;
@@ -459,11 +459,11 @@
         private ToolStripStatusLabel tsLbStatus;
         private Panel pnGrid;
         private DataGridView dgFacturas;
-        private Panel pnClientes;
-        private DataGridView dgClientes;
+        private Panel pnProveedores;
+        private DataGridView dgProveedores;
         private ToolStripSeparator toolStripSeparator4;
-        private Panel pnHeadFacemi;
-        private Label lbHeadFacemi;
+        private Panel pnHeadFacrec;
+        private Label lbHeadFacrec;
         private ToolStripLabel toolStripLabel1;
         private ToolStripComboBox tsComboYear;
         private ToolStripStatusLabel tsLbTotalBase;

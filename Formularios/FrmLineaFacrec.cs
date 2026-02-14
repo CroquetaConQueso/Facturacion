@@ -7,13 +7,13 @@ using System.Windows.Forms;
 
 namespace FacturacionDAM.Formularios
 {
-    public partial class FrmLineaFacemi : Form
+    public partial class FrmLineaFacrec : Form
     {
         public bool edicion = false;
 
         private readonly BindingSource _bsLineas;
         private readonly Tabla _tablaLineas;
-        private readonly int _idFacemi;
+        private readonly int _idFacrec;
 
         private readonly Tabla _tablaProductos;
         private readonly BindingSource _bsProductos;
@@ -21,19 +21,19 @@ namespace FacturacionDAM.Formularios
         private bool _cargandoProductos = false;
         private bool _aplicandoProducto = false;
 
-        public FrmLineaFacemi(BindingSource bsLineas, Tabla tablaLineas, int idFacemi, bool edicion = false)
+        public FrmLineaFacrec(BindingSource bsLineas, Tabla tablaLineas, int idFacrec, bool edicion = false)
         {
             InitializeComponent();
 
             _bsLineas = bsLineas ?? throw new ArgumentNullException(nameof(bsLineas));
             _tablaLineas = tablaLineas ?? throw new ArgumentNullException(nameof(tablaLineas));
-            _idFacemi = idFacemi;
+            _idFacrec = idFacrec;
             this.edicion = edicion;
 
             _tablaProductos = new Tabla(Program.appDAM.LaConexion);
             _bsProductos = new BindingSource();
 
-            Load += FrmLineaFacemi_Load;
+            Load += FrmLineaFacrec_Load;
 
             btnAceptar.Click += btnAceptar_Click;
             btnCancelar.Click += btnCancelar_Click;
@@ -50,7 +50,7 @@ namespace FacturacionDAM.Formularios
             cbProducto.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
-        private void FrmLineaFacemi_Load(object sender, EventArgs e)
+        private void FrmLineaFacrec_Load(object sender, EventArgs e)
         {
             if (_bsLineas.Current is not DataRowView drv)
             {
@@ -78,10 +78,10 @@ namespace FacturacionDAM.Formularios
         {
             var row = drv.Row;
 
-            if (row.Table.Columns.Contains("idfacemi"))
+            if (row.Table.Columns.Contains("idFacrec"))
             {
-                if (row["idfacemi"] == DBNull.Value || Convert.ToInt32(row["idfacemi"]) == 0)
-                    row["idfacemi"] = _idFacemi;
+                if (row["idFacrec"] == DBNull.Value || Convert.ToInt32(row["idFacrec"]) == 0)
+                    row["idFacrec"] = _idFacrec;
             }
 
             SetDefault(row, "cantidad", 1m);
@@ -259,7 +259,7 @@ namespace FacturacionDAM.Formularios
 
             if (_bsLineas.Current is DataRowView row)
             {
-                if (row.Row.Table.Columns.Contains("idfacemi")) row["idfacemi"] = _idFacemi;
+                if (row.Row.Table.Columns.Contains("idFacrec")) row["idFacrec"] = _idFacrec;
                 row["descripcion"] = (txtDescripcion.Text ?? "").Trim();
             }
 
@@ -299,10 +299,10 @@ namespace FacturacionDAM.Formularios
                 return false;
             }
 
-            if (_bsLineas.Current is DataRowView drv && drv.Row.Table.Columns.Contains("idfacemi"))
+            if (_bsLineas.Current is DataRowView drv && drv.Row.Table.Columns.Contains("idFacrec"))
             {
-                if (drv["idfacemi"] == DBNull.Value || Convert.ToInt32(drv["idfacemi"]) == 0)
-                    drv["idfacemi"] = _idFacemi;
+                if (drv["idFacrec"] == DBNull.Value || Convert.ToInt32(drv["idFacrec"]) == 0)
+                    drv["idFacrec"] = _idFacrec;
             }
 
             return true;
