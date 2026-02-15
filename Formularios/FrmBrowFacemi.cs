@@ -496,6 +496,7 @@ WHERE idemisor = @idEmisor
 
         private void facturaActualConRetencion_Click(object sender, EventArgs e)
         {
+            // 1. Validar selección
             if (!TryGetFacturaActual(out int idFactura))
             {
                 MessageBox.Show("Selecciona una factura primero.");
@@ -504,12 +505,15 @@ WHERE idemisor = @idEmisor
 
             try
             {
+                // 2. Crear los datos (El SQL ya está corregido para apuntar al Cliente)
                 var ds = CrearDataSetFactura(idFactura);
+
+                // 3. Mostrar el informe (SIN generar XSD, directo al informe)
                 MostrarInforme("FacturaConRetencion.mrt", ds, null);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al generar informe: " + ex.Message);
+                MessageBox.Show("Error: " + ex.Message);
             }
         }
 
@@ -545,53 +549,53 @@ WHERE idemisor = @idEmisor
             var ds = new DataSet("DatosFactura");
             var p = new Dictionary<string, object> { ["@id"] = idFactura };
 
+            // CORRECCIÓN DEFINITIVA:
+            // c.nombrecomercial -> nombrecomercial (para que Stimulsoft lo vea como CLIENTE)
             string sqlCabecera = @"
-SELECT
-    f.id,
-    f.numero,
-    f.fecha,
-    f.base,
-    f.cuota,
-    f.retencion,
-    f.total,
-    e.nombrecomercial AS nombrecomercial,
-    e.nifcif AS nifcif,
-    e.domicilio AS direccion,
-    e.poblacion AS poblacion,
-    e.codigopostal AS codigopostal,
-    c.nombrecomercial AS cliente_nombrecomercial,
-    c.nifcif AS cliente_nifcif,
-    c.direccion AS cliente_direccion,
-    c.poblacion AS cliente_poblacion,
-    c.cpostal AS cliente_cpostal
-FROM facemi f
-INNER JOIN emisores e ON e.id = f.idemisor
-INNER JOIN clientes c ON c.id = f.idcliente
-WHERE f.id = @id;";
+        SELECT 
+            f.id,
+            f.numero,
+            f.fecha,
+            f.base,
+            f.cuota,
+            f.retencion,
+            f.total,
+            
+            -- DATOS DEL CLIENTE (Mapeados a los nombres estándar del informe)
+            c.nombrecomercial,
+            c.nifcif,
+            c.direccion,
+            c.poblacion,
+            c.cpostal AS codigopostal,
+            c.idprovincia AS provincia
+
+        FROM facemi f
+        LEFT JOIN clientes c ON c.id = f.idcliente
+        WHERE f.id = @id;";
 
             var tCabecera = new Tabla(Program.appDAM.LaConexion);
+
             if (!tCabecera.InicializarDatos(sqlCabecera, p) || tCabecera.LaTabla.Rows.Count == 0)
-                throw new InvalidOperationException("No se encontró la cabecera de la factura (id=" + idFactura + ").");
+                throw new InvalidOperationException($"No se ha podido cargar la cabecera de la factura {idFactura}.");
 
             var dtCabecera = tCabecera.LaTabla.Copy();
             dtCabecera.TableName = "Cabecera";
             ds.Tables.Add(dtCabecera);
 
+            // Consulta de LÍNEAS
             string sqlLineas = @"
-SELECT
-    l.id,
-    l.idfacemi,
-    l.idproducto,
-    l.descripcion,
-    l.cantidad,
-    l.precio,
-    l.tipoiva,
-    l.cuota,
-    l.base,
-    l.base AS total
-FROM facemilin l
-WHERE l.idfacemi = @id
-ORDER BY l.id;";
+        SELECT 
+            l.id,
+            l.idfacemi,
+            l.descripcion,
+            l.cantidad,
+            l.precio,
+            l.cuota,
+            l.base,
+            l.base AS total
+        FROM facemilin l 
+        WHERE l.idfacemi = @id
+        ORDER BY l.id;";
 
             var tLineas = new Tabla(Program.appDAM.LaConexion);
             tLineas.InicializarDatos(sqlLineas, p);
@@ -660,24 +664,33 @@ ORDER BY " + orderBy + ";";
                 return;
             }
 
-            report.Load(ruta);
-            report.RegData(ds);
-            report.Dictionary.Synchronize();
-
-            if (variables != null)
+            try
             {
-                foreach (var kv in variables)
+                report.Load(ruta);
+
+                // IMPORTANTE: Limpiamos conexiones previas para forzar el uso de tu DataSet
+                report.Dictionary.Databases.Clear();
+                report.RegData(ds);
+                report.Dictionary.Synchronize();
+
+                if (variables != null)
                 {
-                    if (report.Dictionary.Variables.Contains(kv.Key))
-                        report.Dictionary.Variables[kv.Key].Value = kv.Value ?? "";
+                    foreach (var kv in variables)
+                    {
+                        if (report.Dictionary.Variables.Contains(kv.Key))
+                            report.Dictionary.Variables[kv.Key].Value = kv.Value ?? "";
+                    }
                 }
+
+                AplicarVariablesEmisorDesdeBD(report);
+
+                // Mostramos el informe directamente
+                report.Show();
             }
-
-            AplicarVariablesEmisorDesdeBD(report);
-
-            report.Compile();
-            report.Render(false);
-            report.Show();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al mostrar el informe:\n" + ex.Message);
+            }
         }
 
         private void AplicarVariablesEmisorDesdeBD(StiReport report)
