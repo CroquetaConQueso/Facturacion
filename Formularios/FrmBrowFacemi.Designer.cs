@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmBrowFacemi));
             splitContainerFacemi = new SplitContainer();
             pnClientes = new Panel();
@@ -43,6 +43,9 @@
             statusStrip1 = new StatusStrip();
             tsLbNumReg = new ToolStripStatusLabel();
             tsLbStatus = new ToolStripStatusLabel();
+            tsLbTotalBase = new ToolStripStatusLabel();
+            tsLbTotalCuota = new ToolStripStatusLabel();
+            tsLbTotalTotal = new ToolStripStatusLabel();
             pnMenu = new Panel();
             tsHerramientas = new ToolStrip();
             tsBtnNew = new ToolStripButton();
@@ -58,11 +61,15 @@
             tsBtnExportCSV = new ToolStripButton();
             tsBtnExportXML = new ToolStripButton();
             toolStripSeparator4 = new ToolStripSeparator();
+            tsBtnExportaciones = new ToolStripSplitButton();
+            toolStripSeparator5 = new ToolStripSeparator();
             toolStripLabel1 = new ToolStripLabel();
             tsComboYear = new ToolStripComboBox();
-            tsLbTotalBase = new ToolStripStatusLabel();
-            tsLbTotalCuota = new ToolStripStatusLabel();
-            tsLbTotalTotal = new ToolStripStatusLabel();
+            listadoDeFacturasTotalesToolStripMenuItem = new ToolStripMenuItem();
+            listadoAgrupadoPorClientesToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator6 = new ToolStripSeparator();
+            facturaActualSinRetencion = new ToolStripMenuItem();
+            facturaActualConRetencion = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)splitContainerFacemi).BeginInit();
             splitContainerFacemi.Panel1.SuspendLayout();
             splitContainerFacemi.Panel2.SuspendLayout();
@@ -160,14 +167,14 @@
             // 
             dgFacturas.AllowUserToAddRows = false;
             dgFacturas.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.LightGray;
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgFacturas.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = Color.LightGray;
+            dataGridViewCellStyle5.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dataGridViewCellStyle5.ForeColor = Color.White;
+            dataGridViewCellStyle5.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = DataGridViewTriState.True;
+            dgFacturas.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             dgFacturas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgFacturas.Dock = DockStyle.Fill;
             dgFacturas.Location = new Point(0, 44);
@@ -232,6 +239,27 @@
             tsLbStatus.Name = "tsLbStatus";
             tsLbStatus.Size = new Size(0, 17);
             // 
+            // tsLbTotalBase
+            // 
+            tsLbTotalBase.Margin = new Padding(10, 3, 0, 2);
+            tsLbTotalBase.Name = "tsLbTotalBase";
+            tsLbTotalBase.Size = new Size(63, 17);
+            tsLbTotalBase.Text = "Total Base:";
+            // 
+            // tsLbTotalCuota
+            // 
+            tsLbTotalCuota.Margin = new Padding(10, 3, 0, 2);
+            tsLbTotalCuota.Name = "tsLbTotalCuota";
+            tsLbTotalCuota.Size = new Size(71, 17);
+            tsLbTotalCuota.Text = "Total Cuota:";
+            // 
+            // tsLbTotalTotal
+            // 
+            tsLbTotalTotal.Margin = new Padding(10, 3, 0, 2);
+            tsLbTotalTotal.Name = "tsLbTotalTotal";
+            tsLbTotalTotal.Size = new Size(92, 17);
+            tsLbTotalTotal.Text = "Total de Totales:";
+            // 
             // pnMenu
             // 
             pnMenu.Controls.Add(tsHerramientas);
@@ -244,7 +272,7 @@
             // tsHerramientas
             // 
             tsHerramientas.ImageScalingSize = new Size(20, 20);
-            tsHerramientas.Items.AddRange(new ToolStripItem[] { tsBtnNew, tsBtnEdit, toolStripSeparator1, tsBtnDelete, toolStripSeparator2, tsBtnFirst, tsBtnPrev, tsBtnNext, tsBtnLast, toolStripSeparator3, tsBtnExportCSV, tsBtnExportXML, toolStripSeparator4, toolStripLabel1, tsComboYear });
+            tsHerramientas.Items.AddRange(new ToolStripItem[] { tsBtnNew, tsBtnEdit, toolStripSeparator1, tsBtnDelete, toolStripSeparator2, tsBtnFirst, tsBtnPrev, tsBtnNext, tsBtnLast, toolStripSeparator3, tsBtnExportCSV, tsBtnExportXML, toolStripSeparator4, tsBtnExportaciones, toolStripSeparator5, toolStripLabel1, tsComboYear });
             tsHerramientas.Location = new Point(0, 0);
             tsHerramientas.Name = "tsHerramientas";
             tsHerramientas.Size = new Size(560, 27);
@@ -367,6 +395,22 @@
             toolStripSeparator4.Name = "toolStripSeparator4";
             toolStripSeparator4.Size = new Size(6, 27);
             // 
+            // tsBtnExportaciones
+            // 
+            tsBtnExportaciones.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsBtnExportaciones.DropDownItems.AddRange(new ToolStripItem[] { listadoDeFacturasTotalesToolStripMenuItem, listadoAgrupadoPorClientesToolStripMenuItem, toolStripSeparator6, facturaActualSinRetencion, facturaActualConRetencion });
+            tsBtnExportaciones.Image = (Image)resources.GetObject("tsBtnExportaciones.Image");
+            tsBtnExportaciones.ImageTransparentColor = Color.Magenta;
+            tsBtnExportaciones.Name = "tsBtnExportaciones";
+            tsBtnExportaciones.Size = new Size(36, 24);
+            tsBtnExportaciones.Text = "toolStripSplitButton1";
+            tsBtnExportaciones.ButtonClick += tsBtnExportaciones_ButtonClick;
+            // 
+            // toolStripSeparator5
+            // 
+            toolStripSeparator5.Name = "toolStripSeparator5";
+            toolStripSeparator5.Size = new Size(6, 27);
+            // 
             // toolStripLabel1
             // 
             toolStripLabel1.Name = "toolStripLabel1";
@@ -381,26 +425,37 @@
             tsComboYear.Size = new Size(75, 27);
             tsComboYear.SelectedIndexChanged += tsComboYear_SelectedIndexChanged;
             // 
-            // tsLbTotalBase
+            // listadoDeFacturasTotalesToolStripMenuItem
             // 
-            tsLbTotalBase.Margin = new Padding(10, 3, 0, 2);
-            tsLbTotalBase.Name = "tsLbTotalBase";
-            tsLbTotalBase.Size = new Size(63, 17);
-            tsLbTotalBase.Text = "Total Base:";
+            listadoDeFacturasTotalesToolStripMenuItem.Name = "listadoDeFacturasTotalesToolStripMenuItem";
+            listadoDeFacturasTotalesToolStripMenuItem.Size = new Size(239, 22);
+            listadoDeFacturasTotalesToolStripMenuItem.Text = "Listado de Facturas (Totales)";
+            listadoDeFacturasTotalesToolStripMenuItem.Click += listadoDeFacturasTotalesToolStripMenuItem_Click;
             // 
-            // tsLbTotalCuota
+            // listadoAgrupadoPorClientesToolStripMenuItem
             // 
-            tsLbTotalCuota.Margin = new Padding(10, 3, 0, 2);
-            tsLbTotalCuota.Name = "tsLbTotalCuota";
-            tsLbTotalCuota.Size = new Size(71, 17);
-            tsLbTotalCuota.Text = "Total Cuota:";
+            listadoAgrupadoPorClientesToolStripMenuItem.Name = "listadoAgrupadoPorClientesToolStripMenuItem";
+            listadoAgrupadoPorClientesToolStripMenuItem.Size = new Size(239, 22);
+            listadoAgrupadoPorClientesToolStripMenuItem.Text = "Listado Agrupado por Clientes";
+            listadoAgrupadoPorClientesToolStripMenuItem.Click += listadoAgrupadoPorClientesToolStripMenuItem_Click;
             // 
-            // tsLbTotalTotal
+            // toolStripSeparator6
             // 
-            tsLbTotalTotal.Margin = new Padding(10, 3, 0, 2);
-            tsLbTotalTotal.Name = "tsLbTotalTotal";
-            tsLbTotalTotal.Size = new Size(92, 17);
-            tsLbTotalTotal.Text = "Total de Totales:";
+            toolStripSeparator6.Name = "toolStripSeparator6";
+            toolStripSeparator6.Size = new Size(231, 6);
+            // 
+            // facturaActualSinRetencion
+            // 
+            facturaActualSinRetencion.Name = "facturaActualSinRetencion";
+            facturaActualSinRetencion.Size = new Size(234, 22);
+            facturaActualSinRetencion.Text = "Factura Actual (Sin Retención)";
+            // 
+            // facturaActualConRetencion
+            // 
+            facturaActualConRetencion.Name = "facturaActualConRetencion";
+            facturaActualConRetencion.Size = new Size(239, 22);
+            facturaActualConRetencion.Text = "Factura Actual (Con Retención)";
+            facturaActualConRetencion.Click += facturaActualConRetencion_Click;
             // 
             // FrmBrowFacemi
             // 
@@ -469,5 +524,12 @@
         private ToolStripStatusLabel tsLbTotalBase;
         private ToolStripStatusLabel tsLbTotalCuota;
         private ToolStripStatusLabel tsLbTotalTotal;
+        private ToolStripSeparator toolStripSeparator5;
+        private ToolStripSplitButton tsBtnExportaciones;
+        private ToolStripMenuItem listadoDeFacturasTotalesToolStripMenuItem;
+        private ToolStripMenuItem listadoAgrupadoPorClientesToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator6;
+        private ToolStripMenuItem facturaActualSinRetencion;
+        private ToolStripMenuItem facturaActualConRetencion;
     }
 }

@@ -182,5 +182,18 @@ namespace FacturacionDAM.Modelos {
             }
         }
 
+        /// <summary>
+        /// Verifica si hay proveedores en la base de datos.
+        /// </summary>
+        /// <returns>Retorna true si los hay, false sino.</returns>
+        public bool HayProveedores()
+        {
+            using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM proveedores", _conexion))
+            {
+                var n = Convert.ToInt32(cmd.ExecuteScalar());
+                return n > 0;
+            }
+        }
+
     }
 }

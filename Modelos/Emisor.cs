@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FacturacionDAM.Modelos
 {
@@ -11,15 +7,18 @@ namespace FacturacionDAM.Modelos
         public int id { get; set; }
         public string nombre { get; set; }
         public string apellidos { get; set; }
-        public string nifcif {  get; set; } 
-
+        public string nifcif { get; set; }
         public string nombreComercial { get; set; }
+        public int nextNumFac { get; set; }
 
-        public int nextNumFac {  get; set; }
-
-        public Emisor ()
+        public Emisor()
         {
             id = -1;
+            nombre = "";
+            apellidos = "";
+            nifcif = "";
+            nombreComercial = "";
+            nextNumFac = 1;
         }
     }
 }

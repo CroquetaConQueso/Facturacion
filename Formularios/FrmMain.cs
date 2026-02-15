@@ -80,7 +80,22 @@ namespace FacturacionDAM.Formularios
 
         private void tsBtnCompras_Click(object sender, EventArgs e)
         {
-            AbrirFormularioHijo<FrmBrowTiposIva>();
+            if (Program.appDAM.emisor == null)
+            {
+                MessageBox.Show("Debe seleccionar un emisor (empresa) antes de gestionar compras.",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!Program.appDAM.HayProveedores())
+            {
+                MessageBox.Show(
+                    "No hay proveedores registrados.\nDebe registrar al menos un proveedor antes de gestionar facturas recibidas.",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            AbrirFormularioHijo<FrmBrowFacrec>();
         }
 
         private void tsBtnProveedores_Click(object sender, EventArgs e)

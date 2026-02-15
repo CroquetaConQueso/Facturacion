@@ -54,6 +54,10 @@
               "target": "Package",
               "version": "[9.4.0, )"
             },
+            "Stimulsoft.Reports.Net": {
+              "target": "Package",
+              "version": "[2026.1.3, )"
+            },
             "System.Text.Json": {
               "target": "Package",
               "version": "[9.0.9, )"

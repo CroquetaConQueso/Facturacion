@@ -1,21 +1,14 @@
 ﻿using FacturacionDAM.Modelos;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FacturacionDAM.Formularios
 {
     public partial class FrmSeleccionarEmisor : Form
     {
-
-        private Tabla _tablaEmisores;                                   // Para acceso a la tabla de emisores.
-        private BindingSource _bsEmisores = new BindingSource();        // Para visualizr los datos en los controles del formulario.
+        private Tabla _tablaEmisores;
+        private readonly BindingSource _bsEmisores = new BindingSource();
 
         public FrmSeleccionarEmisor()
         {
@@ -35,63 +28,59 @@ namespace FacturacionDAM.Formularios
             }
             else
             {
-                MessageBox.Show("No se pudieron cargar los emisores.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+                MessageBox.Show("No se pudieron cargar los emisores.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Program.appDAM.estadoApp = EstadoApp.Error;
-
-                this.DialogResult = DialogResult.Cancel;
-                this.Close();
-                return;
+                DialogResult = DialogResult.Cancel;
+                Close();
             }
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
             Program.appDAM.estadoApp = EstadoApp.ConectadoSinEmisor;
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         private void btnSeleccionar_Click(object sender, EventArgs e)
         {
-            /*
-             * El siguiente if se podría haber hecho así:
-             *      DataRowView row = _bsEmisores.Current as DataRowView;
-             *      if (row != null)
-             *      
-             * En ese caso sería conveniente usar un try ... catch
-             * Sin embargo, con esta forma primero comprueba el tipo, y sólo si es el esperado
-             * crea el objeto row.
-             */
-
-
-            if (_bsEmisores.Current is DataRowView row)
-            {
-                Emisor emisorSeleccionado = new Emisor
-                {
-                    id = Convert.ToInt32(row["id"]),
-                    nifcif = row["nifcif"].ToString(),
-                    nombre = row["nombre"].ToString(),
-                    apellidos = row["apellidos"].ToString(),
-                    nombreComercial = row["nombrecomercial"].ToString(),
-                    nextNumFac = Convert.ToInt32(row["nextnumfac"])
-                };
-
-                Program.appDAM.emisor = emisorSeleccionado;
-                Program.appDAM.estadoApp = EstadoApp.Conectado;
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            else
+            if (_bsEmisores.Current is not DataRowView row)
             {
                 MessageBox.Show("Debe seleccionar un emisor válido.");
+                return;
             }
+
+            var emisorSeleccionado = new Emisor
+            {
+                id = SafeInt(row["id"], -1),
+                nifcif = SafeStr(row["nifcif"]),
+                nombre = SafeStr(row["nombre"]),
+                apellidos = SafeStr(row["apellidos"]),
+                nombreComercial = SafeStr(row["nombrecomercial"]),
+                nextNumFac = SafeInt(row["nextnumfac"], 1)
+            };
+
+            Program.appDAM.emisor = emisorSeleccionado;
+            Program.appDAM.estadoApp = EstadoApp.Conectado;
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+
+        private static string SafeStr(object v)
+        {
+            return v == null || v == DBNull.Value ? "" : v.ToString();
+        }
+
+        private static int SafeInt(object v, int def)
+        {
+            if (v == null || v == DBNull.Value) return def;
+            if (v is int i) return i;
+            return int.TryParse(v.ToString(), out int n) ? n : def;
         }
 
         private void FrmSeleccionarEmisor_FormClosing(object sender, FormClosingEventArgs e)
         {
-            _tablaEmisores.Liberar();
+            _tablaEmisores?.Liberar();
             _tablaEmisores = null;
         }
     }
