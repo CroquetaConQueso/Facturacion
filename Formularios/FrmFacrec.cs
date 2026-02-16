@@ -1,5 +1,4 @@
-﻿// Ruta: FacturacionDAM/Formularios/FrmFacrec.cs
-using FacturacionDAM.Modelos;
+﻿using FacturacionDAM.Modelos;
 using FacturacionDAM.Utils;
 using MySql.Data.MySqlClient;
 using System;
@@ -57,6 +56,24 @@ namespace FacturacionDAM.Formularios
 
             dgLineasFactura.DataSource = _bsLineasFactura;
             ConfigurarGridLineas();
+
+            // Configuración inicial de permisos
+            ConfigurarEstadoEdicion();
+        }
+
+        // Bloquea o desbloquea la gestión de líneas según si la factura ya existe
+        private void ConfigurarEstadoEdicion()
+        {
+            // Solo permitimos manipular líneas si la factura ya está guardada (tiene ID real)
+            bool permitirLineas = (idFactura > 0);
+
+            dgLineasFactura.Enabled = permitirLineas;
+
+            // Intentamos deshabilitar los botones visualmente si existen
+            // Usamos try-catch por si los nombres en el Designer varían
+            try { if (tsBtnNew != null) tsBtnNew.Enabled = permitirLineas; } catch { }
+            try { if (tsBtnEdit != null) tsBtnEdit.Enabled = permitirLineas; } catch { }
+            try { if (tsBtnDelete != null) tsBtnDelete.Enabled = permitirLineas; } catch { }
         }
 
         private void CargarFacturaExistente()
@@ -92,6 +109,7 @@ namespace FacturacionDAM.Formularios
 
             _bsFactura.MoveLast();
 
+            // Cargamos estructura vacía para evitar errores, aunque no dejaremos añadir líneas aún
             string sqlLineas = "SELECT * FROM facreclin WHERE idfacrec = -1";
             _tablaLineasFactura.InicializarDatos(sqlLineas);
             _bsLineasFactura.DataSource = _tablaLineasFactura.LaTabla;
@@ -130,7 +148,6 @@ namespace FacturacionDAM.Formularios
 
         private void WireUI()
         {
-            // Usamos OnPropertyChanged para que la UI sea reactiva, pero sin forzar EndEdit prematuro
             txtNumero.DataBindings.Add("Text", _bsFactura, "numero", true, DataSourceUpdateMode.OnPropertyChanged);
             fechaFactura.DataBindings.Add("Value", _bsFactura, "fecha", true, DataSourceUpdateMode.OnPropertyChanged);
             txtDescripcion.DataBindings.Add("Text", _bsFactura, "descripcion", true, DataSourceUpdateMode.OnPropertyChanged);
@@ -166,13 +183,15 @@ namespace FacturacionDAM.Formularios
 
         private void RecalcularTotales()
         {
-            // Validación robusta inicial
-            if (_bsFactura == null || _bsFactura.Count == 0 || _bsFactura.Current == null) return;
-            if (_tablaLineasFactura?.LaTabla == null) return;
-
-            // Bloque try-catch específico para evitar el crash por concurrencia o estado de fila
             try
             {
+                if (_bsFactura == null || _bsFactura.Count == 0 || _bsFactura.Position < 0) return;
+
+                var current = _bsFactura.Current;
+                if (current == null) return;
+
+                if (_tablaLineasFactura?.LaTabla == null) return;
+
                 decimal baseSum = 0m;
                 decimal cuotaSum = 0m;
 
@@ -187,9 +206,8 @@ namespace FacturacionDAM.Formularios
                         cuotaSum += Convert.ToDecimal(fila["cuota"]);
                 }
 
-                if (_bsFactura.Current is DataRowView row)
+                if (current is DataRowView row)
                 {
-                    // Verificamos que la fila siga siendo válida y editable
                     if (row.Row.RowState == DataRowState.Detached && !row.IsNew) return;
 
                     row["base"] = baseSum;
@@ -207,15 +225,9 @@ namespace FacturacionDAM.Formularios
                     ActualizarLabelsTotales(baseSum, cuotaSum, importeRetencion, (decimal)row["total"]);
                 }
             }
-            catch (IndexOutOfRangeException)
+            catch (Exception)
             {
-                // Silenciamos este error específico de BindingSource intermedio
-                // Ocurre a veces cuando la fila es 'Nueva' y se accede concurrentemente
-            }
-            catch (Exception ex)
-            {
-                // Loguear si es necesario, pero evitar crash de UI
-                System.Diagnostics.Debug.WriteLine("Error calculando totales: " + ex.Message);
+                // Silencio errores de concurrencia UI
             }
         }
 
@@ -235,8 +247,17 @@ namespace FacturacionDAM.Formularios
 
         private void numTipoRet_ValueChanged(object sender, EventArgs e) => RecalcularTotales();
 
+        // ------------------ CRUD LÍNEAS ------------------
+
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
+            // VALIDACIÓN CRÍTICA: Bloquear creación de productos si no hay ID de factura real
+            if (idFactura <= 0)
+            {
+                MessageBox.Show("Debes guardar la cabecera de la factura antes de añadir productos.", "Guardar primero", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             _bsLineasFactura.AddNew();
             using var frm = new FrmLineaFacrec(_bsLineasFactura, _tablaLineasFactura, idFactura, false);
             if (frm.ShowDialog() == DialogResult.OK)
@@ -247,7 +268,9 @@ namespace FacturacionDAM.Formularios
 
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
+            if (idFactura <= 0) return;
             if (_bsLineasFactura.Current == null) return;
+
             using var frm = new FrmLineaFacrec(_bsLineasFactura, _tablaLineasFactura, idFactura, true);
             if (frm.ShowDialog() == DialogResult.OK)
                 RecalcularTotales();
@@ -255,7 +278,9 @@ namespace FacturacionDAM.Formularios
 
         private void tsBtnDelete_Click(object sender, EventArgs e)
         {
+            if (idFactura <= 0) return;
             if (_bsLineasFactura.Current == null) return;
+
             if (MessageBox.Show("¿Borrar línea seleccionada?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 _bsLineasFactura.RemoveCurrent();
@@ -267,6 +292,8 @@ namespace FacturacionDAM.Formularios
         {
             if (e.RowIndex >= 0) tsBtnEdit_Click(sender, null);
         }
+
+        // ------------------------------------------------
 
         private void btnAceptar_Click(object sender, EventArgs e)
         {
@@ -293,7 +320,7 @@ namespace FacturacionDAM.Formularios
         {
             try
             {
-                _bsFactura.EndEdit(); // Aquí es donde se confirman todos los cambios finalmente
+                _bsFactura.EndEdit();
                 DataRow row = ((DataRowView)_bsFactura.Current).Row;
 
                 if (row["descripcion"] == DBNull.Value) row["descripcion"] = "";
@@ -301,6 +328,7 @@ namespace FacturacionDAM.Formularios
 
                 Utilidades.ForzarValoresNoNulos(row, new[] { "base", "cuota", "total", "retencion", "tiporet" });
 
+                // 1. Guardar Cabecera (Obtener ID si es nueva)
                 _tablaFactura.GuardarCambios();
 
                 if (!modoEdicion)
@@ -309,13 +337,16 @@ namespace FacturacionDAM.Formularios
                         idFactura = Convert.ToInt32(row["id"]);
                 }
 
-                foreach (DataRow linea in _tablaLineasFactura.LaTabla.Rows)
+                // 2. Guardar Líneas (Solo si ya tenemos ID, aunque en modo Nuevo no debería haber líneas)
+                if (idFactura > 0)
                 {
-                    if (linea.RowState != DataRowState.Deleted && linea.RowState != DataRowState.Detached)
-                        linea["idfacrec"] = idFactura;
+                    foreach (DataRow linea in _tablaLineasFactura.LaTabla.Rows)
+                    {
+                        if (linea.RowState != DataRowState.Deleted && linea.RowState != DataRowState.Detached)
+                            linea["idfacrec"] = idFactura;
+                    }
+                    _tablaLineasFactura.GuardarCambios();
                 }
-
-                _tablaLineasFactura.GuardarCambios();
             }
             catch (Exception ex)
             {
