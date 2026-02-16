@@ -9,10 +9,20 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
+/*
+ * Módulo: FrmBrowFacemi
+ * Propósito: Gestión principal de facturas emitidas. Permite filtrar por cliente y año,
+ * realizar operaciones CRUD (Crear, Leer, Actualizar, Borrar), exportar datos y generar
+ * diversos tipos de informes (listados anuales, facturas individuales y por cliente).
+ */
+
+
 namespace FacturacionDAM.Formularios
 {
     public partial class FrmBrowFacemi : Form
     {
+        #region Campos y Constructor
+
         private Tabla _tablaClientes;
         private Tabla _tablaFacemi;
 
@@ -27,6 +37,11 @@ namespace FacturacionDAM.Formularios
             InitializeComponent();
         }
 
+        #endregion
+
+        #region Inicialización y Configuración
+
+        // Carga inicial: verifica emisor activo, inicializa tablas y configura rejillas.
         private void FrmBrowFacemi_Load(object sender, EventArgs e)
         {
             if (Program.appDAM?.emisor == null)
@@ -63,6 +78,7 @@ namespace FacturacionDAM.Formularios
             ConfiguracionVentana.Guardar(this, "BrowFacemi");
         }
 
+        // Obtiene los años distintos disponibles en las facturas para poblar el filtro temporal.
         private void CargarYearsDesdeBD()
         {
             tsComboYear.Items.Clear();
@@ -71,10 +87,10 @@ namespace FacturacionDAM.Formularios
             try
             {
                 const string sql = @"
-SELECT DISTINCT YEAR(fecha) AS anho
-FROM facemi
-WHERE idemisor = @idEmisor
-ORDER BY anho DESC;";
+                    SELECT DISTINCT YEAR(fecha) AS anho
+                    FROM facemi
+                    WHERE idemisor = @idEmisor
+                    ORDER BY anho DESC;";
 
                 using var cmd = new MySqlCommand(sql, Program.appDAM.LaConexion);
                 cmd.Parameters.AddWithValue("@idEmisor", _idEmisor);
@@ -91,6 +107,7 @@ ORDER BY anho DESC;";
                 years.Clear();
             }
 
+            // Si no hay datos, asegurar al menos el año actual para evitar inconsistencias en la UI.
             if (years.Count == 0)
                 years.Add(DateTime.Now.Year);
 
@@ -104,9 +121,9 @@ ORDER BY anho DESC;";
         private void CargarClientes()
         {
             const string sql = @"
-SELECT id, nombrecomercial, nombre, apellidos, nifcif
-FROM clientes
-ORDER BY nombrecomercial, nombre, apellidos;";
+                SELECT id, nombrecomercial, nombre, apellidos, nifcif
+                FROM clientes
+                ORDER BY nombrecomercial, nombre, apellidos;";
 
             if (!_tablaClientes.InicializarDatos(sql))
             {
@@ -134,18 +151,10 @@ ORDER BY nombrecomercial, nombre, apellidos;";
             {
                 switch (col.Name.ToLower())
                 {
-                    case "nombrecomercial":
-                        col.HeaderText = "Nombre Comercial";
-                        break;
-                    case "nombre":
-                        col.HeaderText = "Nombre";
-                        break;
-                    case "apellidos":
-                        col.HeaderText = "Apellidos";
-                        break;
-                    case "nifcif":
-                        col.HeaderText = "NIF/CIF";
-                        break;
+                    case "nombrecomercial": col.HeaderText = "Nombre Comercial"; break;
+                    case "nombre": col.HeaderText = "Nombre"; break;
+                    case "apellidos": col.HeaderText = "Apellidos"; break;
+                    case "nifcif": col.HeaderText = "NIF/CIF"; break;
                 }
             }
         }
@@ -164,6 +173,10 @@ ORDER BY nombrecomercial, nombre, apellidos;";
             dgFacturas.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(255, 240, 255, 255);
         }
 
+        #endregion
+
+        #region Lógica de Carga y Cálculos
+
         private void dgClientes_SelectionChanged(object sender, EventArgs e)
         {
             CargarFacturasClienteSeleccionado();
@@ -177,6 +190,7 @@ ORDER BY nombrecomercial, nombre, apellidos;";
             CargarFacturasClienteSeleccionado();
         }
 
+        // Refresca la lista de facturas basándose en el cliente seleccionado en la grilla superior y el año del filtro.
         private void CargarFacturasClienteSeleccionado()
         {
             _bsFacturas.SuspendBinding();
@@ -185,6 +199,7 @@ ORDER BY nombrecomercial, nombre, apellidos;";
 
             if (_bsClientes.Current is not DataRowView rowCliente)
             {
+                // Sin cliente seleccionado, limpiamos vista y mostramos totales globales del año.
                 ActualizarEstado(0, ContarTotalesAnho());
                 CalcularTotales();
                 return;
@@ -200,12 +215,12 @@ ORDER BY nombrecomercial, nombre, apellidos;";
             };
 
             const string sql = @"
-SELECT f.*
-FROM facemi f
-WHERE f.idemisor = @idEmisor
-  AND f.idcliente = @idCliente
-  AND YEAR(f.fecha) = @year
-ORDER BY f.fecha DESC, f.id DESC;";
+                SELECT f.*
+                FROM facemi f
+                WHERE f.idemisor = @idEmisor
+                  AND f.idcliente = @idCliente
+                  AND YEAR(f.fecha) = @year
+                ORDER BY f.fecha DESC, f.id DESC;";
 
             if (!_tablaFacemi.InicializarDatos(sql, p))
             {
@@ -215,9 +230,7 @@ ORDER BY f.fecha DESC, f.id DESC;";
             }
 
             dgFacturas.DataSource = null;
-
             _bsFacturas.DataSource = _tablaFacemi.LaTabla;
-
             dgFacturas.AutoGenerateColumns = true;
             dgFacturas.DataSource = _bsFacturas;
 
@@ -236,18 +249,10 @@ ORDER BY f.fecha DESC, f.id DESC;";
             {
                 switch (col.Name.ToLower())
                 {
-                    case "idemisor":
-                        col.HeaderText = "ID Emisor";
-                        break;
-                    case "idcliente":
-                        col.HeaderText = "ID Cliente";
-                        break;
-                    case "idconceptofac":
-                        col.HeaderText = "ID Concepto";
-                        break;
-                    case "fecha":
-                        col.HeaderText = "Fecha";
-                        break;
+                    case "idemisor": col.HeaderText = "ID Emisor"; break;
+                    case "idcliente": col.HeaderText = "ID Cliente"; break;
+                    case "idconceptofac": col.HeaderText = "ID Concepto"; break;
+                    case "fecha": col.HeaderText = "Fecha"; break;
                     case "base":
                         col.HeaderText = "Base Imponible";
                         col.DefaultCellStyle.Format = "N2";
@@ -263,12 +268,8 @@ ORDER BY f.fecha DESC, f.id DESC;";
                         col.DefaultCellStyle.Format = "N2";
                         col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                         break;
-                    case "pagada":
-                        col.HeaderText = "Pagada";
-                        break;
-                    case "numero":
-                        col.HeaderText = "Número";
-                        break;
+                    case "pagada": col.HeaderText = "Pagada"; break;
+                    case "numero": col.HeaderText = "Número"; break;
                     default:
                         if (col.Name.ToLower().StartsWith("id") && col.Name.Length > 2)
                         {
@@ -286,6 +287,7 @@ ORDER BY f.fecha DESC, f.id DESC;";
             }
         }
 
+        // Suma los importes visibles en el BindingSource para mostrar totales en la barra de estado.
         private void CalcularTotales()
         {
             decimal totalBase = 0;
@@ -314,15 +316,16 @@ ORDER BY f.fecha DESC, f.id DESC;";
             if (tsLbTotalTotal != null) tsLbTotalTotal.Text = $"Totales totales: {totalTotal:N2}";
         }
 
+        // Cuenta el total de facturas del año para comparar con las filtradas por cliente.
         private int ContarTotalesAnho()
         {
             try
             {
                 const string sql = @"
-SELECT COUNT(*)
-FROM facemi
-WHERE idemisor = @idEmisor
-  AND YEAR(fecha) = @year;";
+                    SELECT COUNT(*)
+                    FROM facemi
+                    WHERE idemisor = @idEmisor
+                      AND YEAR(fecha) = @year;";
 
                 using var cmd = new MySqlCommand(sql, Program.appDAM.LaConexion);
                 cmd.Parameters.AddWithValue("@idEmisor", _idEmisor);
@@ -345,6 +348,10 @@ WHERE idemisor = @idEmisor
             if (tsLbStatus != null)
                 tsLbStatus.Text = $"Nº de registros totales: {totales}";
         }
+
+        #endregion
+
+        #region Navegación y CRUD
 
         private void tsBtnFirst_Click(object sender, EventArgs e) => _bsFacturas.MoveFirst();
         private void tsBtnPrev_Click(object sender, EventArgs e) => _bsFacturas.MovePrevious();
@@ -395,6 +402,10 @@ WHERE idemisor = @idEmisor
             CargarFacturasClienteSeleccionado();
         }
 
+        #endregion
+
+        #region Exportación
+
         private void tsBtnExportCSV_Click(object sender, EventArgs e)
         {
             if (_bsFacturas.DataSource is not DataTable dt || dt.Rows.Count == 0) return;
@@ -413,12 +424,22 @@ WHERE idemisor = @idEmisor
                 ExportarDatos.ExportarXML(dt, sfd.FileName, "Facemi");
         }
 
+        private void tsBtnExportaciones_ButtonClick(object sender, EventArgs e)
+        {
+            tsBtnExportaciones.ShowDropDown();
+        }
+
+        #endregion
+
+        #region Gestión de Informes
+
         private void btnInforme_Click(object sender, EventArgs e)
         {
+            // Abre el formulario de selección de fechas para el informe anual genérico.
             DateTime fechaInicial = new DateTime(_yearActual, 1, 1);
             DateTime fechaFinal = new DateTime(_yearActual, 12, 31);
 
-            FrmInformeFacemiAnual frm = new FrmInformeFacemiAnual();
+            using var frm = new FrmInformeFacemiAnual();
 
             frm.dTPAnoInicio.MinDate = fechaInicial;
             frm.dTPAnoInicio.MaxDate = fechaFinal;
@@ -431,72 +452,79 @@ WHERE idemisor = @idEmisor
             frm.ShowDialog(this);
         }
 
-        private void tsBtnExportaciones_ButtonClick(object sender, EventArgs e)
-        {
-            tsBtnExportaciones.ShowDropDown();
-        }
-
         private void listadoDeFacturasTotalesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
-            {
-                var fi = new DateTime(_yearActual, 1, 1);
-                var ff = new DateTime(_yearActual, 12, 31);
+            // Redirige al mismo formulario de selección de fechas que btnInforme.
+            DateTime fechaInicial = new DateTime(_yearActual, 1, 1);
+            DateTime fechaFinal = new DateTime(_yearActual, 12, 31);
 
-                var ds = ConstruirDataSetListadoTotales(fi, ff, false);
-
-                if (!ds.Tables.Contains("vista_facturas_emitidas") || ds.Tables["vista_facturas_emitidas"].Rows.Count == 0)
-                {
-                    MessageBox.Show("No hay facturas para el año seleccionado.");
-                    return;
-                }
-
-                var vars = new Dictionary<string, string>
-                {
-                    ["nombreEmisor"] = Program.appDAM?.emisor?.nombreComercial ?? "",
-                    ["rangoFechas"] = $"{fi:dd/MM/yyyy} - {ff:dd/MM/yyyy}"
-                };
-
-                MostrarInforme("InformeFacemiList1.mrt", ds, vars);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al generar el listado: " + ex.Message);
-            }
+            using var frm = new FrmInformeFacemiAnual();
+            frm.dTPAnoInicio.Value = fechaInicial;
+            frm.dTPAnoFin.Value = fechaFinal;
+            frm.ShowDialog(this);
         }
 
+        // Genera un listado específico para el cliente seleccionado en la rejilla.
+        // Se crean fechas por defecto (año completo) y se carga un informe diseñado específicamente para cliente.
         private void listadoAgrupadoPorClientesToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Verificación de integridad: requiere un registro seleccionado en la lista de clientes.
+            if (_bsClientes.Current is not DataRowView rowCliente)
+            {
+                MessageBox.Show("Por favor, selecciona un cliente en la lista superior.");
+                return;
+            }
+
+            int idCliente = Convert.ToInt32(rowCliente["id"]);
+            DateTime fi = new DateTime(_yearActual, 1, 1);
+            DateTime ff = new DateTime(_yearActual, 12, 31);
+
+            string nombreMrt = "InformeFacturasCliente.mrt";
+            string ruta = Path.Combine(Application.StartupPath, "informes", nombreMrt);
+
+            if (!File.Exists(ruta))
+            {
+                MessageBox.Show("No encuentro el archivo de reporte: " + ruta);
+                return;
+            }
+
             try
             {
-                var fi = new DateTime(_yearActual, 1, 1);
-                var ff = new DateTime(_yearActual, 12, 31);
+                // Obtención del conjunto de datos mediante el método especializado.
+                DataSet ds = CreateDataSetFacturasPorCliente(idCliente, fi, ff);
 
-                var ds = ConstruirDataSetListadoTotales(fi, ff, true);
-
-                if (!ds.Tables.Contains("vista_facturas_emitidas") || ds.Tables["vista_facturas_emitidas"].Rows.Count == 0)
+                if (ds.Tables["ListadoFacturasCliente"].Rows.Count == 0)
                 {
-                    MessageBox.Show("No hay facturas para el año seleccionado.");
+                    MessageBox.Show("El cliente no tiene facturas para el periodo seleccionado.");
                     return;
                 }
 
-                var vars = new Dictionary<string, string>
-                {
-                    ["nombreEmisor"] = Program.appDAM?.emisor?.nombreComercial ?? "",
-                    ["rangoFechas"] = $"{fi:dd/MM/yyyy} - {ff:dd/MM/yyyy}"
-                };
+                StiReport report = new StiReport();
+                report.Load(ruta);
 
-                MostrarInforme("InformeFacemiList1.mrt", ds, vars);
+                // Limpieza de orígenes de datos previos para asegurar el uso exclusivo de la RAM.
+                report.Dictionary.Databases.Clear();
+                report.Dictionary.DataSources.Clear();
+                report.RegData(ds);
+                report.Dictionary.Synchronize();
+
+                // Asignación de variables para la cabecera dinámica del informe.
+                SetVar(report, "NombreCliente", rowCliente["nombrecomercial"].ToString());
+                SetVar(report, "NifCliente", rowCliente["nifcif"].ToString());
+                SetVar(report, "RangoFechas", $"Ejercicio: {_yearActual}");
+
+                AplicarVariablesEmisorDesdeBD(report);
+
+                report.Show();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al generar el listado: " + ex.Message);
+                MessageBox.Show("Error al generar el listado por cliente:\n" + ex.Message);
             }
         }
 
         private void facturaActualConRetencion_Click(object sender, EventArgs e)
         {
-            // 1. Validar selección
             if (!TryGetFacturaActual(out int idFactura))
             {
                 MessageBox.Show("Selecciona una factura primero.");
@@ -505,10 +533,7 @@ WHERE idemisor = @idEmisor
 
             try
             {
-                // 2. Crear los datos (El SQL ya está corregido para apuntar al Cliente)
                 var ds = CrearDataSetFactura(idFactura);
-
-                // 3. Mostrar el informe (SIN generar XSD, directo al informe)
                 MostrarInforme("FacturaConRetencion.mrt", ds, null);
             }
             catch (Exception ex)
@@ -536,6 +561,8 @@ WHERE idemisor = @idEmisor
             }
         }
 
+        #region Métodos Auxiliares DataSet e Informes
+
         private bool TryGetFacturaActual(out int idFactura)
         {
             idFactura = -1;
@@ -549,27 +576,26 @@ WHERE idemisor = @idEmisor
             var ds = new DataSet("DatosFactura");
             var p = new Dictionary<string, object> { ["@id"] = idFactura };
 
-            // -------------------------------------------------------------------------
-            // 1. CABECERA
-            // -------------------------------------------------------------------------
+            // Consulta de Cabecera
             string sqlCabecera = @"
-        SELECT 
-            f.id,
-            f.numero,
-            f.fecha,
-            f.base,
-            f.cuota,
-            f.retencion,
-            f.total,
-            c.nombrecomercial,
-            c.nifcif,
-            c.direccion,
-            c.poblacion,
-            c.cpostal AS codigopostal,
-            c.idprovincia AS provincia
-        FROM facemi f
-        LEFT JOIN clientes c ON c.id = f.idcliente
-        WHERE f.id = @id;";
+                SELECT 
+                    f.id,
+                    f.numero,
+                    f.fecha,
+                    f.base,
+                    f.cuota,
+                    f.retencion,
+                    (f.base + f.cuota - IFNULL(f.retencion, 0)) AS total,
+                    (f.base + f.cuota) AS totalSinRetencion, 
+                    c.nombrecomercial,
+                    c.nifcif,
+                    c.direccion,
+                    c.poblacion,
+                    c.cpostal AS codigopostal,
+                    c.idprovincia AS provincia
+                FROM facemi f
+                LEFT JOIN clientes c ON c.id = f.idcliente
+                WHERE f.id = @id;";
 
             var tCabecera = new Tabla(Program.appDAM.LaConexion);
 
@@ -580,30 +606,21 @@ WHERE idemisor = @idEmisor
             dtCabecera.TableName = "Cabecera";
             ds.Tables.Add(dtCabecera);
 
-            // -------------------------------------------------------------------------
-            // 2. LÍNEAS (CÁLCULO FORZADO DE DECIMALES)
-            // -------------------------------------------------------------------------
-            // Usamos 100.0 (con decimal) para obligar a SQL a tratarlo como moneda y no redondear a 0.
+            // Consulta de Líneas
             string sqlLineas = @"
-        SELECT 
-            l.id,
-            l.idfacemi,
-            l.descripcion,
-            l.cantidad,
-            l.precio,
-            l.tipoiva,
-            
-            -- Forzamos el cálculo: Base * (IVA / 100.0)
-            (l.base * (IFNULL(l.tipoiva, 0) / 100.0)) AS cuota,
-
-            l.base,
-
-            -- Forzamos el cálculo: Base + (Base * IVA / 100.0)
-            (l.base + (l.base * (IFNULL(l.tipoiva, 0) / 100.0))) AS total
-
-        FROM facemilin l 
-        WHERE l.idfacemi = @id
-        ORDER BY l.id;";
+                SELECT 
+                    l.id,
+                    l.idfacemi,
+                    l.descripcion,
+                    l.cantidad,
+                    l.precio,
+                    l.tipoiva,
+                    (l.base * (IFNULL(l.tipoiva, 0) / 100.0)) AS cuota,
+                    l.base,
+                    (l.base * (IFNULL(l.tipoiva, 0) / 100.0) + l.base) AS total
+                FROM facemilin l 
+                WHERE l.idfacemi = @id
+                ORDER BY l.id;";
 
             var tLineas = new Tabla(Program.appDAM.LaConexion);
             tLineas.InicializarDatos(sqlLineas, p);
@@ -612,9 +629,6 @@ WHERE idemisor = @idEmisor
             dtLineas.TableName = "Lineas";
             ds.Tables.Add(dtLineas);
 
-            // -------------------------------------------------------------------------
-            // 3. RELACIONES
-            // -------------------------------------------------------------------------
             if (dtCabecera.Columns.Contains("id") && dtLineas.Columns.Contains("idfacemi"))
             {
                 if (!ds.Relations.Contains("Cabecera_Lineas"))
@@ -624,27 +638,102 @@ WHERE idemisor = @idEmisor
             return ds;
         }
 
-        private DataSet ConstruirDataSetListadoTotales(DateTime fi, DateTime ff, bool ordenarPorCliente)
+        // Construye el DataSet específico para el listado por cliente.
+        // Realiza conversiones manuales de tipos (String para número, Bool para pagada)
+        // para garantizar compatibilidad con Stimulsoft.
+        private DataSet CreateDataSetFacturasPorCliente(int idCliente, DateTime fi, DateTime ff)
         {
-            var ds = new DataSet("ListadoFacturas");
-            string orderBy = ordenarPorCliente ? "c.nombrecomercial, f.fecha, f.id" : "f.fecha DESC, f.id DESC";
+            DataSet ds = new DataSet("ReportData");
+
+            // Consulta SQL con alias que mapean directamente a los campos del diseño del informe.
+            string sql = @"
+        SELECT 
+            f.id AS Id, 
+            f.numero AS NumeroFactura, 
+            f.fecha AS FechaEmision, 
+            f.descripcion AS Descripcion,
+            f.base AS BaseImponible, 
+            f.cuota AS CuotaIVA, 
+            f.retencion AS RetencionIRPF, 
+            f.total AS TotalPagar, 
+            f.pagada AS Pagada
+        FROM facemi f 
+        WHERE f.idemisor = @idEmisor 
+          AND f.idcliente = @idCliente 
+          AND f.fecha BETWEEN @fi AND @ff
+        ORDER BY f.fecha DESC, f.numero DESC;";
+
+            var p = new Dictionary<string, object>
+            {
+                ["@idEmisor"] = _idEmisor,
+                ["@idCliente"] = idCliente,
+                ["@fi"] = fi.Date,
+                ["@ff"] = ff.Date
+            };
+
+            var t = new Tabla(Program.appDAM.LaConexion);
+
+            // Definición manual del esquema de la tabla para forzar tipos de datos correctos.
+            DataTable dtTyped = new DataTable("ListadoFacturasCliente");
+            dtTyped.Columns.Add("Id", typeof(int));
+            dtTyped.Columns.Add("NumeroFactura", typeof(string));
+            dtTyped.Columns.Add("FechaEmision", typeof(DateTime));
+            dtTyped.Columns.Add("Descripcion", typeof(string));
+            dtTyped.Columns.Add("BaseImponible", typeof(decimal));
+            dtTyped.Columns.Add("CuotaIVA", typeof(decimal));
+            dtTyped.Columns.Add("RetencionIRPF", typeof(decimal));
+            dtTyped.Columns.Add("TotalPagar", typeof(decimal));
+            dtTyped.Columns.Add("Pagada", typeof(bool));
+
+            // Uso del método existente InicializarDatos para cargar la tabla origen.
+            if (t.InicializarDatos(sql, p))
+            {
+                foreach (DataRow r in t.LaTabla.Rows)
+                {
+                    DataRow nr = dtTyped.NewRow();
+
+                    nr["Id"] = r["Id"] != DBNull.Value ? Convert.ToInt32(r["Id"]) : 0;
+                    nr["NumeroFactura"] = r["NumeroFactura"]?.ToString() ?? "";
+                    nr["FechaEmision"] = r["FechaEmision"] != DBNull.Value ? Convert.ToDateTime(r["FechaEmision"]) : DateTime.MinValue;
+                    nr["Descripcion"] = r["Descripcion"]?.ToString() ?? "";
+                    nr["BaseImponible"] = r["BaseImponible"] != DBNull.Value ? Convert.ToDecimal(r["BaseImponible"]) : 0m;
+                    nr["CuotaIVA"] = r["CuotaIVA"] != DBNull.Value ? Convert.ToDecimal(r["CuotaIVA"]) : 0m;
+                    nr["RetencionIRPF"] = r["RetencionIRPF"] != DBNull.Value ? Convert.ToDecimal(r["RetencionIRPF"]) : 0m;
+                    nr["TotalPagar"] = r["TotalPagar"] != DBNull.Value ? Convert.ToDecimal(r["TotalPagar"]) : 0m;
+
+                    // Conversión lógica: MySQL TINYINT (0/1) se traduce a Booleano real de C#.
+                    nr["Pagada"] = r["Pagada"] != DBNull.Value && Convert.ToInt32(r["Pagada"]) == 1;
+
+                    dtTyped.Rows.Add(nr);
+                }
+            }
+
+            ds.Tables.Add(dtTyped);
+            return ds;
+        }
+
+        private DataSet CreateDataSetListadoFacturasEmitidas(DateTime fi, DateTime ff, bool ordenarPorCliente)
+        {
+            DataSet ds = new DataSet("DS_ListadoFacturas");
+            string orderBy = ordenarPorCliente ? "c.nombrecomercial, f.fecha, f.numero" : "f.fecha DESC, f.numero DESC";
 
             string sql = @"
-SELECT
-    f.numero AS Numero,
-    f.fecha AS Fecha,
-    c.nombrecomercial AS Cliente,
-    f.base AS Base,
-    f.cuota AS Cuota,
-    f.total AS Total,
-    f.retencion AS Retencion,
-    f.pagada AS Pagada,
-    f.descripcion AS Descripcion
-FROM facemi f
-INNER JOIN clientes c ON f.idcliente = c.id
-WHERE f.idemisor = @idEmisor
-  AND f.fecha BETWEEN @fi AND @ff
-ORDER BY " + orderBy + ";";
+                SELECT
+                    f.id AS Id,
+                    f.numero AS Numero,
+                    f.fecha AS Fecha,
+                    c.nombrecomercial AS NombreRazonSocial,
+                    c.nifcif AS Nif,
+                    f.base AS BaseImponible,
+                    f.retencion AS RetencionIRPF,
+                    f.cuota AS CuotaIVA,
+                    f.total AS Total,
+                    f.pagada AS Pagada
+                FROM facemi f
+                LEFT JOIN clientes c ON f.idcliente = c.id
+                WHERE f.idemisor = @idEmisor
+                  AND f.fecha BETWEEN @fi AND @ff
+                ORDER BY " + orderBy + ";";
 
             var p = new Dictionary<string, object>
             {
@@ -657,7 +746,7 @@ ORDER BY " + orderBy + ";";
             if (t.InicializarDatos(sql, p))
             {
                 var dt = t.LaTabla.Copy();
-                dt.TableName = "vista_facturas_emitidas";
+                dt.TableName = "FacturasEmitidas";
                 ds.Tables.Add(dt);
             }
 
@@ -679,7 +768,6 @@ ORDER BY " + orderBy + ";";
             {
                 report.Load(ruta);
 
-                // IMPORTANTE: Limpiamos conexiones previas para forzar el uso de tu DataSet
                 report.Dictionary.Databases.Clear();
                 report.RegData(ds);
                 report.Dictionary.Synchronize();
@@ -695,8 +783,6 @@ ORDER BY " + orderBy + ";";
 
                 AplicarVariablesEmisorDesdeBD(report);
 
-                // Mostramos el informe directamente
-                //report.Design();
                 report.Show();
             }
             catch (Exception ex)
@@ -705,6 +791,7 @@ ORDER BY " + orderBy + ";";
             }
         }
 
+        // Obtiene datos del emisor activo desde BD y los inyecta como variables en el reporte.
         private void AplicarVariablesEmisorDesdeBD(StiReport report)
         {
             if (report == null) return;
@@ -723,9 +810,9 @@ ORDER BY " + orderBy + ";";
             try
             {
                 const string sql = @"
-SELECT nombrecomercial, nifcif, domicilio, codigopostal, poblacion, telefono1, telefono2, email
-FROM emisores
-WHERE id = @id;";
+                    SELECT nombrecomercial, nifcif, domicilio, codigopostal, poblacion, telefono1, telefono2, email
+                    FROM emisores
+                    WHERE id = @id;";
 
                 var p = new Dictionary<string, object> { ["@id"] = _idEmisor };
                 var t = new Tabla(Program.appDAM.LaConexion);
@@ -736,7 +823,6 @@ WHERE id = @id;";
 
                     if (r.Table.Columns.Contains("nombrecomercial") && r["nombrecomercial"] != DBNull.Value) nombre = r["nombrecomercial"].ToString();
                     if (r.Table.Columns.Contains("nifcif") && r["nifcif"] != DBNull.Value) nif = r["nifcif"].ToString();
-
                     if (r.Table.Columns.Contains("domicilio") && r["domicilio"] != DBNull.Value) domicilio = r["domicilio"].ToString();
                     if (r.Table.Columns.Contains("codigopostal") && r["codigopostal"] != DBNull.Value) cp = r["codigopostal"].ToString();
                     if (r.Table.Columns.Contains("poblacion") && r["poblacion"] != DBNull.Value) poblacion = r["poblacion"].ToString();
@@ -747,17 +833,15 @@ WHERE id = @id;";
             }
             catch
             {
+                // Fallo no crítico; continuamos con valores vacíos.
             }
 
             SetVar(report, "nombreEmisor", nombre);
             SetVar(report, "nifEmisor", nif);
-
             SetVar(report, "direccionEmisor", domicilio);
             SetVar(report, "domicilioEmisor", domicilio);
-
             SetVar(report, "cpEmisor", cp);
             SetVar(report, "codigopostalEmisor", cp);
-
             SetVar(report, "poblacionEmisor", poblacion);
             SetVar(report, "telefono1Emisor", telefono1);
             SetVar(report, "telefono2Emisor", telefono2);
@@ -769,5 +853,9 @@ WHERE id = @id;";
             if (report.Dictionary.Variables.Contains(nombre))
                 report.Dictionary.Variables[nombre].Value = valor ?? "";
         }
+
+        #endregion
+
+        #endregion
     }
 }
