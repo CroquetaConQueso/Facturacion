@@ -549,8 +549,9 @@ WHERE idemisor = @idEmisor
             var ds = new DataSet("DatosFactura");
             var p = new Dictionary<string, object> { ["@id"] = idFactura };
 
-            // CORRECCIÓN DEFINITIVA:
-            // c.nombrecomercial -> nombrecomercial (para que Stimulsoft lo vea como CLIENTE)
+            // -------------------------------------------------------------------------
+            // 1. CABECERA
+            // -------------------------------------------------------------------------
             string sqlCabecera = @"
         SELECT 
             f.id,
@@ -560,15 +561,12 @@ WHERE idemisor = @idEmisor
             f.cuota,
             f.retencion,
             f.total,
-            
-            -- DATOS DEL CLIENTE (Mapeados a los nombres estándar del informe)
             c.nombrecomercial,
             c.nifcif,
             c.direccion,
             c.poblacion,
             c.cpostal AS codigopostal,
             c.idprovincia AS provincia
-
         FROM facemi f
         LEFT JOIN clientes c ON c.id = f.idcliente
         WHERE f.id = @id;";
@@ -582,7 +580,10 @@ WHERE idemisor = @idEmisor
             dtCabecera.TableName = "Cabecera";
             ds.Tables.Add(dtCabecera);
 
-            // Consulta de LÍNEAS
+            // -------------------------------------------------------------------------
+            // 2. LÍNEAS (CÁLCULO FORZADO DE DECIMALES)
+            // -------------------------------------------------------------------------
+            // Usamos 100.0 (con decimal) para obligar a SQL a tratarlo como moneda y no redondear a 0.
             string sqlLineas = @"
         SELECT 
             l.id,
@@ -590,9 +591,16 @@ WHERE idemisor = @idEmisor
             l.descripcion,
             l.cantidad,
             l.precio,
-            l.cuota,
+            l.tipoiva,
+            
+            -- Forzamos el cálculo: Base * (IVA / 100.0)
+            (l.base * (IFNULL(l.tipoiva, 0) / 100.0)) AS cuota,
+
             l.base,
-            l.base AS total
+
+            -- Forzamos el cálculo: Base + (Base * IVA / 100.0)
+            (l.base + (l.base * (IFNULL(l.tipoiva, 0) / 100.0))) AS total
+
         FROM facemilin l 
         WHERE l.idfacemi = @id
         ORDER BY l.id;";
@@ -604,6 +612,9 @@ WHERE idemisor = @idEmisor
             dtLineas.TableName = "Lineas";
             ds.Tables.Add(dtLineas);
 
+            // -------------------------------------------------------------------------
+            // 3. RELACIONES
+            // -------------------------------------------------------------------------
             if (dtCabecera.Columns.Contains("id") && dtLineas.Columns.Contains("idfacemi"))
             {
                 if (!ds.Relations.Contains("Cabecera_Lineas"))
@@ -685,6 +696,7 @@ ORDER BY " + orderBy + ";";
                 AplicarVariablesEmisorDesdeBD(report);
 
                 // Mostramos el informe directamente
+                //report.Design();
                 report.Show();
             }
             catch (Exception ex)
