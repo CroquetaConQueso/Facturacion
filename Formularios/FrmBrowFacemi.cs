@@ -1,4 +1,11 @@
-﻿using FacturacionDAM.Modelos;
+﻿/*
+ * Módulo: FrmBrowFacemi
+ * Propósito: Gestión principal de facturas emitidas. Permite filtrar por cliente y año,
+ * realizar operaciones CRUD (Crear, Leer, Actualizar, Borrar), exportar datos y generar
+ * diversos tipos de informes (listados anuales, facturas individuales y por cliente).
+ */
+
+using FacturacionDAM.Modelos;
 using FacturacionDAM.Utils;
 using MySql.Data.MySqlClient;
 using Stimulsoft.Report;
@@ -8,14 +15,6 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-
-/*
- * Módulo: FrmBrowFacemi
- * Propósito: Gestión principal de facturas emitidas. Permite filtrar por cliente y año,
- * realizar operaciones CRUD (Crear, Leer, Actualizar, Borrar), exportar datos y generar
- * diversos tipos de informes (listados anuales, facturas individuales y por cliente).
- */
-
 
 namespace FacturacionDAM.Formularios
 {
@@ -468,7 +467,7 @@ namespace FacturacionDAM.Formularios
         // Se crean fechas por defecto (año completo) y se carga un informe diseñado específicamente para cliente.
         private void listadoAgrupadoPorClientesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Verificación de integridad: requiere un registro seleccionado en la lista de clientes.
+            // Validación de selección previa
             if (_bsClientes.Current is not DataRowView rowCliente)
             {
                 MessageBox.Show("Por favor, selecciona un cliente en la lista superior.");
@@ -476,6 +475,9 @@ namespace FacturacionDAM.Formularios
             }
 
             int idCliente = Convert.ToInt32(rowCliente["id"]);
+            string nombreCliente = rowCliente["nombrecomercial"].ToString();
+            string nifCliente = rowCliente["nifcif"].ToString();
+
             DateTime fi = new DateTime(_yearActual, 1, 1);
             DateTime ff = new DateTime(_yearActual, 12, 31);
 
@@ -484,34 +486,38 @@ namespace FacturacionDAM.Formularios
 
             if (!File.Exists(ruta))
             {
-                MessageBox.Show("No encuentro el archivo de reporte: " + ruta);
+                MessageBox.Show("No encuentro el archivo de reporte: " + ruta + "\n\nDebe crearse con el diseñador.");
                 return;
             }
 
             try
             {
-                // Obtención del conjunto de datos mediante el método especializado.
+                // Se genera el dataset específico para clientes (incluye conversiones de tipos String/Bool)
                 DataSet ds = CreateDataSetFacturasPorCliente(idCliente, fi, ff);
 
                 if (ds.Tables["ListadoFacturasCliente"].Rows.Count == 0)
                 {
-                    MessageBox.Show("El cliente no tiene facturas para el periodo seleccionado.");
+                    MessageBox.Show($"El cliente {nombreCliente} no tiene facturas en el año {_yearActual}.");
                     return;
                 }
 
                 StiReport report = new StiReport();
                 report.Load(ruta);
 
-                // Limpieza de orígenes de datos previos para asegurar el uso exclusivo de la RAM.
                 report.Dictionary.Databases.Clear();
                 report.Dictionary.DataSources.Clear();
                 report.RegData(ds);
                 report.Dictionary.Synchronize();
 
-                // Asignación de variables para la cabecera dinámica del informe.
-                SetVar(report, "NombreCliente", rowCliente["nombrecomercial"].ToString());
-                SetVar(report, "NifCliente", rowCliente["nifcif"].ToString());
-                SetVar(report, "RangoFechas", $"Ejercicio: {_yearActual}");
+                // Inyección segura de variables de cabecera
+                Action<string, string> setVar = (key, val) => {
+                    if (report.Dictionary.Variables.Contains(key)) report.Dictionary.Variables[key].Value = val;
+                    else report.Dictionary.Variables.Add(key, val);
+                };
+
+                setVar("NombreCliente", nombreCliente);
+                setVar("NifCliente", nifCliente);
+                setVar("RangoFechas", $"Ejercicio: {_yearActual}");
 
                 AplicarVariablesEmisorDesdeBD(report);
 
@@ -645,23 +651,22 @@ namespace FacturacionDAM.Formularios
         {
             DataSet ds = new DataSet("ReportData");
 
-            // Consulta SQL con alias que mapean directamente a los campos del diseño del informe.
             string sql = @"
-        SELECT 
-            f.id AS Id, 
-            f.numero AS NumeroFactura, 
-            f.fecha AS FechaEmision, 
-            f.descripcion AS Descripcion,
-            f.base AS BaseImponible, 
-            f.cuota AS CuotaIVA, 
-            f.retencion AS RetencionIRPF, 
-            f.total AS TotalPagar, 
-            f.pagada AS Pagada
-        FROM facemi f 
-        WHERE f.idemisor = @idEmisor 
-          AND f.idcliente = @idCliente 
-          AND f.fecha BETWEEN @fi AND @ff
-        ORDER BY f.fecha DESC, f.numero DESC;";
+                SELECT 
+                    f.id AS Id,
+                    f.numero AS NumeroFactura,         
+                    f.fecha AS FechaEmision,           
+                    f.descripcion AS Descripcion,      
+                    f.base AS BaseImponible,           
+                    f.cuota AS CuotaIVA,               
+                    f.retencion AS RetencionIRPF,      
+                    f.total AS TotalPagar,             
+                    f.pagada AS Pagada                 
+                FROM facemi f
+                WHERE f.idemisor = @idEmisor
+                  AND f.idcliente = @idCliente
+                  AND f.fecha BETWEEN @fi AND @ff
+                ORDER BY f.fecha DESC, f.numero DESC;";
 
             var p = new Dictionary<string, object>
             {
@@ -673,8 +678,9 @@ namespace FacturacionDAM.Formularios
 
             var t = new Tabla(Program.appDAM.LaConexion);
 
-            // Definición manual del esquema de la tabla para forzar tipos de datos correctos.
+            // Definición manual de la tabla para forzar tipos de datos correctos
             DataTable dtTyped = new DataTable("ListadoFacturasCliente");
+
             dtTyped.Columns.Add("Id", typeof(int));
             dtTyped.Columns.Add("NumeroFactura", typeof(string));
             dtTyped.Columns.Add("FechaEmision", typeof(DateTime));
@@ -685,26 +691,30 @@ namespace FacturacionDAM.Formularios
             dtTyped.Columns.Add("TotalPagar", typeof(decimal));
             dtTyped.Columns.Add("Pagada", typeof(bool));
 
-            // Uso del método existente InicializarDatos para cargar la tabla origen.
             if (t.InicializarDatos(sql, p))
             {
-                foreach (DataRow r in t.LaTabla.Rows)
+                foreach (DataRow rowRaw in t.LaTabla.Rows)
                 {
-                    DataRow nr = dtTyped.NewRow();
+                    DataRow newRow = dtTyped.NewRow();
 
-                    nr["Id"] = r["Id"] != DBNull.Value ? Convert.ToInt32(r["Id"]) : 0;
-                    nr["NumeroFactura"] = r["NumeroFactura"]?.ToString() ?? "";
-                    nr["FechaEmision"] = r["FechaEmision"] != DBNull.Value ? Convert.ToDateTime(r["FechaEmision"]) : DateTime.MinValue;
-                    nr["Descripcion"] = r["Descripcion"]?.ToString() ?? "";
-                    nr["BaseImponible"] = r["BaseImponible"] != DBNull.Value ? Convert.ToDecimal(r["BaseImponible"]) : 0m;
-                    nr["CuotaIVA"] = r["CuotaIVA"] != DBNull.Value ? Convert.ToDecimal(r["CuotaIVA"]) : 0m;
-                    nr["RetencionIRPF"] = r["RetencionIRPF"] != DBNull.Value ? Convert.ToDecimal(r["RetencionIRPF"]) : 0m;
-                    nr["TotalPagar"] = r["TotalPagar"] != DBNull.Value ? Convert.ToDecimal(r["TotalPagar"]) : 0m;
+                    newRow["Id"] = rowRaw["Id"] != DBNull.Value ? Convert.ToInt32(rowRaw["Id"]) : 0;
+                    newRow["NumeroFactura"] = rowRaw["NumeroFactura"] != DBNull.Value ? rowRaw["NumeroFactura"].ToString() : "";
+                    newRow["FechaEmision"] = rowRaw["FechaEmision"] != DBNull.Value ? Convert.ToDateTime(rowRaw["FechaEmision"]) : DateTime.MinValue;
+                    newRow["Descripcion"] = rowRaw["Descripcion"] != DBNull.Value ? rowRaw["Descripcion"].ToString() : "";
+                    newRow["BaseImponible"] = rowRaw["BaseImponible"] != DBNull.Value ? Convert.ToDecimal(rowRaw["BaseImponible"]) : 0m;
+                    newRow["CuotaIVA"] = rowRaw["CuotaIVA"] != DBNull.Value ? Convert.ToDecimal(rowRaw["CuotaIVA"]) : 0m;
+                    newRow["RetencionIRPF"] = rowRaw["RetencionIRPF"] != DBNull.Value ? Convert.ToDecimal(rowRaw["RetencionIRPF"]) : 0m;
+                    newRow["TotalPagar"] = rowRaw["TotalPagar"] != DBNull.Value ? Convert.ToDecimal(rowRaw["TotalPagar"]) : 0m;
 
-                    // Conversión lógica: MySQL TINYINT (0/1) se traduce a Booleano real de C#.
-                    nr["Pagada"] = r["Pagada"] != DBNull.Value && Convert.ToInt32(r["Pagada"]) == 1;
+                    // Conversión Booleana de TINYINT (MySQL) a Bool (C#)
+                    int valorPagada = 0;
+                    if (rowRaw["Pagada"] != DBNull.Value)
+                    {
+                        valorPagada = Convert.ToInt32(rowRaw["Pagada"]);
+                    }
+                    newRow["Pagada"] = (valorPagada == 1);
 
-                    dtTyped.Rows.Add(nr);
+                    dtTyped.Rows.Add(newRow);
                 }
             }
 
