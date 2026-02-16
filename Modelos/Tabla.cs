@@ -1,4 +1,11 @@
-﻿using MySql.Data.MySqlClient;
+﻿/*
+ * Clase: Tabla
+ * Propósito: Abstracción para la gestión de datos mediante DataTables y DataAdapters.
+ * Facilita la carga, manipulación y persistencia de datos contra MySQL, gestionando
+ * automáticamente la concurrencia y la sincronización de IDs autonuméricos tras inserciones.
+ */
+
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -21,6 +28,8 @@ namespace FacturacionDAM.Modelos
             _cn = cn ?? throw new ArgumentNullException(nameof(cn));
         }
 
+        // Inicializa el DataAdapter y carga los datos en el DataTable.
+        // Configura la recuperación automática de IDs para evitar errores de concurrencia.
         public bool InicializarDatos(string sql, Dictionary<string, object>? parametros = null)
         {
             if (string.IsNullOrWhiteSpace(sql)) return false;
@@ -34,6 +43,25 @@ namespace FacturacionDAM.Modelos
 
             _da = new MySqlDataAdapter();
             _da.SelectCommand = CrearCommand(sql, parametros);
+
+            // Sincronización de IDs tras INSERT para evitar DBConcurrencyException en borrados posteriores.
+            _da.RowUpdated += (s, e) =>
+            {
+                if (e.Status == UpdateStatus.Continue && e.StatementType == StatementType.Insert)
+                {
+                    try
+                    {
+                        if (e.Row.Table.Columns.Contains("id"))
+                        {
+                            var cmd = new MySqlCommand("SELECT LAST_INSERT_ID()", _da.SelectCommand.Connection);
+                            long newId = Convert.ToInt64(cmd.ExecuteScalar());
+                            e.Row["id"] = newId;
+                        }
+                    }
+                    catch { } // Continuar flujo aunque falle la sincronización del ID.
+                }
+            };
+
             _da.Fill(LaTabla);
 
             return true;
@@ -67,7 +95,6 @@ namespace FacturacionDAM.Modelos
             return cmd.ExecuteScalar();
         }
 
-        // Método añadido solicitado
         public long UltimoIdInsertado()
         {
             var res = EjecutarEscalar("SELECT LAST_INSERT_ID()");

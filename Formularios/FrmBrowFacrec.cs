@@ -1,4 +1,9 @@
-﻿// Ruta: FacturacionDAM/Formularios/FrmBrowFacrec.cs
+﻿/*
+ * Módulo: FrmBrowFacrec
+ * Propósito: Gestión de facturas recibidas (compras). Permite filtrar por proveedor y año,
+ * gestionar el CRUD básico y exportar listados.
+ */
+
 using FacturacionDAM.Modelos;
 using FacturacionDAM.Utils;
 using MySql.Data.MySqlClient;
@@ -6,25 +11,32 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO; // Necesario para Path en exportaciones
 using System.Windows.Forms;
 
 namespace FacturacionDAM.Formularios
 {
     public partial class FrmBrowFacrec : Form
     {
+        #region Campos y Constructor
+
         private Tabla _tablaProveedores;
         private Tabla _tablaFacrec;
 
         private readonly BindingSource _bsProveedores = new BindingSource();
         private readonly BindingSource _bsFacturas = new BindingSource();
 
-        private int _idEmpresa; // Corresponde al emisor activo
+        private int _idEmpresa; // ID del emisor activo (nuestra empresa)
         private int _yearActual;
 
         public FrmBrowFacrec()
         {
             InitializeComponent();
         }
+
+        #endregion
+
+        #region Inicialización y Configuración
 
         private void FrmBrowFacrec_Load(object sender, EventArgs e)
         {
@@ -69,7 +81,6 @@ namespace FacturacionDAM.Formularios
 
             try
             {
-                // Buscamos años disponibles en facturas recibidas para la empresa actual
                 const string sql = @"
                     SELECT DISTINCT YEAR(fecha) AS anho
                     FROM facrec
@@ -103,9 +114,11 @@ namespace FacturacionDAM.Formularios
 
         private void CargarProveedores()
         {
-            const string sql = @"SELECT id, nombrecomercial, nombre, apellidos, nifcif
-                                 FROM proveedores
-                                 ORDER BY nombrecomercial, nombre, apellidos;";
+            // Ojo: Asegúrate que la tabla 'proveedores' tiene estos campos exactos.
+            const string sql = @"
+                SELECT id, nombrecomercial, nombre, apellidos, nifcif
+                FROM proveedores
+                ORDER BY nombrecomercial, nombre, apellidos;";
 
             if (!_tablaProveedores.InicializarDatos(sql))
             {
@@ -124,6 +137,7 @@ namespace FacturacionDAM.Formularios
             dgProveedores.AllowUserToAddRows = false;
             dgProveedores.AllowUserToDeleteRows = false;
 
+            // Ocultamos ID explícitamente y aplicamos estilos
             if (dgProveedores.Columns.Contains("id"))
                 dgProveedores.Columns["id"].Visible = false;
 
@@ -133,18 +147,10 @@ namespace FacturacionDAM.Formularios
             {
                 switch (col.Name.ToLower())
                 {
-                    case "nombrecomercial":
-                        col.HeaderText = "Nombre Comercial";
-                        break;
-                    case "nombre":
-                        col.HeaderText = "Nombre";
-                        break;
-                    case "apellidos":
-                        col.HeaderText = "Apellidos";
-                        break;
-                    case "nifcif":
-                        col.HeaderText = "NIFCIF";
-                        break;
+                    case "nombrecomercial": col.HeaderText = "Nombre Comercial"; break;
+                    case "nombre": col.HeaderText = "Nombre"; break;
+                    case "apellidos": col.HeaderText = "Apellidos"; break;
+                    case "nifcif": col.HeaderText = "NIF/CIF"; break;
                 }
             }
         }
@@ -162,6 +168,10 @@ namespace FacturacionDAM.Formularios
 
             dgFacturas.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(255, 240, 255, 255);
         }
+
+        #endregion
+
+        #region Lógica de Carga y Cálculos
 
         private void dgProveedores_SelectionChanged(object sender, EventArgs e)
         {
@@ -215,7 +225,6 @@ namespace FacturacionDAM.Formularios
 
             dgFacturas.DataSource = null;
             _bsFacturas.DataSource = _tablaFacrec.LaTabla;
-
             dgFacturas.AutoGenerateColumns = true;
             dgFacturas.DataSource = _bsFacturas;
 
@@ -228,21 +237,20 @@ namespace FacturacionDAM.Formularios
             CalcularTotales();
         }
 
+        // Configura cabeceras y oculta columnas técnicas (IDs).
         private void ConfigurarCabeceras()
         {
             foreach (DataGridViewColumn col in dgFacturas.Columns)
             {
+                // Filtro global para ocultar cualquier ID técnico
+                if (col.Name.ToLower().StartsWith("id"))
+                {
+                    col.Visible = false;
+                    continue;
+                }
+
                 switch (col.Name.ToLower())
                 {
-                    case "idempresa":
-                        col.HeaderText = "ID Empresa";
-                        break;
-                    case "idproveedor":
-                        col.HeaderText = "ID Proveedor";
-                        break;
-                    case "idconceptofac":
-                        col.HeaderText = "ID Concepto";
-                        break;
                     case "fecha":
                         col.HeaderText = "Fecha";
                         break;
@@ -268,13 +276,7 @@ namespace FacturacionDAM.Formularios
                         col.HeaderText = "Número";
                         break;
                     default:
-                        // Formato User Friendly genérico
-                        if (col.Name.ToLower().StartsWith("id") && col.Name.Length > 2)
-                        {
-                            string rest = col.Name.Substring(2);
-                            col.HeaderText = "ID " + char.ToUpper(rest[0]) + rest.Substring(1);
-                        }
-                        else if (!string.IsNullOrEmpty(col.Name))
+                        if (!string.IsNullOrEmpty(col.Name))
                         {
                             string header = col.Name.Replace("_", " ");
                             if (header.Length > 0)
@@ -345,20 +347,22 @@ namespace FacturacionDAM.Formularios
                 tsLbStatus.Text = $"Nº de registros totales: {totales}";
         }
 
-        // Navegación del BindingSource
+        #endregion
+
+        #region Navegación y CRUD
+
         private void tsBtnFirst_Click(object sender, EventArgs e) => _bsFacturas.MoveFirst();
         private void tsBtnPrev_Click(object sender, EventArgs e) => _bsFacturas.MovePrevious();
         private void tsBtnNext_Click(object sender, EventArgs e) => _bsFacturas.MoveNext();
         private void tsBtnLast_Click(object sender, EventArgs e) => _bsFacturas.MoveLast();
 
-        // Acciones CRUD
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
             if (_bsProveedores.Current is not DataRowView rowProveedor) return;
 
             int idProveedor = Convert.ToInt32(rowProveedor["id"]);
 
-            // Asumimos que existirá FrmFacrec similar a FrmFacemi
+            // Abre el formulario de edición para una nueva factura (-1)
             using var frm = new FrmFacrec(_bsFacturas, _tablaFacrec, _idEmpresa, idProveedor, _yearActual, -1);
             if (frm.ShowDialog(this) == DialogResult.OK)
                 CargarFacturasProveedorSeleccionado();
@@ -366,10 +370,10 @@ namespace FacturacionDAM.Formularios
 
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
-            if (_bsProveedores.Current is not DataRowView rowProveedor) return;
+            if (_bsProveedores.Current is not DataRowView) return;
             if (_bsFacturas.Current is not DataRowView rowFactura) return;
 
-            int idProveedor = Convert.ToInt32(rowProveedor["id"]);
+            int idProveedor = Convert.ToInt32(rowFactura["idproveedor"]); // Tomamos el ID del registro real
             int idFacrec = Convert.ToInt32(rowFactura["id"]);
 
             using var frm = new FrmFacrec(_bsFacturas, _tablaFacrec, _idEmpresa, idProveedor, _yearActual, idFacrec);
@@ -397,6 +401,10 @@ namespace FacturacionDAM.Formularios
             CargarFacturasProveedorSeleccionado();
         }
 
+        #endregion
+
+        #region Exportación
+
         private void tsBtnExportCSV_Click(object sender, EventArgs e)
         {
             if (_bsFacturas.DataSource is not DataTable dt || dt.Rows.Count == 0) return;
@@ -414,5 +422,8 @@ namespace FacturacionDAM.Formularios
             if (sfd.ShowDialog(this) == DialogResult.OK)
                 ExportarDatos.ExportarXML(dt, sfd.FileName, "Facrec");
         }
+
+
+        #endregion
     }
 }

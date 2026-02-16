@@ -246,12 +246,17 @@ namespace FacturacionDAM.Formularios
         {
             foreach (DataGridViewColumn col in dgFacturas.Columns)
             {
+                if (col.Name.ToLower().StartsWith("id"))
+                {
+                    col.Visible = false;
+                    continue;
+                }
+
                 switch (col.Name.ToLower())
                 {
-                    case "idemisor": col.HeaderText = "ID Emisor"; break;
-                    case "idcliente": col.HeaderText = "ID Cliente"; break;
-                    case "idconceptofac": col.HeaderText = "ID Concepto"; break;
-                    case "fecha": col.HeaderText = "Fecha"; break;
+                    case "fecha":
+                        col.HeaderText = "Fecha";
+                        break;
                     case "base":
                         col.HeaderText = "Base Imponible";
                         col.DefaultCellStyle.Format = "N2";
@@ -267,15 +272,14 @@ namespace FacturacionDAM.Formularios
                         col.DefaultCellStyle.Format = "N2";
                         col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                         break;
-                    case "pagada": col.HeaderText = "Pagada"; break;
-                    case "numero": col.HeaderText = "Número"; break;
+                    case "pagada":
+                        col.HeaderText = "Pagada";
+                        break;
+                    case "numero":
+                        col.HeaderText = "Número";
+                        break;
                     default:
-                        if (col.Name.ToLower().StartsWith("id") && col.Name.Length > 2)
-                        {
-                            string rest = col.Name.Substring(2);
-                            col.HeaderText = "ID " + char.ToUpper(rest[0]) + rest.Substring(1);
-                        }
-                        else if (!string.IsNullOrEmpty(col.Name))
+                        if (!string.IsNullOrEmpty(col.Name))
                         {
                             string header = col.Name.Replace("_", " ");
                             if (header.Length > 0)
