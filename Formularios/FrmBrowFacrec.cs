@@ -1,13 +1,4 @@
-﻿/*
- * Módulo: FrmBrowFacrec
- * Propósito: Gestión de facturas recibidas (compras). 
- * Correcciones: 
- * - Refresco automático de proveedores al activar.
- * - Refresco automático de años al crear/editar facturas (SOLUCIONADO).
- * - Mantenimiento de la selección del año tras refrescar.
- */
-
-using FacturacionDAM.Modelos;
+﻿using FacturacionDAM.Modelos;
 using FacturacionDAM.Utils;
 using MySql.Data.MySqlClient;
 using System;
@@ -16,6 +7,13 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+
+/*
+ * FrmBrowFacrec
+ * Gestión de facturas recibidas (compras):
+ * - Proveedores (arriba) + facturas del proveedor/año (abajo).
+ * - CRUD, exportación y recargas defensivas para evitar “datos viejos” o filas fantasma.
+ */
 
 namespace FacturacionDAM.Formularios
 {
@@ -43,6 +41,7 @@ namespace FacturacionDAM.Formularios
 
         #region Inicialización y Ciclo de Vida
 
+        // Inicializa contexto (empresa), carga años/proveedores y enlaza grids.
         private void FrmBrowFacrec_Load(object sender, EventArgs e)
         {
             if (Program.appDAM?.emisor == null)
@@ -57,7 +56,6 @@ namespace FacturacionDAM.Formularios
             _tablaProveedores = new Tabla(Program.appDAM.LaConexion);
             _tablaFacrec = new Tabla(Program.appDAM.LaConexion);
 
-            // Carga inicial
             CargarYearsDesdeBD();
             CargarProveedores();
 
@@ -72,6 +70,7 @@ namespace FacturacionDAM.Formularios
             _isLoaded = true;
         }
 
+        // Al volver al formulario, refresca proveedores para reflejar altas/ediciones externas.
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
@@ -82,6 +81,7 @@ namespace FacturacionDAM.Formularios
             }
         }
 
+        // Refresca proveedores manteniendo la selección si es posible.
         private void RefrescarListaProveedores()
         {
             try
@@ -130,10 +130,9 @@ namespace FacturacionDAM.Formularios
 
         #region Carga de Datos
 
-        // CORREGIDO: Ahora intenta mantener la selección del año tras recargar
+        // Carga años disponibles en facrec para la empresa y conserva el año seleccionado si sigue existiendo.
         private void CargarYearsDesdeBD()
         {
-            // Guardamos selección actual
             object seleccionPrevia = tsComboYear.SelectedItem;
 
             tsComboYear.Items.Clear();
@@ -168,7 +167,6 @@ namespace FacturacionDAM.Formularios
             foreach (var y in years)
                 tsComboYear.Items.Add(y);
 
-            // Restauramos selección o vamos al primero
             if (seleccionPrevia != null && tsComboYear.Items.Contains(seleccionPrevia))
             {
                 tsComboYear.SelectedItem = seleccionPrevia;
@@ -240,6 +238,7 @@ namespace FacturacionDAM.Formularios
             dgFacturas.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(255, 240, 255, 255);
         }
 
+        // Cabeceras y formato numérico de columnas habituales (base/cuota/total).
         private void ConfigurarCabeceras()
         {
             foreach (DataGridViewColumn col in dgFacturas.Columns)
@@ -305,6 +304,8 @@ namespace FacturacionDAM.Formularios
             CargarFacturasProveedorSeleccionado();
         }
 
+        // Carga facturas del proveedor seleccionado filtrando por empresa + año.
+        // Reenlaza el DataGridView para evitar “restos” de columnas/filas anteriores.
         private void CargarFacturasProveedorSeleccionado()
         {
             _bsFacturas.SuspendBinding();
@@ -356,6 +357,7 @@ namespace FacturacionDAM.Formularios
             CalcularTotales();
         }
 
+        // Totales agregados de la lista visible (proveedor/año actuales).
         private void CalcularTotales()
         {
             decimal totalBase = 0;
@@ -384,6 +386,7 @@ namespace FacturacionDAM.Formularios
             if (tsLbTotalTotal != null) tsLbTotalTotal.Text = $"Totales totales: {totalTotal:N2}";
         }
 
+        // Conteo anual global (sin filtro de proveedor) para contexto en barra de estado.
         private int ContarTotalesAnho()
         {
             try
@@ -425,6 +428,7 @@ namespace FacturacionDAM.Formularios
         private void tsBtnNext_Click(object sender, EventArgs e) => _bsFacturas.MoveNext();
         private void tsBtnLast_Click(object sender, EventArgs e) => _bsFacturas.MoveLast();
 
+        // Alta: si el editor confirma, refresca años + lista. Si cancela, revierte en memoria y recarga.
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
             if (_bsProveedores.Current is not DataRowView rowProveedor) return;
@@ -432,14 +436,20 @@ namespace FacturacionDAM.Formularios
             int idProveedor = Convert.ToInt32(rowProveedor["id"]);
 
             using var frm = new FrmFacrec(_bsFacturas, _tablaFacrec, _idEmpresa, idProveedor, _yearActual, -1);
+
             if (frm.ShowDialog(this) == DialogResult.OK)
             {
-                // CORRECCIÓN: Recargar años por si se añadió uno nuevo
                 CargarYearsDesdeBD();
+                CargarFacturasProveedorSeleccionado();
+            }
+            else
+            {
+                _bsFacturas.CancelEdit();
                 CargarFacturasProveedorSeleccionado();
             }
         }
 
+        // Edición: si cancela, deshace cambios en memoria.
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
             if (_bsProveedores.Current is not DataRowView) return;
@@ -451,9 +461,12 @@ namespace FacturacionDAM.Formularios
             using var frm = new FrmFacrec(_bsFacturas, _tablaFacrec, _idEmpresa, idProveedor, _yearActual, idFacrec);
             if (frm.ShowDialog(this) == DialogResult.OK)
             {
-                // CORRECCIÓN: Recargar años por si la fecha de la factura cambió de año
                 CargarYearsDesdeBD();
                 CargarFacturasProveedorSeleccionado();
+            }
+            else
+            {
+                _bsFacturas.CancelEdit();
             }
         }
 
@@ -475,7 +488,6 @@ namespace FacturacionDAM.Formularios
             _tablaFacrec.GuardarCambios();
             _tablaFacrec.Refrescar();
 
-            // CORRECCIÓN: Recargar años por si se borró la única factura de un año
             CargarYearsDesdeBD();
             CargarFacturasProveedorSeleccionado();
         }
