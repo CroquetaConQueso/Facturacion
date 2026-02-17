@@ -403,7 +403,7 @@
             tsBtnExportaciones.ImageTransparentColor = Color.Magenta;
             tsBtnExportaciones.Name = "tsBtnExportaciones";
             tsBtnExportaciones.Size = new Size(36, 24);
-            tsBtnExportaciones.Text = "toolStripSplitButton1";
+            tsBtnExportaciones.Text = "Exportaciones de Facturas";
             tsBtnExportaciones.ButtonClick += tsBtnExportaciones_ButtonClick;
             // 
             // listadoDeFacturasTotalesToolStripMenuItem
