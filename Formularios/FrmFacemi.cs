@@ -57,9 +57,6 @@ namespace FacturacionDAM.Formularios
             WireUI();
         }
 
-
-
-
         private void WireUI()
         {
             tsBtnFirst.Click += (s, e) => { _bsLineasFactura?.MoveFirst(); ActualizarEstado(); };
@@ -72,6 +69,27 @@ namespace FacturacionDAM.Formularios
 
             chkRetencion.CheckedChanged += (s, e) => RecalcularTotales();
             numTipoRet.ValueChanged += (s, e) => RecalcularTotales();
+
+            // --- CORRECCIÓN 2: Autocompletar Descripción al cambiar Concepto ---
+            // Usamos SelectionChangeCommitted para que solo salte cuando el USUARIO lo cambia (no por código)
+            cbConceptFac.SelectionChangeCommitted += (s, e) =>
+            {
+                // Solo rellenamos si la descripción está vacía para no borrar lo que el usuario haya escrito
+                if (string.IsNullOrWhiteSpace(txtDescripcion.Text))
+                {
+                    if (cbConceptFac.SelectedItem is DataRowView item)
+                    {
+                        string descConcepto = item["descripcion"].ToString();
+                        txtDescripcion.Text = descConcepto;
+
+                        // Actualizamos inmediatamente el BindingSource para que la validación lo detecte
+                        if (_bsFactura.Current is DataRowView rowFactura)
+                        {
+                            rowFactura["descripcion"] = descConcepto;
+                        }
+                    }
+                }
+            };
         }
 
         private void FrmFacemi_Load(object sender, EventArgs e)
@@ -120,6 +138,7 @@ namespace FacturacionDAM.Formularios
                 Program.appDAM.RegistrarLog("Inicializar factura", ex.Message);
             }
         }
+
         private bool ExisteNumeroFactura(int numero)
         {
             string sql = @"
@@ -131,17 +150,16 @@ namespace FacturacionDAM.Formularios
           AND id <> @idActual";
 
             var parametros = new Dictionary<string, object>
-    {
-        { "@idemisor", _idEmisor },
-        { "@numero", numero },
-        { "@anho", _anhoFactura },
-        { "@idActual", modoEdicion ? idFactura : -1 }
-    };
+            {
+                { "@idemisor", _idEmisor },
+                { "@numero", numero },
+                { "@anho", _anhoFactura },
+                { "@idActual", modoEdicion ? idFactura : -1 }
+            };
 
             object? esc = _tablaFactura.EjecutarEscalar(sql, parametros);
             return Convert.ToInt32(esc ?? 0) > 0;
         }
-
 
         private void FrmFacemi_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -154,9 +172,7 @@ namespace FacturacionDAM.Formularios
                 {
                     _bsFactura.CancelEdit();
                 }
-                catch
-                {
-                }
+                catch { }
             }
         }
 
@@ -195,7 +211,6 @@ namespace FacturacionDAM.Formularios
                 }
             }
         }
-
 
         private void tsBtnDelete_Click(object sender, EventArgs e)
         {
@@ -244,25 +259,28 @@ namespace FacturacionDAM.Formularios
             try
             {
                 if (!(_bsFactura.Current is DataRowView)) return false;
+
+                // --- CORRECCIÓN 1: Movemos EndEdit al principio ---
+                // Esto fuerza a que lo que hay escrito en los TextBox (ej. Descripción) viaje al DataRow
+                // ANTES de que ValidarDatos lo compruebe. Evita el "falso negativo".
                 _bsFactura.EndEdit();
+                if (_bsLineasFactura != null) _bsLineasFactura.EndEdit();
 
                 if (!ValidarDatos()) return false;
+
+                RecalcularTotales();
+                // _bsFactura.EndEdit(); // Ya no hace falta aquí, lo hicimos arriba
 
                 ForzarValoresNoNulos();
                 _tablaFactura.GuardarCambios();
 
                 if (!modoEdicion)
                 {
-                    using (var cmd = new MySqlCommand("SELECT LAST_INSERT_ID()", Program.appDAM.LaConexion))
-                    {
-                        object res = cmd.ExecuteScalar();
-                        idFactura = Convert.ToInt32(res);
-                    }
+                    idFactura = (int)_tablaFactura.UltimoIdInsertado();
                     ActualizarNumeracionEmisorSiEsNuevaFactura();
                     modoEdicion = true;
                 }
 
-                if (_bsLineasFactura != null) _bsLineasFactura.EndEdit();
                 if (_tablaLineasFactura?.LaTabla != null)
                 {
                     foreach (DataRow r in _tablaLineasFactura.LaTabla.Rows)
@@ -272,11 +290,13 @@ namespace FacturacionDAM.Formularios
                     }
                     _tablaLineasFactura.GuardarCambios();
                 }
+
                 return true;
             }
             catch (Exception ex)
             {
                 Program.appDAM.RegistrarLog("Guardar factura", ex.Message);
+                MessageBox.Show("Error al guardar la factura: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -288,39 +308,34 @@ namespace FacturacionDAM.Formularios
 
             if (_anhoFactura <= 0)
             {
-                MessageBox.Show("_anhoFactura no está inicializado (año fiscal inválido).", "Validación",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("_anhoFactura no está inicializado (año fiscal inválido).", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
             if (row["numero"] == DBNull.Value || string.IsNullOrWhiteSpace(row["numero"].ToString()))
             {
-                MessageBox.Show("El campo 'Número' es obligatorio.", "Validación",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("El campo 'Número' es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtNumero.Focus();
                 return false;
             }
 
             if (row["fecha"] == DBNull.Value)
             {
-                MessageBox.Show("El campo 'Fecha' es obligatorio.", "Validación",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("El campo 'Fecha' es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 fechaFactura.Focus();
                 return false;
             }
 
             if (row["idconceptofac"] == DBNull.Value || Convert.ToInt32(row["idconceptofac"]) <= 0)
             {
-                MessageBox.Show("Debe seleccionar un concepto de facturación.", "Validación",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Debe seleccionar un concepto de facturación.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 cbConceptFac.Focus();
                 return false;
             }
 
             if (row["descripcion"] == DBNull.Value || string.IsNullOrWhiteSpace(row["descripcion"].ToString()))
             {
-                MessageBox.Show("El campo 'Descripción' es obligatorio.", "Validación",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("El campo 'Descripción' es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtDescripcion.Focus();
                 return false;
             }
@@ -331,9 +346,7 @@ namespace FacturacionDAM.Formularios
 
             if (fecha < inicio || fecha > fin)
             {
-                MessageBox.Show($"La fecha debe estar entre el {inicio:dd/MM/yyyy} y el {fin:dd/MM/yyyy}.",
-                    "Validación",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"La fecha debe estar entre el {inicio:dd/MM/yyyy} y el {fin:dd/MM/yyyy}.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 fechaFactura.Focus();
                 return false;
             }
@@ -342,31 +355,25 @@ namespace FacturacionDAM.Formularios
             int idActual = modoEdicion ? idFactura : -1;
 
             string sqlCheck = @"
-        SELECT COUNT(*)
-        FROM facemi
-        WHERE idemisor = @idemisor
-          AND numero = @numero
-          AND YEAR(fecha) = @anho
+        SELECT COUNT(*) 
+        FROM facemi 
+        WHERE idemisor = @idemisor 
+          AND numero = @numero 
+          AND YEAR(fecha) = @anho 
           AND id <> @idActual";
 
             var parametros = new Dictionary<string, object>
-    {
-        { "@idemisor", _idEmisor },
-        { "@numero", numero },
-        { "@anho", _anhoFactura },
-        { "@idActual", idActual }
-    };
+            {
+                { "@idemisor", _idEmisor },
+                { "@numero", numero },
+                { "@anho", _anhoFactura },
+                { "@idActual", idActual }
+            };
 
             object? esc = _tablaFactura.EjecutarEscalar(sqlCheck, parametros);
-            int duplicados = Convert.ToInt32(esc ?? 0);
-
-            if (duplicados > 0)
+            if (Convert.ToInt32(esc ?? 0) > 0)
             {
-                MessageBox.Show(
-                    $"Ya existe otra factura del emisor con el número {numero} en el año {_anhoFactura}.",
-                    "Número duplicado",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show($"Ya existe otra factura del emisor con el número {numero} en el año {_anhoFactura}.", "Número duplicado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtNumero.Focus();
                 return false;
             }
@@ -390,12 +397,7 @@ namespace FacturacionDAM.Formularios
         private void ActualizarNumeracionEmisorSiEsNuevaFactura()
         {
             string sql = "UPDATE emisores SET nextnumfac = nextnumfac + 1 WHERE id=@id";
-
-            var p = new Dictionary<string, object>
-            {
-                { "@id", Program.appDAM.emisor.id }
-            };
-
+            var p = new Dictionary<string, object> { { "@id", Program.appDAM.emisor.id } };
             _tablaFactura.EjecutarComando(sql, p);
             Program.appDAM.emisor.nextNumFac++;
         }
@@ -418,7 +420,6 @@ namespace FacturacionDAM.Formularios
                     row["idemisor"] = Program.appDAM.emisor.id;
                     row["idcliente"] = _idCliente;
                 }
-
                 return true;
             }
 
@@ -444,7 +445,6 @@ namespace FacturacionDAM.Formularios
             cbConceptFac.Enabled = false;
             return false;
         }
-
 
         private void InitFactura()
         {
@@ -474,21 +474,13 @@ namespace FacturacionDAM.Formularios
             lbRetencion.Text = "";
         }
 
-
-
         private void CargarLineasFacturaExistente()
         {
             int idFacemi = idFactura;
 
-            if (idFacemi <= 0)
+            if (idFacemi <= 0 && _bsFactura?.Current is DataRowView drv && drv.Row.Table.Columns.Contains("id") && drv["id"] != DBNull.Value)
             {
-                if (_bsFactura?.Current is DataRowView drv &&
-                    drv.Row != null &&
-                    drv.Row.Table.Columns.Contains("id") &&
-                    drv["id"] != DBNull.Value)
-                {
-                    idFacemi = Convert.ToInt32(drv["id"]);
-                }
+                idFacemi = Convert.ToInt32(drv["id"]);
             }
 
             if (idFacemi <= 0)
@@ -512,8 +504,7 @@ namespace FacturacionDAM.Formularios
 
         private void PrepararBindingFactura()
         {
-            if (!(_bsFactura.Current is DataRowView row))
-                return;
+            if (!(_bsFactura.Current is DataRowView row)) return;
 
             if (row["fecha"] == DBNull.Value)
                 row["fecha"] = new DateTime(_anhoFactura, DateTime.Today.Month, DateTime.Today.Day);
@@ -558,29 +549,38 @@ namespace FacturacionDAM.Formularios
             _bsLineasFactura.DataSource = _tablaLineasFactura.LaTabla;
             dgLineasFactura.DataSource = _bsLineasFactura;
 
-            if (dgLineasFactura.Columns.Contains("id"))
-                dgLineasFactura.Columns["id"].Visible = false;
-
-            if (dgLineasFactura.Columns.Contains("idfacemi"))
-                dgLineasFactura.Columns["idfacemi"].Visible = false;
-
-            if (dgLineasFactura.Columns.Contains("descripcion"))
-                dgLineasFactura.Columns["descripcion"].HeaderText = "Descripción";
-
-            if (dgLineasFactura.Columns.Contains("cantidad"))
-                dgLineasFactura.Columns["cantidad"].HeaderText = "Cantidad";
-
-            if (dgLineasFactura.Columns.Contains("precio"))
-                dgLineasFactura.Columns["precio"].HeaderText = "Precio";
-
-            if (dgLineasFactura.Columns.Contains("base"))
-                dgLineasFactura.Columns["base"].HeaderText = "Base";
-
-            if (dgLineasFactura.Columns.Contains("tipoiva"))
-                dgLineasFactura.Columns["tipoiva"].HeaderText = "IVA %";
-
-            if (dgLineasFactura.Columns.Contains("cuota"))
-                dgLineasFactura.Columns["cuota"].HeaderText = "Cuota IVA";
+            // Ocultación exhaustiva de IDs y columnas técnicas
+            foreach (DataGridViewColumn col in dgLineasFactura.Columns)
+            {
+                if (col.Name.ToLower().StartsWith("id")) // Oculta id, idfacemi, idproducto, etc.
+                {
+                    col.Visible = false;
+                }
+                else if (col.Name.ToLower() == "descripcion")
+                {
+                    col.HeaderText = "Descripción";
+                }
+                else if (col.Name.ToLower() == "cantidad")
+                {
+                    col.HeaderText = "Cantidad";
+                }
+                else if (col.Name.ToLower() == "precio")
+                {
+                    col.HeaderText = "Precio";
+                }
+                else if (col.Name.ToLower() == "base")
+                {
+                    col.HeaderText = "Base";
+                }
+                else if (col.Name.ToLower() == "tipoiva")
+                {
+                    col.HeaderText = "IVA %";
+                }
+                else if (col.Name.ToLower() == "cuota")
+                {
+                    col.HeaderText = "Cuota IVA";
+                }
+            }
         }
 
         private void RecalcularTotales()
@@ -595,19 +595,38 @@ namespace FacturacionDAM.Formularios
                 if (fila.RowState == DataRowState.Deleted || fila.RowState == DataRowState.Detached)
                     continue;
 
-                baseSum += fila.Field<decimal?>("base") ?? 0m;
-                cuotaSum += fila.Field<decimal?>("cuota") ?? 0m;
+                baseSum += fila.Table.Columns.Contains("base") && fila["base"] != DBNull.Value
+                           ? Convert.ToDecimal(fila["base"]) : 0m;
+                cuotaSum += fila.Table.Columns.Contains("cuota") && fila["cuota"] != DBNull.Value
+                            ? Convert.ToDecimal(fila["cuota"]) : 0m;
             }
 
             if (_bsFactura.Current is DataRowView row)
             {
+                decimal tipoRet = (chkRetencion.Checked ? numTipoRet.Value : 0m);
+                decimal retencion = (chkRetencion.Checked && tipoRet > 0m)
+                    ? Math.Round(baseSum * (tipoRet / 100m), 2, MidpointRounding.AwayFromZero)
+                    : 0m;
+
+                decimal totalBruto = baseSum + cuotaSum;
+                decimal totalNeto = totalBruto - retencion;
+                if (totalNeto < 0m) totalNeto = 0m;
+
                 row["base"] = baseSum;
                 row["cuota"] = cuotaSum;
-                row["total"] = baseSum + cuotaSum;
+                row["retencion"] = retencion;
+                row["total"] = totalNeto;
 
-                decimal tipoRet = chkRetencion.Checked ? numTipoRet.Value : 0m;
-                row["retencion"] = Math.Round(baseSum * (tipoRet / 100m), 2, MidpointRounding.AwayFromZero);
+                ActualizarLabelsTotales(baseSum, cuotaSum, retencion, totalNeto);
             }
+        }
+
+        private void ActualizarLabelsTotales(decimal b, decimal c, decimal r, decimal t)
+        {
+            if (lbBase != null) lbBase.Text = b.ToString("N2");
+            if (lbCuota != null) lbCuota.Text = c.ToString("N2");
+            if (lbRetencion != null) lbRetencion.Text = r.ToString("N2");
+            if (lbTotal != null) lbTotal.Text = t.ToString("N2");
         }
 
         private void tsBtnExportCSV_Click(object sender, EventArgs e)

@@ -5,6 +5,23 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
+
+/*
+ * FrmLineaFacrec
+ * Edición de una línea de factura recibida (facreclin).
+ *
+ * Qué hace:
+ * - Permite seleccionar un producto y autocompletar descripción, precio e IVA.
+ * - Calcula base/cuota/total de la línea y vuelca base+cuota a la fila.
+ * - Guarda la línea asociándola a la factura recibida actual.
+ *
+ * Particularidades:
+ * - Carga “inteligente” del combo: incluye activos y, si la línea ya tenía producto,
+ *   lo incluye aunque esté inactivo (para no romper ediciones históricas).
+ * - Banderas (_cargandoDatos/_cargandoProductos/_aplicandoProducto) para evitar bucles
+ *   de eventos y sobrescrituras mientras se inicializa el formulario.
+ */
+
 namespace FacturacionDAM.Formularios
 {
     public partial class FrmLineaFacrec : Form
@@ -18,8 +35,10 @@ namespace FacturacionDAM.Formularios
         private readonly Tabla _tablaProductos;
         private readonly BindingSource _bsProductos;
 
+        // Banderas de control de eventos (evitan reentradas durante carga/aplicación)
         private bool _cargandoProductos = false;
         private bool _aplicandoProducto = false;
+        private bool _cargandoDatos = false;
 
         public FrmLineaFacrec(BindingSource bsLineas, Tabla tablaLineas, int idFacrec, bool edicion = false)
         {
@@ -52,6 +71,7 @@ namespace FacturacionDAM.Formularios
 
         private void FrmLineaFacrec_Load(object sender, EventArgs e)
         {
+            // Sin fila actual no hay edición posible
             if (_bsLineas.Current is not DataRowView drv)
             {
                 DialogResult = DialogResult.Cancel;
@@ -59,29 +79,44 @@ namespace FacturacionDAM.Formularios
                 return;
             }
 
-            PrepararFilaLinea(drv);
+            _cargandoDatos = true;
 
-            if (!CargarProductos())
+            try
             {
-                MessageBox.Show("No se pudieron cargar los productos.", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                DialogResult = DialogResult.Cancel;
-                Close();
-                return;
-            }
+                // Normaliza la fila (defaults + id facrec)
+                PrepararFilaLinea(drv);
 
-            CargarControlesDesdeFila(drv);
-            RecalcularYVolcar();
+                // Carga combo de productos incluyendo (si aplica) el producto actual aunque esté inactivo
+                if (!CargarProductos(drv))
+                {
+                    MessageBox.Show("No se pudieron cargar los productos.", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    DialogResult = DialogResult.Cancel;
+                    Close();
+                    return;
+                }
+
+                // Volcado fila -> controles y cálculo inicial
+                CargarControlesDesdeFila(drv);
+                RecalcularYVolcar();
+            }
+            finally
+            {
+                _cargandoDatos = false;
+            }
         }
 
         private void PrepararFilaLinea(DataRowView drv)
         {
             var row = drv.Row;
 
-            if (row.Table.Columns.Contains("idFacrec"))
+            // Normalización de nombres de columna (compatibilidad con esquemas distintos)
+            string colId = row.Table.Columns.Contains("idfacrec") ? "idfacrec" : "idFacrec";
+
+            if (row.Table.Columns.Contains(colId))
             {
-                if (row["idFacrec"] == DBNull.Value || Convert.ToInt32(row["idFacrec"]) == 0)
-                    row["idFacrec"] = _idFacrec;
+                if (row[colId] == DBNull.Value || Convert.ToInt32(row[colId]) == 0)
+                    row[colId] = _idFacrec;
             }
 
             SetDefault(row, "cantidad", 1m);
@@ -91,6 +126,7 @@ namespace FacturacionDAM.Formularios
             SetDefault(row, "cuota", 0m);
             SetDefault(row, "descripcion", "");
 
+            // idproducto puede estar vacío si la línea no depende del catálogo
             if (row.Table.Columns.Contains("idproducto") && (row["idproducto"] == null))
                 row["idproducto"] = DBNull.Value;
         }
@@ -101,9 +137,19 @@ namespace FacturacionDAM.Formularios
             if (row[col] == DBNull.Value) row[col] = value;
         }
 
-        private bool CargarProductos()
+        // Carga productos activos; si la línea ya tenía producto, se incluye aunque esté inactivo
+        private bool CargarProductos(DataRowView drvActual)
         {
-            const string sql = @"
+            int idProductoActual = -1;
+            if (drvActual != null &&
+                drvActual.Row.Table.Columns.Contains("idproducto") &&
+                drvActual["idproducto"] != DBNull.Value)
+            {
+                idProductoActual = Convert.ToInt32(drvActual["idproducto"]);
+            }
+
+            // SQL: activos o producto actual (para edición consistente)
+            string sql = @"
                 SELECT
                     p.id,
                     p.descripcion,
@@ -111,12 +157,19 @@ namespace FacturacionDAM.Formularios
                     t.porcentaje AS iva_porcentaje
                 FROM productos p
                 LEFT JOIN tiposiva t ON t.id = p.idtipoiva
-                WHERE p.activo = 1
-                ORDER BY p.descripcion;";
+                WHERE p.activo = 1";
+
+            if (idProductoActual > 0)
+            {
+                sql += $" OR p.id = {idProductoActual}";
+            }
+
+            sql += " ORDER BY p.descripcion;";
 
             if (!_tablaProductos.InicializarDatos(sql))
                 return false;
 
+            // Búsqueda rápida por id para aplicar producto
             if (_tablaProductos.LaTabla.Columns.Contains("id"))
                 _tablaProductos.LaTabla.PrimaryKey = new[] { _tablaProductos.LaTabla.Columns["id"] };
 
@@ -129,17 +182,19 @@ namespace FacturacionDAM.Formularios
                 cbProducto.DisplayMember = "descripcion";
                 cbProducto.ValueMember = "id";
 
-                if (_bsLineas.Current is DataRowView drvLinea)
+                // Preselección visual (si la línea ya tenía producto)
+                if (idProductoActual > 0)
                 {
-                    if (drvLinea.Row.Table.Columns.Contains("idproducto") && drvLinea["idproducto"] != DBNull.Value)
-                    {
-                        cbProducto.SelectedValue = Convert.ToInt32(drvLinea["idproducto"]);
-                    }
-                    else
-                    {
-                        cbProducto.SelectedIndex = -1;
-                    }
+                    cbProducto.SelectedValue = idProductoActual;
                 }
+                else
+                {
+                    cbProducto.SelectedIndex = -1;
+                }
+            }
+            catch
+            {
+                cbProducto.SelectedIndex = -1;
             }
             finally
             {
@@ -152,20 +207,13 @@ namespace FacturacionDAM.Formularios
         private void CargarControlesDesdeFila(DataRowView drv)
         {
             var row = drv.Row;
+
             txtDescripcion.Text = Convert.ToString(row["descripcion"]) ?? "";
             numCantidad.Value = ToDecimal(row, "cantidad", 1m);
             numPrecio.Value = ToDecimal(row, "precio", 0m);
             numTipoIva.Value = ToDecimal(row, "tipoiva", 0m);
 
-            if (row.Table.Columns.Contains("idproducto") && row["idproducto"] != DBNull.Value)
-            {
-                try { cbProducto.SelectedValue = Convert.ToInt32(row["idproducto"]); }
-                catch { cbProducto.SelectedIndex = -1; }
-            }
-            else
-            {
-                cbProducto.SelectedIndex = -1;
-            }
+            // La selección del combo se hace en CargarProductos (para respetar producto inactivo)
         }
 
         private decimal ToDecimal(DataRow row, string col, decimal def)
@@ -179,7 +227,10 @@ namespace FacturacionDAM.Formularios
 
         private void TxtDescripcion_TextChanged(object sender, EventArgs e)
         {
+            // Evita volcar mientras se inicializa el formulario
+            if (_cargandoDatos) return;
             if (_bsLineas.Current is not DataRowView drv) return;
+
             if (drv.Row.Table.Columns.Contains("descripcion"))
                 drv["descripcion"] = txtDescripcion.Text ?? "";
         }
@@ -189,7 +240,8 @@ namespace FacturacionDAM.Formularios
 
         private void AplicarProductoSeleccionado()
         {
-            if (_cargandoProductos || _aplicandoProducto || cbProducto.SelectedValue == null || cbProducto.SelectedValue == DBNull.Value) return;
+            // Durante carga no aplicamos para no sobrescribir valores existentes
+            if (_cargandoDatos || _cargandoProductos || _aplicandoProducto || cbProducto.SelectedValue == null || cbProducto.SelectedValue == DBNull.Value) return;
 
             int idProd = Convert.ToInt32(cbProducto.SelectedValue);
             DataRow prodRow = _tablaProductos.LaTabla.Rows.Find(idProd);
@@ -227,10 +279,15 @@ namespace FacturacionDAM.Formularios
             return decimal.Round(v, num.DecimalPlaces, MidpointRounding.AwayFromZero);
         }
 
-        private void CamposCalculo_ValueChanged(object sender, EventArgs e) => RecalcularYVolcar();
+        private void CamposCalculo_ValueChanged(object sender, EventArgs e)
+        {
+            if (_cargandoDatos) return;
+            RecalcularYVolcar();
+        }
 
         private void RecalcularYVolcar()
         {
+            // Calcula importes de línea (base/cuota) y los vuelca a la fila
             if (_bsLineas.Current is not DataRowView drv) return;
             var row = drv.Row;
 
@@ -257,9 +314,12 @@ namespace FacturacionDAM.Formularios
         {
             if (!ValidarLinea()) return;
 
+            // Asegura vínculo con factura y normaliza descripción
             if (_bsLineas.Current is DataRowView row)
             {
-                if (row.Row.Table.Columns.Contains("idFacrec")) row["idFacrec"] = _idFacrec;
+                string colId = row.Row.Table.Columns.Contains("idfacrec") ? "idfacrec" : "idFacrec";
+                if (row.Row.Table.Columns.Contains(colId)) row[colId] = _idFacrec;
+
                 row["descripcion"] = (txtDescripcion.Text ?? "").Trim();
             }
 
@@ -299,10 +359,15 @@ namespace FacturacionDAM.Formularios
                 return false;
             }
 
-            if (_bsLineas.Current is DataRowView drv && drv.Row.Table.Columns.Contains("idFacrec"))
+            // Última defensa: si es nueva, fuerza idfacrec antes de guardar
+            if (_bsLineas.Current is DataRowView drv)
             {
-                if (drv["idFacrec"] == DBNull.Value || Convert.ToInt32(drv["idFacrec"]) == 0)
-                    drv["idFacrec"] = _idFacrec;
+                string colId = drv.Row.Table.Columns.Contains("idfacrec") ? "idfacrec" : "idFacrec";
+                if (drv.Row.Table.Columns.Contains(colId))
+                {
+                    if (drv[colId] == DBNull.Value || Convert.ToInt32(drv[colId]) == 0)
+                        drv[colId] = _idFacrec;
+                }
             }
 
             return true;

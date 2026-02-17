@@ -69,23 +69,97 @@ namespace FacturacionDAM.Formularios
 
         private void tsBtnDelete_Click(object sender, EventArgs e)
         {
-            if (_bs.Current is DataRowView row)
+            if (_bs.Current is not DataRowView row) return;
+
+            // Obtenemos el ID del proveedor seleccionado
+            int idProveedor = row["id"] != DBNull.Value ? Convert.ToInt32(row["id"]) : -1;
+            if (idProveedor <= 0) return;
+
+            // Verificamos si tiene facturas asociadas
+            if (TieneFacturasRecibidas(idProveedor))
             {
-                string mNif = Convert.ToString(row["nifcif"]) ?? "";
+                // FEEDBACK AL USUARIO: Damos la opción de borrar todo o cancelar
+                var respuesta = MessageBox.Show(
+                    "Este proveedor tiene facturas asociadas.\n\n" +
+                    "¿Desea ELIMINAR el proveedor Y TODAS sus facturas?\n" +
+                    "(Esta acción no se puede deshacer).",
+                    "Conflicto de Datos",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2);
 
-                if (TieneFacturasEmitidas(mNif))
+                if (respuesta == DialogResult.Yes)
                 {
-                    MessageBox.Show("No se puede eliminar el Proveedor porque tiene facturas emitidas.");
-                    return;
+                    // Ejecutamos el borrado en cascada (Facturas -> Proveedor)
+                    if (EliminarProveedorEnCascada(idProveedor))
+                    {
+                        MessageBox.Show("Proveedor y facturas eliminados correctamente.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
-
+                // Si dice NO, no hacemos nada (se mantienen proveedor y facturas)
+            }
+            else
+            {
+                // Borrado estándar (sin facturas)
                 if (MessageBox.Show("¿Desea eliminar el registro seleccionado?",
-                    "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     _bs.RemoveCurrent();
-                    _tabla.GuardarCambios();
-                    ActualizarEstado();
+                    try
+                    {
+                        _tabla.GuardarCambios();
+                        ActualizarEstado();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error al eliminar: " + ex.Message);
+                        _tabla.Refrescar();
+                    }
                 }
+            }
+        }
+
+        // Método auxiliar para borrar de forma segura usando Transacción SQL
+        private bool EliminarProveedorEnCascada(int idProveedor)
+        {
+            MySqlTransaction? trans = null;
+            try
+            {
+                if (Program.appDAM.LaConexion.State != ConnectionState.Open)
+                    Program.appDAM.LaConexion.Open();
+
+                trans = Program.appDAM.LaConexion.BeginTransaction();
+
+                // 1. Borrar Facturas asociadas (Las líneas se borran solas por la FK de la BD)
+                string sqlFacturas = "DELETE FROM facrec WHERE idproveedor = @id";
+                using (var cmd = new MySqlCommand(sqlFacturas, Program.appDAM.LaConexion, trans))
+                {
+                    cmd.Parameters.AddWithValue("@id", idProveedor);
+                    cmd.ExecuteNonQuery();
+                }
+
+                // 2. Borrar el Proveedor
+                string sqlProveedor = "DELETE FROM proveedores WHERE id = @id";
+                using (var cmd = new MySqlCommand(sqlProveedor, Program.appDAM.LaConexion, trans))
+                {
+                    cmd.Parameters.AddWithValue("@id", idProveedor);
+                    cmd.ExecuteNonQuery();
+                }
+
+                trans.Commit();
+
+                // 3. Actualizar la vista local
+                _tabla.Refrescar();
+                _bs.DataSource = _tabla.LaTabla; // Rebind para asegurar consistencia
+                ActualizarEstado();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                trans?.Rollback();
+                MessageBox.Show("Error crítico al eliminar en cascada: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
         }
 
@@ -168,7 +242,6 @@ namespace FacturacionDAM.Formularios
             if (dgTabla.Columns.Contains("telefono2"))
                 dgTabla.Columns["telefono2"].Visible = false;
 
-            // En tu BD es "direccion" (no "domicilio")
             if (dgTabla.Columns.Contains("direccion"))
                 dgTabla.Columns["direccion"].Visible = false;
 
@@ -196,7 +269,6 @@ namespace FacturacionDAM.Formularios
                 dgTabla.Columns["nombrecomercial"].Width = 200;
             }
 
-            // En tu BD es "cpostal" (no "codigopostal")
             if (dgTabla.Columns.Contains("cpostal"))
             {
                 dgTabla.Columns["cpostal"].HeaderText = "C.P.";
@@ -248,32 +320,23 @@ namespace FacturacionDAM.Formularios
             return _provincias.TryGetValue(id, out var nombre) ? nombre : "";
         }
 
-        private bool TieneFacturasEmitidas(string aNifCif)
+        // Verifica si existen facturas en la tabla 'facrec' para este proveedor
+        private bool TieneFacturasRecibidas(int idProveedor)
         {
-            if (string.IsNullOrWhiteSpace(aNifCif)) return false;
+            if (idProveedor <= 0) return false;
 
             try
             {
-                using var cmd = new MySqlCommand(@"
-                    SELECT COUNT(*)
-                    FROM facemi f
-                    INNER JOIN proveedores c ON c.id = f.idproveedor
-                    WHERE c.nifcif = @nif;", Program.appDAM.LaConexion);
+                using var cmd = new MySqlCommand("SELECT COUNT(*) FROM facrec WHERE idproveedor = @id", Program.appDAM.LaConexion);
+                cmd.Parameters.AddWithValue("@id", idProveedor);
 
-                cmd.Parameters.AddWithValue("@nif", aNifCif);
-
-                object? obj = cmd.ExecuteScalar();
-                int count = 0;
-
-                if (obj != null && obj != DBNull.Value)
-                    int.TryParse(Convert.ToString(obj), out count);
-
+                long count = Convert.ToInt64(cmd.ExecuteScalar());
                 return count > 0;
             }
             catch (Exception ex)
             {
-                Program.appDAM?.RegistrarLog("TieneFacturasEmitidas Proveedor", ex.Message);
-                return false;
+                Program.appDAM?.RegistrarLog("Error validación facturas proveedor", ex.Message);
+                return true; // Bloqueamos por seguridad en caso de error
             }
         }
     }

@@ -5,6 +5,20 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
+/*
+ * FrmLineaFacemi
+ * Edición de una línea de factura emitida (facemilin).
+ *
+ * Qué hace:
+ * - Permite seleccionar un producto (opcional) y rellena descripción, precio e IVA.
+ * - Calcula base, cuota e importe total de la línea (solo visual, la BD guarda base y cuota).
+ * - Guarda cambios en la tabla de líneas asociada a la factura actual.
+ *
+ * Notas:
+ * - IVA limitado a 100.00% (validación defensiva).
+ * - Se usan banderas (_cargandoDatos/_cargandoProductos/_aplicandoProducto) para evitar bucles de eventos.
+ */
+
 namespace FacturacionDAM.Formularios
 {
     public partial class FrmLineaFacemi : Form
@@ -18,8 +32,10 @@ namespace FacturacionDAM.Formularios
         private readonly Tabla _tablaProductos;
         private readonly BindingSource _bsProductos;
 
+        // Banderas para evitar reentradas (eventos disparándose mientras cargamos o aplicamos un producto)
         private bool _cargandoProductos = false;
         private bool _aplicandoProducto = false;
+        private bool _cargandoDatos = false;
 
         public FrmLineaFacemi(BindingSource bsLineas, Tabla tablaLineas, int idFacemi, bool edicion = false)
         {
@@ -32,6 +48,16 @@ namespace FacturacionDAM.Formularios
 
             _tablaProductos = new Tabla(Program.appDAM.LaConexion);
             _bsProductos = new BindingSource();
+
+            // Rangos de edición para evitar valores inválidos y excepciones al asignar al NumericUpDown
+            numCantidad.Maximum = 999999m;
+            numCantidad.Minimum = 0.01m;
+
+            numPrecio.Maximum = 999999m;
+            numPrecio.Minimum = 0m;
+
+            numTipoIva.Maximum = 100.00m;
+            numTipoIva.Minimum = 0m;
 
             Load += FrmLineaFacemi_Load;
 
@@ -52,6 +78,7 @@ namespace FacturacionDAM.Formularios
 
         private void FrmLineaFacemi_Load(object sender, EventArgs e)
         {
+            // Si no hay fila actual en el BindingSource, no hay nada que editar
             if (_bsLineas.Current is not DataRowView drv)
             {
                 DialogResult = DialogResult.Cancel;
@@ -59,31 +86,45 @@ namespace FacturacionDAM.Formularios
                 return;
             }
 
-            PrepararFilaLinea(drv);
+            _cargandoDatos = true;
 
-            if (!CargarProductos())
+            try
             {
-                MessageBox.Show("No se pudieron cargar los productos.", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                DialogResult = DialogResult.Cancel;
-                Close();
-                return;
-            }
+                // Normaliza la fila (defaults, idfacemi, nulls)
+                PrepararFilaLinea(drv);
 
-            CargarControlesDesdeFila(drv);
-            RecalcularYVolcar();
+                // Carga catálogo de productos (combo)
+                if (!CargarProductos())
+                {
+                    MessageBox.Show("No se pudieron cargar los productos.", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    DialogResult = DialogResult.Cancel;
+                    Close();
+                    return;
+                }
+
+                // Volcado fila -> controles y cálculo inicial
+                CargarControlesDesdeFila(drv);
+                RecalcularYVolcar();
+            }
+            finally
+            {
+                _cargandoDatos = false;
+            }
         }
 
         private void PrepararFilaLinea(DataRowView drv)
         {
             var row = drv.Row;
 
+            // Asegura que la línea queda asociada a la factura (en nuevas líneas)
             if (row.Table.Columns.Contains("idfacemi"))
             {
                 if (row["idfacemi"] == DBNull.Value || Convert.ToInt32(row["idfacemi"]) == 0)
                     row["idfacemi"] = _idFacemi;
             }
 
+            // Defaults para evitar DBNull en cálculos / UI
             SetDefault(row, "cantidad", 1m);
             SetDefault(row, "precio", 0m);
             SetDefault(row, "base", 0m);
@@ -91,6 +132,7 @@ namespace FacturacionDAM.Formularios
             SetDefault(row, "cuota", 0m);
             SetDefault(row, "descripcion", "");
 
+            // idproducto puede ser DBNull si la línea no usa producto del catálogo
             if (row.Table.Columns.Contains("idproducto") && (row["idproducto"] == null))
                 row["idproducto"] = DBNull.Value;
         }
@@ -103,6 +145,7 @@ namespace FacturacionDAM.Formularios
 
         private bool CargarProductos()
         {
+            // Se trae el precio unidad y el % IVA (si hay tipo IVA asociado al producto)
             const string sql = @"
                 SELECT
                     p.id,
@@ -117,6 +160,7 @@ namespace FacturacionDAM.Formularios
             if (!_tablaProductos.InicializarDatos(sql))
                 return false;
 
+            // Para búsqueda rápida por id (Rows.Find)
             if (_tablaProductos.LaTabla.Columns.Contains("id"))
                 _tablaProductos.LaTabla.PrimaryKey = new[] { _tablaProductos.LaTabla.Columns["id"] };
 
@@ -125,10 +169,12 @@ namespace FacturacionDAM.Formularios
             try
             {
                 _bsProductos.DataSource = _tablaProductos.LaTabla;
+
                 cbProducto.DataSource = _bsProductos;
                 cbProducto.DisplayMember = "descripcion";
                 cbProducto.ValueMember = "id";
 
+                // Si la línea tiene idproducto, preselecciona
                 if (_bsLineas.Current is DataRowView drvLinea)
                 {
                     if (drvLinea.Row.Table.Columns.Contains("idproducto") && drvLinea["idproducto"] != DBNull.Value)
@@ -152,11 +198,15 @@ namespace FacturacionDAM.Formularios
         private void CargarControlesDesdeFila(DataRowView drv)
         {
             var row = drv.Row;
-            txtDescripcion.Text = Convert.ToString(row["descripcion"]) ?? "";
-            numCantidad.Value = ToDecimal(row, "cantidad", 1m);
-            numPrecio.Value = ToDecimal(row, "precio", 0m);
-            numTipoIva.Value = ToDecimal(row, "tipoiva", 0m);
 
+            txtDescripcion.Text = Convert.ToString(row["descripcion"]) ?? "";
+
+            // Asignación defensiva: evita ArgumentOutOfRangeException en NumericUpDown
+            numCantidad.Value = ValidarLimite(numCantidad, ToDecimal(row, "cantidad", 1m));
+            numPrecio.Value = ValidarLimite(numPrecio, ToDecimal(row, "precio", 0m));
+            numTipoIva.Value = ValidarLimite(numTipoIva, ToDecimal(row, "tipoiva", 0m));
+
+            // Selección producto si existe
             if (row.Table.Columns.Contains("idproducto") && row["idproducto"] != DBNull.Value)
             {
                 try { cbProducto.SelectedValue = Convert.ToInt32(row["idproducto"]); }
@@ -166,6 +216,13 @@ namespace FacturacionDAM.Formularios
             {
                 cbProducto.SelectedIndex = -1;
             }
+        }
+
+        private decimal ValidarLimite(NumericUpDown num, decimal valor)
+        {
+            if (valor < num.Minimum) return num.Minimum;
+            if (valor > num.Maximum) return num.Maximum;
+            return valor;
         }
 
         private decimal ToDecimal(DataRow row, string col, decimal def)
@@ -179,7 +236,10 @@ namespace FacturacionDAM.Formularios
 
         private void TxtDescripcion_TextChanged(object sender, EventArgs e)
         {
+            // Evita volcar mientras se está inicializando el formulario
+            if (_cargandoDatos) return;
             if (_bsLineas.Current is not DataRowView drv) return;
+
             if (drv.Row.Table.Columns.Contains("descripcion"))
                 drv["descripcion"] = txtDescripcion.Text ?? "";
         }
@@ -189,49 +249,62 @@ namespace FacturacionDAM.Formularios
 
         private void AplicarProductoSeleccionado()
         {
-            if (_cargandoProductos || _aplicandoProducto || cbProducto.SelectedValue == null || cbProducto.SelectedValue == DBNull.Value) return;
+            // Evita reentradas y estados incoherentes
+            if (_cargandoDatos || _cargandoProductos || _aplicandoProducto || cbProducto.SelectedValue == null || cbProducto.SelectedValue == DBNull.Value)
+                return;
 
             int idProd = Convert.ToInt32(cbProducto.SelectedValue);
+
             DataRow prodRow = _tablaProductos.LaTabla.Rows.Find(idProd);
             if (prodRow == null) return;
 
             _aplicandoProducto = true;
+
             try
             {
                 var rowL = ((DataRowView)_bsLineas.Current).Row;
 
-                if (rowL.Table.Columns.Contains("idproducto")) rowL["idproducto"] = idProd;
+                if (rowL.Table.Columns.Contains("idproducto"))
+                    rowL["idproducto"] = idProd;
 
+                // Rellena descripción desde catálogo
                 string desc = Convert.ToString(prodRow["descripcion"]) ?? "";
                 txtDescripcion.Text = desc;
-                if (rowL.Table.Columns.Contains("descripcion")) rowL["descripcion"] = desc;
 
+                if (rowL.Table.Columns.Contains("descripcion"))
+                    rowL["descripcion"] = desc;
+
+                // Precio unidad
                 decimal precio = prodRow["preciounidad"] == DBNull.Value ? 0m : Convert.ToDecimal(prodRow["preciounidad"]);
-                numPrecio.Value = NormalizarNumeric(numPrecio, precio);
+                numPrecio.Value = ValidarLimite(numPrecio, precio);
 
+                // % IVA asociado al producto
                 decimal iva = prodRow["iva_porcentaje"] == DBNull.Value ? 0m : Convert.ToDecimal(prodRow["iva_porcentaje"]);
-                numTipoIva.Value = NormalizarNumeric(numTipoIva, iva);
+                numTipoIva.Value = ValidarLimite(numTipoIva, iva);
 
                 RecalcularYVolcar();
 
+                // UX: deja el cursor al final para editar rápido
                 txtDescripcion.Focus();
                 txtDescripcion.SelectionStart = txtDescripcion.Text.Length;
             }
-            finally { _aplicandoProducto = false; }
+            finally
+            {
+                _aplicandoProducto = false;
+            }
         }
 
-        private decimal NormalizarNumeric(NumericUpDown num, decimal v)
+        private void CamposCalculo_ValueChanged(object sender, EventArgs e)
         {
-            if (v < num.Minimum) return num.Minimum;
-            if (v > num.Maximum) return num.Maximum;
-            return decimal.Round(v, num.DecimalPlaces, MidpointRounding.AwayFromZero);
+            if (_cargandoDatos) return;
+            RecalcularYVolcar();
         }
-
-        private void CamposCalculo_ValueChanged(object sender, EventArgs e) => RecalcularYVolcar();
 
         private void RecalcularYVolcar()
         {
+            // Calcula importes de línea y los vuelca a la fila (base y cuota). El total es solo visual.
             if (_bsLineas.Current is not DataRowView drv) return;
+
             var row = drv.Row;
 
             decimal cantidad = numCantidad.Value;
@@ -257,17 +330,28 @@ namespace FacturacionDAM.Formularios
         {
             if (!ValidarLinea()) return;
 
+            // Normaliza campos antes de guardar
             if (_bsLineas.Current is DataRowView row)
             {
-                if (row.Row.Table.Columns.Contains("idfacemi")) row["idfacemi"] = _idFacemi;
+                if (row.Row.Table.Columns.Contains("idfacemi"))
+                    row["idfacemi"] = _idFacemi;
+
                 row["descripcion"] = (txtDescripcion.Text ?? "").Trim();
             }
 
             RecalcularYVolcar();
             _bsLineas.EndEdit();
-            _tablaLineas.GuardarCambios();
-            DialogResult = DialogResult.OK;
-            Close();
+
+            try
+            {
+                _tablaLineas.GuardarCambios();
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar la línea: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
@@ -292,6 +376,13 @@ namespace FacturacionDAM.Formularios
                 return false;
             }
 
+            if (numTipoIva.Value > 100.00m)
+            {
+                MessageBox.Show("El porcentaje de IVA no puede ser superior al 100.00%.", "Dato Incorrecto",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(txtDescripcion.Text))
             {
                 MessageBox.Show("La descripción no puede estar vacía.", "Aviso",
@@ -299,6 +390,7 @@ namespace FacturacionDAM.Formularios
                 return false;
             }
 
+            // Asegura asociación con factura para nuevas filas
             if (_bsLineas.Current is DataRowView drv && drv.Row.Table.Columns.Contains("idfacemi"))
             {
                 if (drv["idfacemi"] == DBNull.Value || Convert.ToInt32(drv["idfacemi"]) == 0)

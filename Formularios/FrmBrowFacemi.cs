@@ -11,9 +11,9 @@ using System.Windows.Forms;
 
 /*
  * Módulo: FrmBrowFacemi
- * Propósito: Gestión principal de facturas emitidas. Permite filtrar por cliente y año,
- * realizar operaciones CRUD, exportar datos y generar informes (anuales, por cliente,
- * y facturas individuales con/sin retención).
+ * Propósito: Gestión principal de facturas emitidas.
+ * Corrección: Se ha implementado la actualización dinámica del filtro de años
+ * para permitir ver facturas de fechas nuevas (ej. 2025) inmediatamente.
  */
 
 namespace FacturacionDAM.Formularios
@@ -26,7 +26,7 @@ namespace FacturacionDAM.Formularios
         private Tabla _tablaClientes;
         private Tabla _tablaFacemi;
 
-        // BindingSource para desacoplar DataGridView del DataTable y facilitar refrescos.
+        // BindingSource para desacopla DataGridView del DataTable y facilitar refrescos.
         private readonly BindingSource _bsClientes = new BindingSource();
         private readonly BindingSource _bsFacturas = new BindingSource();
 
@@ -85,6 +85,9 @@ namespace FacturacionDAM.Formularios
         // Construye el filtro de años según las facturas disponibles del emisor.
         private void CargarYearsDesdeBD()
         {
+            // Guardamos la selección actual para intentar restaurarla
+            object seleccionPrevia = tsComboYear.SelectedItem;
+
             tsComboYear.Items.Clear();
             var years = new List<int>();
 
@@ -118,7 +121,16 @@ namespace FacturacionDAM.Formularios
             foreach (var y in years)
                 tsComboYear.Items.Add(y);
 
-            tsComboYear.SelectedIndex = 0;
+            // Intentamos restaurar el año seleccionado
+            if (seleccionPrevia != null && tsComboYear.Items.Contains(seleccionPrevia))
+            {
+                tsComboYear.SelectedItem = seleccionPrevia;
+            }
+            else
+            {
+                tsComboYear.SelectedIndex = 0;
+            }
+
             _yearActual = (int)tsComboYear.SelectedItem;
         }
 
@@ -392,7 +404,10 @@ namespace FacturacionDAM.Formularios
 
             using var frm = new FrmFacemi(_bsFacturas, _tablaFacemi, _idEmisor, idCliente, _yearActual, -1);
             if (frm.ShowDialog(this) == DialogResult.OK)
+            {
+                CargarYearsDesdeBD();
                 CargarFacturasClienteSeleccionado();
+            }
         }
 
         // Edición: abre el formulario editor sobre la factura seleccionada.
@@ -406,7 +421,10 @@ namespace FacturacionDAM.Formularios
 
             using var frm = new FrmFacemi(_bsFacturas, _tablaFacemi, _idEmisor, idCliente, _yearActual, idFacemi);
             if (frm.ShowDialog(this) == DialogResult.OK)
+            {
+                CargarYearsDesdeBD();
                 CargarFacturasClienteSeleccionado();
+            }
         }
 
         // Acceso rápido: doble click abre edición.
@@ -428,6 +446,8 @@ namespace FacturacionDAM.Formularios
             _bsFacturas.RemoveCurrent();
             _tablaFacemi.GuardarCambios();
             _tablaFacemi.Refrescar();
+
+            CargarYearsDesdeBD();
             CargarFacturasClienteSeleccionado();
         }
 
@@ -687,14 +707,14 @@ namespace FacturacionDAM.Formularios
             string sql = @"
                 SELECT 
                     f.id AS Id,
-                    f.numero AS NumeroFactura,         
-                    f.fecha AS FechaEmision,           
-                    f.descripcion AS Descripcion,      
-                    f.base AS BaseImponible,           
-                    f.cuota AS CuotaIVA,               
-                    f.retencion AS RetencionIRPF,      
-                    f.total AS TotalPagar,             
-                    f.pagada AS Pagada                 
+                    f.numero AS NumeroFactura,          
+                    f.fecha AS FechaEmision,            
+                    f.descripcion AS Descripcion,       
+                    f.base AS BaseImponible,            
+                    f.cuota AS CuotaIVA,                
+                    f.retencion AS RetencionIRPF,       
+                    f.total AS TotalPagar,              
+                    f.pagada AS Pagada                  
                 FROM facemi f
                 WHERE f.idemisor = @idEmisor
                   AND f.idcliente = @idCliente
@@ -752,47 +772,6 @@ namespace FacturacionDAM.Formularios
             return ds;
         }
 
-        // Dataset para listados generales de facturas emitidas (orden configurable).
-        private DataSet CreateDataSetListadoFacturasEmitidas(DateTime fi, DateTime ff, bool ordenarPorCliente)
-        {
-            DataSet ds = new DataSet("DS_ListadoFacturas");
-            string orderBy = ordenarPorCliente ? "c.nombrecomercial, f.fecha, f.numero" : "f.fecha DESC, f.numero DESC";
-
-            string sql = @"
-                SELECT
-                    f.id AS Id,
-                    f.numero AS Numero,
-                    f.fecha AS Fecha,
-                    c.nombrecomercial AS NombreRazonSocial,
-                    c.nifcif AS Nif,
-                    f.base AS BaseImponible,
-                    f.retencion AS RetencionIRPF,
-                    f.cuota AS CuotaIVA,
-                    f.total AS Total,
-                    f.pagada AS Pagada
-                FROM facemi f
-                LEFT JOIN clientes c ON f.idcliente = c.id
-                WHERE f.idemisor = @idEmisor
-                  AND f.fecha BETWEEN @fi AND @ff
-                ORDER BY " + orderBy + ";";
-
-            var p = new Dictionary<string, object>
-            {
-                ["@idEmisor"] = _idEmisor,
-                ["@fi"] = fi.Date,
-                ["@ff"] = ff.Date
-            };
-
-            var t = new Tabla(Program.appDAM.LaConexion);
-            if (t.InicializarDatos(sql, p))
-            {
-                var dt = t.LaTabla.Copy();
-                dt.TableName = "FacturasEmitidas";
-                ds.Tables.Add(dt);
-            }
-
-            return ds;
-        }
 
         // Carga y muestra un informe Stimulsoft basado en DataSet + variables opcionales.
         private void MostrarInforme(string nombreMrt, DataSet ds, Dictionary<string, string> variables)
@@ -840,15 +819,7 @@ namespace FacturacionDAM.Formularios
             if (report == null) return;
             if (_idEmisor <= 0) return;
 
-            string nombre = Program.appDAM?.emisor?.nombreComercial ?? "";
-            string nif = Program.appDAM?.emisor?.nifcif ?? "";
-
-            string domicilio = "";
-            string cp = "";
-            string poblacion = "";
-            string telefono1 = "";
-            string telefono2 = "";
-            string email = "";
+            string nombre = "", nif = "", domicilio = "", cp = "", poblacion = "", telefono1 = "", telefono2 = "", email = "";
 
             try
             {
