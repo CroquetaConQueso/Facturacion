@@ -9,28 +9,21 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-/*
- * Módulo: FrmBrowFacemi
- * Propósito: Gestión principal de facturas emitidas.
- * Corrección: Se ha implementado la actualización dinámica del filtro de años
- * para permitir ver facturas de fechas nuevas (ej. 2025) inmediatamente.
- */
-
 namespace FacturacionDAM.Formularios
 {
     public partial class FrmBrowFacemi : Form
     {
         #region Campos y Constructor
 
-        // Acceso a datos tabular (carga/edición/persistencia) para clientes y facturas.
+        // Tablas DAL para clientes y facturas emitidas.
         private Tabla _tablaClientes;
         private Tabla _tablaFacemi;
 
-        // BindingSource para desacopla DataGridView del DataTable y facilitar refrescos.
+        // BindingSource para enlazar grids y facilitar refrescos/navegación.
         private readonly BindingSource _bsClientes = new BindingSource();
         private readonly BindingSource _bsFacturas = new BindingSource();
 
-        // Contexto de trabajo (emisor y año seleccionado en la UI).
+        // Contexto actual del navegador (emisor activo y año filtrado).
         private int _idEmisor;
         private int _yearActual;
 
@@ -43,7 +36,7 @@ namespace FacturacionDAM.Formularios
 
         #region Inicialización y Configuración
 
-        // Entrada principal del formulario: valida emisor activo, inicializa datos y deja UI lista.
+        // Inicializa el formulario: valida emisor, carga años/clientes, configura grids y carga facturas.
         private void FrmBrowFacemi_Load(object sender, EventArgs e)
         {
             if (Program.appDAM?.emisor == null)
@@ -76,16 +69,15 @@ namespace FacturacionDAM.Formularios
             ConfiguracionVentana.Restaurar(this, "BrowFacemi");
         }
 
-        // Guarda tamaño/posición del formulario al cerrar.
+        // Guarda tamaño/posición del formulario al cerrarse.
         private void FrmBrowFacemi_FormClosing(object sender, FormClosingEventArgs e)
         {
             ConfiguracionVentana.Guardar(this, "BrowFacemi");
         }
 
-        // Construye el filtro de años según las facturas disponibles del emisor.
+        // Carga años disponibles desde facemi para el emisor actual y mantiene selección si es posible.
         private void CargarYearsDesdeBD()
         {
-            // Guardamos la selección actual para intentar restaurarla
             object seleccionPrevia = tsComboYear.SelectedItem;
 
             tsComboYear.Items.Clear();
@@ -114,14 +106,14 @@ namespace FacturacionDAM.Formularios
                 years.Clear();
             }
 
-            // Fallback: evita UI sin opciones cuando aún no hay facturas.
+            // Fallback para no dejar el combo vacío si aún no hay facturas.
             if (years.Count == 0)
                 years.Add(DateTime.Now.Year);
 
             foreach (var y in years)
                 tsComboYear.Items.Add(y);
 
-            // Intentamos restaurar el año seleccionado
+            // Intenta restaurar el año previamente seleccionado.
             if (seleccionPrevia != null && tsComboYear.Items.Contains(seleccionPrevia))
             {
                 tsComboYear.SelectedItem = seleccionPrevia;
@@ -134,7 +126,7 @@ namespace FacturacionDAM.Formularios
             _yearActual = (int)tsComboYear.SelectedItem;
         }
 
-        // Carga el listado completo de clientes (para seleccionar y filtrar facturas).
+        // Carga clientes para la rejilla superior.
         private void CargarClientes()
         {
             const string sql = @"
@@ -151,7 +143,7 @@ namespace FacturacionDAM.Formularios
             _bsClientes.DataSource = _tablaClientes.LaTabla;
         }
 
-        // Configura la rejilla de clientes: solo lectura, selección por fila y headers.
+        // Configuración visual/funcional de la rejilla de clientes.
         private void ConfigurarClientes()
         {
             dgClientes.ReadOnly = true;
@@ -177,7 +169,7 @@ namespace FacturacionDAM.Formularios
             }
         }
 
-        // Configura la rejilla de facturas (reglas base; las cabeceras se ajustan tras cargar datos).
+        // Configuración base de la rejilla de facturas.
         private void ConfigurarFacturas()
         {
             dgFacturas.ReadOnly = true;
@@ -196,13 +188,13 @@ namespace FacturacionDAM.Formularios
 
         #region Lógica de Carga y Cálculos
 
-        // Cambio de cliente: refresca facturas del cliente seleccionado.
+        // Al cambiar cliente, recarga facturas del cliente seleccionado.
         private void dgClientes_SelectionChanged(object sender, EventArgs e)
         {
             CargarFacturasClienteSeleccionado();
         }
 
-        // Cambio de año: refresca facturas aplicando el filtro temporal.
+        // Al cambiar año, actualiza el filtro y recarga facturas.
         private void tsComboYear_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (tsComboYear.SelectedItem is int y)
@@ -211,17 +203,17 @@ namespace FacturacionDAM.Formularios
             CargarFacturasClienteSeleccionado();
         }
 
-        // Carga las facturas del cliente seleccionado y del año actual; recalcula estado y totales.
+        // Carga facturas del cliente seleccionado para el año actual y actualiza resumen/estado.
         private void CargarFacturasClienteSeleccionado()
         {
-            // Limpieza defensiva: evita que la grilla quede enlazada a datos antiguos.
+            // Limpieza defensiva del enlace para evitar arrastre de datos anteriores.
             _bsFacturas.SuspendBinding();
             _bsFacturas.DataSource = null;
             _bsFacturas.ResumeBinding();
 
             if (_bsClientes.Current is not DataRowView rowCliente)
             {
-                // Sin selección: mantenemos coherencia mostrando totales globales del año.
+                // Sin cliente seleccionado: se limpian datos visibles y se mantiene contexto anual.
                 ActualizarEstado(0, ContarTotalesAnho());
                 CalcularTotales();
                 return;
@@ -251,7 +243,7 @@ namespace FacturacionDAM.Formularios
                 return;
             }
 
-            // Reenlace limpio para evitar problemas de autogeneración/orden de columnas.
+            // Reenlace explícito para evitar inconsistencias en autogeneración de columnas.
             dgFacturas.DataSource = null;
             _bsFacturas.DataSource = _tablaFacemi.LaTabla;
             dgFacturas.AutoGenerateColumns = true;
@@ -266,7 +258,7 @@ namespace FacturacionDAM.Formularios
             CalcularTotales();
         }
 
-        // Ajusta cabeceras, formatos y visibilidad según el esquema real cargado en la rejilla.
+        // Ajusta headers, formatos y visibilidad de columnas tras cargar la tabla de facturas.
         private void ConfigurarCabeceras()
         {
             foreach (DataGridViewColumn col in dgFacturas.Columns)
@@ -310,7 +302,7 @@ namespace FacturacionDAM.Formularios
                         break;
 
                     default:
-                        // Header genérico: mejora presentación cuando se autogeneran columnas.
+                        // Header genérico para columnas autogeneradas no mapeadas manualmente.
                         if (!string.IsNullOrEmpty(col.Name))
                         {
                             string header = col.Name.Replace("_", " ");
@@ -322,7 +314,7 @@ namespace FacturacionDAM.Formularios
             }
         }
 
-        // Calcula importes agregados de la lista visible (filtrada por cliente/año).
+        // Calcula totales de base/cuota/total sobre las facturas visibles en la rejilla.
         private void CalcularTotales()
         {
             decimal totalBase = 0;
@@ -351,7 +343,7 @@ namespace FacturacionDAM.Formularios
             if (tsLbTotalTotal != null) tsLbTotalTotal.Text = $"Totales totales: {totalTotal:N2}";
         }
 
-        // Total anual (sin filtro de cliente), usado como contexto comparativo en la barra de estado.
+        // Cuenta facturas del emisor en el año seleccionado (sin filtrar por cliente).
         private int ContarTotalesAnho()
         {
             try
@@ -375,7 +367,7 @@ namespace FacturacionDAM.Formularios
             }
         }
 
-        // Actualiza la barra de estado con conteos (filtrado vs total anual).
+        // Actualiza la barra de estado con registros filtrados y total anual.
         private void ActualizarEstado(int encontrados, int totales)
         {
             if (tsLbNumReg != null)
@@ -389,13 +381,13 @@ namespace FacturacionDAM.Formularios
 
         #region Navegación y CRUD
 
-        // Navegación del BindingSource para moverse por la selección actual.
+        // Navegación sobre la colección de facturas cargadas.
         private void tsBtnFirst_Click(object sender, EventArgs e) => _bsFacturas.MoveFirst();
         private void tsBtnPrev_Click(object sender, EventArgs e) => _bsFacturas.MovePrevious();
         private void tsBtnNext_Click(object sender, EventArgs e) => _bsFacturas.MoveNext();
         private void tsBtnLast_Click(object sender, EventArgs e) => _bsFacturas.MoveLast();
 
-        // Alta: abre el formulario editor en modo nuevo con el cliente/año actuales.
+        // Alta de factura emitida para el cliente y año actualmente seleccionados.
         private void tsBtnNew_Click(object sender, EventArgs e)
         {
             if (_bsClientes.Current is not DataRowView rowCliente) return;
@@ -410,7 +402,7 @@ namespace FacturacionDAM.Formularios
             }
         }
 
-        // Edición: abre el formulario editor sobre la factura seleccionada.
+        // Edición de la factura seleccionada.
         private void tsBtnEdit_Click(object sender, EventArgs e)
         {
             if (_bsClientes.Current is not DataRowView rowCliente) return;
@@ -427,14 +419,14 @@ namespace FacturacionDAM.Formularios
             }
         }
 
-        // Acceso rápido: doble click abre edición.
+        // Doble click en la rejilla de facturas -> editar.
         private void dgFacturas_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.RowIndex < 0) return;
             tsBtnEdit_Click(sender, EventArgs.Empty);
         }
 
-        // Borrado: elimina la factura actual del BindingSource y persiste cambios.
+        // Elimina la factura seleccionada y refresca años/listado.
         private void tsBtnDelete_Click(object sender, EventArgs e)
         {
             if (_bsFacturas.Current is not DataRowView) return;
@@ -455,7 +447,7 @@ namespace FacturacionDAM.Formularios
 
         #region Exportación
 
-        // Exporta el dataset visible a CSV (sin tocar estado de BD).
+        // Exporta las facturas visibles a CSV.
         private void tsBtnExportCSV_Click(object sender, EventArgs e)
         {
             if (_bsFacturas.DataSource is not DataTable dt || dt.Rows.Count == 0) return;
@@ -465,7 +457,7 @@ namespace FacturacionDAM.Formularios
                 ExportarDatos.ExportarCSV(dt, sfd.FileName);
         }
 
-        // Exporta el dataset visible a XML.
+        // Exporta las facturas visibles a XML.
         private void tsBtnExportXML_Click(object sender, EventArgs e)
         {
             if (_bsFacturas.DataSource is not DataTable dt || dt.Rows.Count == 0) return;
@@ -475,7 +467,7 @@ namespace FacturacionDAM.Formularios
                 ExportarDatos.ExportarXML(dt, sfd.FileName, "Facemi");
         }
 
-        // UI: despliega el menú de exportaciones en la ToolStrip.
+        // Abre el desplegable de exportaciones de la ToolStrip.
         private void tsBtnExportaciones_ButtonClick(object sender, EventArgs e)
         {
             tsBtnExportaciones.ShowDropDown();
@@ -485,43 +477,36 @@ namespace FacturacionDAM.Formularios
 
         #region Gestión de Informes
 
-        // Informe anual genérico: delega en un formulario de selección de fechas.
+        // Abre el informe anual general con fechas por defecto del año filtrado.
         private void btnInforme_Click(object sender, EventArgs e)
         {
-            DateTime fechaInicial = new DateTime(_yearActual, 1, 1);
-            DateTime fechaFinal = new DateTime(_yearActual, 12, 31);
-
-            using var frm = new FrmInformeFacemiAnual();
-
-            frm.dTPAnoInicio.MinDate = fechaInicial;
-            frm.dTPAnoInicio.MaxDate = fechaFinal;
-            frm.dTPAnoInicio.Value = fechaInicial;
-
-            frm.dTPAnoFin.MinDate = fechaInicial;
-            frm.dTPAnoFin.MaxDate = fechaFinal;
-            frm.dTPAnoFin.Value = fechaFinal;
-
+            using var frm = new FrmInformeFacemiAnual(ModoReporte.General);
+            EstablecerFechasPorDefecto(frm);
             frm.ShowDialog(this);
         }
 
-        // Entrada alternativa al informe anual, reutiliza el mismo flujo que btnInforme.
+        // Acceso alternativo al mismo informe anual general.
         private void listadoDeFacturasTotalesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DateTime fechaInicial = new DateTime(_yearActual, 1, 1);
-            DateTime fechaFinal = new DateTime(_yearActual, 12, 31);
-
-            using var frm = new FrmInformeFacemiAnual();
-            frm.dTPAnoInicio.Value = fechaInicial;
-            frm.dTPAnoFin.Value = fechaFinal;
+            using var frm = new FrmInformeFacemiAnual(ModoReporte.General);
+            EstablecerFechasPorDefecto(frm);
             frm.ShowDialog(this);
         }
 
-        // Listado por cliente seleccionado: genera dataset tipado y lanza un .mrt específico.
+        // Abre el informe anual agrupado por clientes.
         private void listadoAgrupadoPorClientesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using var frm = new FrmInformeFacemiAnual(ModoReporte.Agrupado);
+            EstablecerFechasPorDefecto(frm);
+            frm.ShowDialog(this);
+        }
+
+        // Abre el informe anual del cliente actualmente seleccionado.
+        private void listadoDeFacturasDeUnClienteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_bsClientes.Current is not DataRowView rowCliente)
             {
-                MessageBox.Show("Por favor, selecciona un cliente en la lista superior.");
+                MessageBox.Show("Por favor, selecciona un cliente en la lista superior.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -529,65 +514,43 @@ namespace FacturacionDAM.Formularios
             string nombreCliente = rowCliente["nombrecomercial"].ToString();
             string nifCliente = rowCliente["nifcif"].ToString();
 
-            DateTime fi = new DateTime(_yearActual, 1, 1);
-            DateTime ff = new DateTime(_yearActual, 12, 31);
-
-            string nombreMrt = "InformeFacturasCliente.mrt";
-            string ruta = Path.Combine(Application.StartupPath, "informes", nombreMrt);
-
-            if (!File.Exists(ruta))
-            {
-                MessageBox.Show("No encuentro el archivo de reporte: " + ruta + "\n\nDebe crearse con el diseñador.");
-                return;
-            }
-
-            try
-            {
-                DataSet ds = CreateDataSetFacturasPorCliente(idCliente, fi, ff);
-
-                if (ds.Tables["ListadoFacturasCliente"].Rows.Count == 0)
-                {
-                    MessageBox.Show($"El cliente {nombreCliente} no tiene facturas en el año {_yearActual}.");
-                    return;
-                }
-
-                StiReport report = new StiReport();
-                report.Load(ruta);
-
-                // Evita conexiones heredadas del diseñador: el informe se alimenta por DataSet.
-                report.Dictionary.Databases.Clear();
-                report.Dictionary.DataSources.Clear();
-                report.RegData(ds);
-                report.Dictionary.Synchronize();
-
-                // Variables de cabecera: se inyectan si existen; si no, se crean.
-                Action<string, string> setVar = (key, val) =>
-                {
-                    if (report.Dictionary.Variables.Contains(key)) report.Dictionary.Variables[key].Value = val;
-                    else report.Dictionary.Variables.Add(key, val);
-                };
-
-                setVar("NombreCliente", nombreCliente);
-                setVar("NifCliente", nifCliente);
-                setVar("RangoFechas", $"Ejercicio: {_yearActual}");
-
-                AplicarVariablesEmisorDesdeBD(report);
-
-                report.Show();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al generar el listado por cliente:\n" + ex.Message);
-            }
+            using var frm = new FrmInformeFacemiAnual(idCliente, nombreCliente, nifCliente);
+            EstablecerFechasPorDefecto(frm);
+            frm.ShowDialog(this);
         }
 
-        // Factura individual con retención: dataset completo (cabecera + líneas) y .mrt específico.
+        // Aplica como rango inicial el año actualmente seleccionado en el navegador.
+        private void EstablecerFechasPorDefecto(FrmInformeFacemiAnual frm)
+        {
+            DateTime fechaInicial = new DateTime(_yearActual, 1, 1);
+            DateTime fechaFinal = new DateTime(_yearActual, 12, 31);
+
+            frm.dTPAnoInicio.Value = fechaInicial;
+            frm.dTPAnoFin.Value = fechaFinal;
+        }
+
+        // Genera factura individual con plantilla de retención (solo si la factura aplica retención).
         private void facturaActualConRetencion_Click(object sender, EventArgs e)
         {
             if (!TryGetFacturaActual(out int idFactura))
             {
-                MessageBox.Show("Selecciona una factura primero.");
+                MessageBox.Show("Selecciona una factura primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
+            }
+
+            if (_bsFacturas.Current is DataRowView row)
+            {
+                bool aplicaRetencion = row["aplicaret"] != DBNull.Value && Convert.ToInt32(row["aplicaret"]) == 1;
+                decimal importeRetencion = row["retencion"] != DBNull.Value ? Convert.ToDecimal(row["retencion"]) : 0m;
+
+                if (!aplicaRetencion || importeRetencion <= 0)
+                {
+                    MessageBox.Show("Esta factura no tiene aplicada ninguna retención (o el importe es 0).\nNo se puede generar este informe.",
+                                    "Generación denegada",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Stop);
+                    return;
+                }
             }
 
             try
@@ -597,16 +560,16 @@ namespace FacturacionDAM.Formularios
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message);
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // Factura individual sin retención: mismo dataset, distinto template.
+        // Genera factura individual con plantilla sin retención.
         private void facturaActualSinRetencion_Click(object sender, EventArgs e)
         {
             if (!TryGetFacturaActual(out int idFactura))
             {
-                MessageBox.Show("Selecciona una factura primero.");
+                MessageBox.Show("Selecciona una factura primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -617,13 +580,13 @@ namespace FacturacionDAM.Formularios
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al generar informe: " + ex.Message);
+                MessageBox.Show("Error al generar informe: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         #region Métodos Auxiliares DataSet e Informes
 
-        // Extrae el id de la factura seleccionada y valida que exista selección.
+        // Obtiene el id de la factura seleccionada.
         private bool TryGetFacturaActual(out int idFactura)
         {
             idFactura = -1;
@@ -632,7 +595,7 @@ namespace FacturacionDAM.Formularios
             return idFactura > 0;
         }
 
-        // Dataset para factura individual: cabecera y líneas con relación para Stimulsoft.
+        // Construye el DataSet de una factura individual (cabecera + líneas + relación).
         private DataSet CrearDataSetFactura(int idFactura)
         {
             var ds = new DataSet("DatosFactura");
@@ -689,7 +652,7 @@ namespace FacturacionDAM.Formularios
             dtLineas.TableName = "Lineas";
             ds.Tables.Add(dtLineas);
 
-            // Relación para que el informe pueda recorrer líneas desde la cabecera.
+            // Relación padre-hijo para navegación de líneas desde la cabecera en el informe.
             if (dtCabecera.Columns.Contains("id") && dtLineas.Columns.Contains("idfacemi"))
             {
                 if (!ds.Relations.Contains("Cabecera_Lineas"))
@@ -699,81 +662,7 @@ namespace FacturacionDAM.Formularios
             return ds;
         }
 
-        // Dataset tipado para listados por cliente: fuerza tipos compatibles con el diseñador de informes.
-        private DataSet CreateDataSetFacturasPorCliente(int idCliente, DateTime fi, DateTime ff)
-        {
-            DataSet ds = new DataSet("ReportData");
-
-            string sql = @"
-                SELECT 
-                    f.id AS Id,
-                    f.numero AS NumeroFactura,          
-                    f.fecha AS FechaEmision,            
-                    f.descripcion AS Descripcion,       
-                    f.base AS BaseImponible,            
-                    f.cuota AS CuotaIVA,                
-                    f.retencion AS RetencionIRPF,       
-                    f.total AS TotalPagar,              
-                    f.pagada AS Pagada                  
-                FROM facemi f
-                WHERE f.idemisor = @idEmisor
-                  AND f.idcliente = @idCliente
-                  AND f.fecha BETWEEN @fi AND @ff
-                ORDER BY f.fecha DESC, f.numero DESC;";
-
-            var p = new Dictionary<string, object>
-            {
-                ["@idEmisor"] = _idEmisor,
-                ["@idCliente"] = idCliente,
-                ["@fi"] = fi.Date,
-                ["@ff"] = ff.Date
-            };
-
-            var t = new Tabla(Program.appDAM.LaConexion);
-
-            DataTable dtTyped = new DataTable("ListadoFacturasCliente");
-            dtTyped.Columns.Add("Id", typeof(int));
-            dtTyped.Columns.Add("NumeroFactura", typeof(string));
-            dtTyped.Columns.Add("FechaEmision", typeof(DateTime));
-            dtTyped.Columns.Add("Descripcion", typeof(string));
-            dtTyped.Columns.Add("BaseImponible", typeof(decimal));
-            dtTyped.Columns.Add("CuotaIVA", typeof(decimal));
-            dtTyped.Columns.Add("RetencionIRPF", typeof(decimal));
-            dtTyped.Columns.Add("TotalPagar", typeof(decimal));
-            dtTyped.Columns.Add("Pagada", typeof(bool));
-
-            if (t.InicializarDatos(sql, p))
-            {
-                foreach (DataRow rowRaw in t.LaTabla.Rows)
-                {
-                    DataRow newRow = dtTyped.NewRow();
-
-                    newRow["Id"] = rowRaw["Id"] != DBNull.Value ? Convert.ToInt32(rowRaw["Id"]) : 0;
-                    newRow["NumeroFactura"] = rowRaw["NumeroFactura"] != DBNull.Value ? rowRaw["NumeroFactura"].ToString() : "";
-                    newRow["FechaEmision"] = rowRaw["FechaEmision"] != DBNull.Value ? Convert.ToDateTime(rowRaw["FechaEmision"]) : DateTime.MinValue;
-                    newRow["Descripcion"] = rowRaw["Descripcion"] != DBNull.Value ? rowRaw["Descripcion"].ToString() : "";
-                    newRow["BaseImponible"] = rowRaw["BaseImponible"] != DBNull.Value ? Convert.ToDecimal(rowRaw["BaseImponible"]) : 0m;
-                    newRow["CuotaIVA"] = rowRaw["CuotaIVA"] != DBNull.Value ? Convert.ToDecimal(rowRaw["CuotaIVA"]) : 0m;
-                    newRow["RetencionIRPF"] = rowRaw["RetencionIRPF"] != DBNull.Value ? Convert.ToDecimal(rowRaw["RetencionIRPF"]) : 0m;
-                    newRow["TotalPagar"] = rowRaw["TotalPagar"] != DBNull.Value ? Convert.ToDecimal(rowRaw["TotalPagar"]) : 0m;
-
-                    // MySQL suele exponer TINYINT como numérico: se normaliza a bool.
-                    int valorPagada = 0;
-                    if (rowRaw["Pagada"] != DBNull.Value)
-                        valorPagada = Convert.ToInt32(rowRaw["Pagada"]);
-
-                    newRow["Pagada"] = (valorPagada == 1);
-
-                    dtTyped.Rows.Add(newRow);
-                }
-            }
-
-            ds.Tables.Add(dtTyped);
-            return ds;
-        }
-
-
-        // Carga y muestra un informe Stimulsoft basado en DataSet + variables opcionales.
+        // Carga y muestra un informe Stimulsoft a partir de DataSet y variables opcionales.
         private void MostrarInforme(string nombreMrt, DataSet ds, Dictionary<string, string> variables)
         {
             var report = new StiReport();
@@ -781,7 +670,7 @@ namespace FacturacionDAM.Formularios
 
             if (!File.Exists(ruta))
             {
-                MessageBox.Show("No encuentro el archivo: " + ruta);
+                MessageBox.Show("No encuentro el archivo: " + ruta, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -789,7 +678,7 @@ namespace FacturacionDAM.Formularios
             {
                 report.Load(ruta);
 
-                // Se fuerza el modo "DataSet" para evitar dependencias de conexiones del diseñador.
+                // Fuerza ejecución con DataSet local y evita dependencias de conexiones del diseñador.
                 report.Dictionary.Databases.Clear();
                 report.RegData(ds);
                 report.Dictionary.Synchronize();
@@ -809,11 +698,11 @@ namespace FacturacionDAM.Formularios
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al mostrar el informe:\n" + ex.Message);
+                MessageBox.Show("Error al mostrar el informe:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // Inyecta variables del emisor (cabecera corporativa) desde BD en el informe.
+        // Carga datos del emisor desde BD y los vuelca en variables del informe.
         private void AplicarVariablesEmisorDesdeBD(StiReport report)
         {
             if (report == null) return;
@@ -847,7 +736,7 @@ namespace FacturacionDAM.Formularios
             }
             catch
             {
-                // Fallo no crítico: el informe se renderiza con valores vacíos por defecto.
+                // Fallo no crítico: el informe puede mostrarse con variables vacías.
             }
 
             SetVar(report, "nombreEmisor", nombre);
@@ -862,7 +751,7 @@ namespace FacturacionDAM.Formularios
             SetVar(report, "emailEmisor", email);
         }
 
-        // Setter defensivo: solo escribe variables existentes en el diccionario del informe.
+        // Asigna una variable solo si existe en el diccionario del reporte.
         private void SetVar(StiReport report, string nombre, string valor)
         {
             if (report.Dictionary.Variables.Contains(nombre))

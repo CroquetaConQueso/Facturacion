@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmBrowFacemi));
             splitContainerFacemi = new SplitContainer();
             pnClientes = new Panel();
@@ -64,6 +64,7 @@
             tsBtnExportaciones = new ToolStripSplitButton();
             listadoDeFacturasTotalesToolStripMenuItem = new ToolStripMenuItem();
             listadoAgrupadoPorClientesToolStripMenuItem = new ToolStripMenuItem();
+            listadoDeFacturasDeUnClienteToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
             facturaActualSinRetencion = new ToolStripMenuItem();
             facturaActualConRetencion = new ToolStripMenuItem();
@@ -167,14 +168,14 @@
             // 
             dgFacturas.AllowUserToAddRows = false;
             dgFacturas.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.LightGray;
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgFacturas.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.LightGray;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.White;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
+            dgFacturas.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dgFacturas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgFacturas.Dock = DockStyle.Fill;
             dgFacturas.Location = new Point(0, 44);
@@ -398,7 +399,7 @@
             // tsBtnExportaciones
             // 
             tsBtnExportaciones.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsBtnExportaciones.DropDownItems.AddRange(new ToolStripItem[] { listadoDeFacturasTotalesToolStripMenuItem, listadoAgrupadoPorClientesToolStripMenuItem, toolStripSeparator6, facturaActualSinRetencion, facturaActualConRetencion });
+            tsBtnExportaciones.DropDownItems.AddRange(new ToolStripItem[] { listadoDeFacturasTotalesToolStripMenuItem, listadoAgrupadoPorClientesToolStripMenuItem, listadoDeFacturasDeUnClienteToolStripMenuItem, toolStripSeparator6, facturaActualSinRetencion, facturaActualConRetencion });
             tsBtnExportaciones.Image = (Image)resources.GetObject("tsBtnExportaciones.Image");
             tsBtnExportaciones.ImageTransparentColor = Color.Magenta;
             tsBtnExportaciones.Name = "tsBtnExportaciones";
@@ -409,33 +410,40 @@
             // listadoDeFacturasTotalesToolStripMenuItem
             // 
             listadoDeFacturasTotalesToolStripMenuItem.Name = "listadoDeFacturasTotalesToolStripMenuItem";
-            listadoDeFacturasTotalesToolStripMenuItem.Size = new Size(239, 22);
+            listadoDeFacturasTotalesToolStripMenuItem.Size = new Size(248, 22);
             listadoDeFacturasTotalesToolStripMenuItem.Text = "Listado de Facturas (Totales)";
             listadoDeFacturasTotalesToolStripMenuItem.Click += listadoDeFacturasTotalesToolStripMenuItem_Click;
             // 
             // listadoAgrupadoPorClientesToolStripMenuItem
             // 
             listadoAgrupadoPorClientesToolStripMenuItem.Name = "listadoAgrupadoPorClientesToolStripMenuItem";
-            listadoAgrupadoPorClientesToolStripMenuItem.Size = new Size(239, 22);
+            listadoAgrupadoPorClientesToolStripMenuItem.Size = new Size(248, 22);
             listadoAgrupadoPorClientesToolStripMenuItem.Text = "Listado Agrupado por Clientes";
             listadoAgrupadoPorClientesToolStripMenuItem.Click += listadoAgrupadoPorClientesToolStripMenuItem_Click;
+            // 
+            // listadoDeFacturasDeUnClienteToolStripMenuItem
+            // 
+            listadoDeFacturasDeUnClienteToolStripMenuItem.Name = "listadoDeFacturasDeUnClienteToolStripMenuItem";
+            listadoDeFacturasDeUnClienteToolStripMenuItem.Size = new Size(248, 22);
+            listadoDeFacturasDeUnClienteToolStripMenuItem.Text = "Listado de Facturas de un Cliente";
+            listadoDeFacturasDeUnClienteToolStripMenuItem.Click += listadoDeFacturasDeUnClienteToolStripMenuItem_Click;
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new Size(236, 6);
+            toolStripSeparator6.Size = new Size(245, 6);
             // 
             // facturaActualSinRetencion
             // 
             facturaActualSinRetencion.Name = "facturaActualSinRetencion";
-            facturaActualSinRetencion.Size = new Size(239, 22);
+            facturaActualSinRetencion.Size = new Size(248, 22);
             facturaActualSinRetencion.Text = "Factura Actual (Sin Retención)";
             facturaActualSinRetencion.Click += facturaActualSinRetencion_Click;
             // 
             // facturaActualConRetencion
             // 
             facturaActualConRetencion.Name = "facturaActualConRetencion";
-            facturaActualConRetencion.Size = new Size(239, 22);
+            facturaActualConRetencion.Size = new Size(248, 22);
             facturaActualConRetencion.Text = "Factura Actual (Con Retención)";
             facturaActualConRetencion.Click += facturaActualConRetencion_Click;
             // 
@@ -532,5 +540,6 @@
         private ToolStripSeparator toolStripSeparator6;
         private ToolStripMenuItem facturaActualSinRetencion;
         private ToolStripMenuItem facturaActualConRetencion;
+        private ToolStripMenuItem listadoDeFacturasDeUnClienteToolStripMenuItem;
     }
 }
